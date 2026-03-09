@@ -142,10 +142,11 @@ const knightPuzzles: PuzzleDefinition[] = [
     category: "knight",
     difficulty: 3,
     narrationKey: "puzzle_knight_fork",
-    // Knight can fork king and queen by going to f7
+    // Knight on e5 forks king on h8 and queen on d8 by going to f7
+    // From f7, knight attacks: d6, d8, e5, g5, h6, h8
     boardSetup: board(
       ["e5", w("knight")],
-      ["e8", b("king")],
+      ["h8", b("king")],
       ["d8", b("queen")]
     ),
     correctMoves: [{ from: "e5" as Square, to: "f7" as Square }],
