@@ -1,0 +1,146 @@
+"use client";
+
+import { useCallback } from "react";
+import type {
+  Square,
+  ChessPiece as ChessPieceType,
+  BoardTheme,
+  PieceColorSet,
+} from "@/types/chess";
+import { coordsToSquare, isLightSquare } from "@/lib/board-utils";
+import ChessPiece from "./ChessPiece";
+
+interface ChessBoardProps {
+  pieces: Record<string, ChessPieceType>;
+  theme: BoardTheme;
+  pieceColors: PieceColorSet;
+  selectedSquare: Square | null;
+  validMoves: Square[];
+  lastMove: { from: Square; to: Square } | null;
+  onSquareTap: (square: Square) => void;
+  flipped?: boolean;
+  interactive?: boolean;
+}
+
+export default function ChessBoard({
+  pieces,
+  theme,
+  pieceColors,
+  selectedSquare,
+  validMoves,
+  lastMove,
+  onSquareTap,
+  flipped = false,
+  interactive = true,
+}: ChessBoardProps) {
+  const handleSquareTap = useCallback(
+    (square: Square) => {
+      if (interactive) {
+        onSquareTap(square);
+      }
+    },
+    [interactive, onSquareTap]
+  );
+
+  const rows = Array.from({ length: 8 }, (_, i) => i);
+  const cols = Array.from({ length: 8 }, (_, i) => i);
+
+  return (
+    <div className="aspect-square w-full max-w-[min(90vw,90vh)]">
+      <div className="grid grid-cols-8 grid-rows-8 h-full w-full rounded-xl overflow-hidden shadow-lg">
+        {rows.map((row) => {
+          const displayRow = flipped ? 7 - row : row;
+          return cols.map((col) => {
+            const displayCol = flipped ? 7 - col : col;
+            const square = coordsToSquare(displayCol, displayRow);
+            const light = isLightSquare(square);
+            const piece = pieces[square];
+            const isSelected = selectedSquare === square;
+            const isValidMove = validMoves.includes(square);
+            const isLastMove =
+              lastMove !== null &&
+              (lastMove.from === square || lastMove.to === square);
+            const hasPiece = piece !== undefined;
+
+            let bgColor: string;
+            if (isSelected) {
+              bgColor = "#fbbf24"; // amber-400
+            } else if (isLastMove) {
+              bgColor = light
+                ? blendColors(theme.lightSquare, "#fbbf24", 0.25)
+                : blendColors(theme.darkSquare, "#fbbf24", 0.25);
+            } else {
+              bgColor = light ? theme.lightSquare : theme.darkSquare;
+            }
+
+            return (
+              <div
+                key={`${displayRow}-${displayCol}`}
+                className="relative flex items-center justify-center"
+                style={{ backgroundColor: bgColor }}
+                onClick={() => handleSquareTap(square)}
+                role={interactive ? "button" : undefined}
+                tabIndex={interactive ? 0 : undefined}
+                aria-label={`Square ${square}${hasPiece ? `, ${piece.color} ${piece.type}` : ""}`}
+                onKeyDown={(e) => {
+                  if (interactive && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    handleSquareTap(square);
+                  }
+                }}
+              >
+                {/* Piece */}
+                {hasPiece && (
+                  <div className="w-[85%] h-[85%] flex items-center justify-center pointer-events-none">
+                    <ChessPiece
+                      type={piece.type}
+                      color={piece.color}
+                      colorSet={pieceColors}
+                      size={100}
+                    />
+                  </div>
+                )}
+
+                {/* Valid move indicator */}
+                {isValidMove && !hasPiece && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-[30%] h-[30%] rounded-full bg-black/25 animate-pulse" />
+                  </div>
+                )}
+
+                {/* Valid capture indicator (ring around capturable piece) */}
+                {isValidMove && hasPiece && (
+                  <div className="absolute inset-[6%] rounded-full border-[3px] border-black/30 pointer-events-none animate-pulse" />
+                )}
+              </div>
+            );
+          });
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Simple color blending for last-move highlight.
+ * Blends hex color `a` toward hex color `b` by `t` (0..1).
+ */
+function blendColors(a: string, b: string, t: number): string {
+  const parseHex = (hex: string) => {
+    const h = hex.replace("#", "");
+    return {
+      r: parseInt(h.substring(0, 2), 16),
+      g: parseInt(h.substring(2, 4), 16),
+      b: parseInt(h.substring(4, 6), 16),
+    };
+  };
+
+  const ca = parseHex(a);
+  const cb = parseHex(b);
+
+  const r = Math.round(ca.r + (cb.r - ca.r) * t);
+  const g = Math.round(ca.g + (cb.g - ca.g) * t);
+  const bl = Math.round(ca.b + (cb.b - ca.b) * t);
+
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${bl.toString(16).padStart(2, "0")}`;
+}
