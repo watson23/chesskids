@@ -29,7 +29,7 @@ export default function PlayPage() {
   }, [sfx, router]);
 
   return (
-    <div className="min-h-dvh flex flex-col bg-amber-50">
+    <div className="min-h-dvh flex flex-col bg-amber-50 pb-14">
       {/* Top bar */}
       <div className="flex items-center px-4 py-3">
         <button

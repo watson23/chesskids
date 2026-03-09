@@ -5,6 +5,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AudioProvider } from "@/hooks/useAudio";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import ViewportHeightFix from "@/components/ViewportHeightFix";
+import BottomNav from "@/components/BottomNav";
 
 const nunitoSans = Nunito_Sans({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default function RootLayout({
         <AuthProvider>
           <AudioProvider>
             {children}
+            <BottomNav />
           </AudioProvider>
         </AuthProvider>
         <ServiceWorkerRegistrar />

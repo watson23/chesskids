@@ -2,15 +2,16 @@
 
 import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import { GearSix } from "@phosphor-icons/react";
 import JourneyMap from "@/components/JourneyMap";
 import ChestOpenModal from "@/components/ChestOpenModal";
 import ChildSelector from "@/components/ChildSelector";
 import AddChildModal from "@/components/AddChildModal";
+import ParentSettings from "@/components/ParentSettings";
 import { CHESTS } from "@/data/chests";
 import { LESSONS } from "@/data/lessons";
-import { useAudio } from "@/hooks/useAudio";
 import { useAuth } from "@/hooks/useAuth";
+import { useLongPress } from "@/hooks/useLongPress";
 import {
   getLessonProgress,
   updateChildProgress,
@@ -22,7 +23,6 @@ import type { LessonProgress } from "@/types/user";
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { language, setLanguage, soundEnabled, setSoundEnabled } = useAudio();
   const {
     user,
     loading,
@@ -38,6 +38,10 @@ function HomeContent() {
   const [openedChests, setOpenedChests] = useState<number[]>([]);
   const [openChestIndex, setOpenChestIndex] = useState<number | null>(null);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const openSettings = useCallback(() => setShowSettings(true), []);
+  const longPressHandlers = useLongPress(openSettings);
 
   // Guard against processing completion params multiple times
   const completionProcessed = useRef(false);
@@ -206,14 +210,6 @@ function HomeContent() {
     [user, refreshChildren, setActiveChild]
   );
 
-  const toggleLanguage = useCallback(() => {
-    setLanguage(language === "en" ? "fi" : "en");
-  }, [language, setLanguage]);
-
-  const toggleSound = useCallback(() => {
-    setSoundEnabled(!soundEnabled);
-  }, [soundEnabled, setSoundEnabled]);
-
   const openedChest =
     openChestIndex !== null
       ? CHESTS.find((c) => c.index === openChestIndex) ?? null
@@ -248,7 +244,7 @@ function HomeContent() {
   }
 
   return (
-    <div className="relative min-h-dvh">
+    <div className="relative min-h-dvh pb-14">
       {/* Journey Map */}
       <JourneyMap
         currentLesson={currentLesson}
@@ -259,37 +255,29 @@ function HomeContent() {
         onChestTap={handleChestTap}
       />
 
-      {/* Top-right floating controls */}
-      <div className="fixed top-4 right-4 z-30 flex gap-2">
-        <button
-          onClick={toggleSound}
-          className="w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-md flex items-center justify-center active:scale-95 transition-transform"
-          aria-label={soundEnabled ? "Mute sound" : "Unmute sound"}
-        >
-          {soundEnabled ? (
-            <SpeakerHigh size={22} weight="bold" className="text-amber-700" />
-          ) : (
-            <SpeakerSlash size={22} weight="bold" className="text-gray-400" />
-          )}
-        </button>
+      {/* Top-left: settings gear (long-press to open parent settings) */}
+      <button
+        {...longPressHandlers}
+        className="fixed top-4 left-4 z-30 w-9 h-9 rounded-full bg-white/60 backdrop-blur shadow-sm flex items-center justify-center transition-transform select-none"
+        aria-label="Parent settings (long press)"
+      >
+        <GearSix size={18} weight="bold" className="text-gray-400" />
+      </button>
 
-        <button
-          onClick={toggleLanguage}
-          className="w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-md flex items-center justify-center active:scale-95 transition-transform text-lg"
-          aria-label={`Switch language to ${language === "en" ? "Finnish" : "English"}`}
-        >
-          {language === "en" ? "\ud83c\uddec\ud83c\udde7" : "\ud83c\uddeb\ud83c\uddee"}
-        </button>
-      </div>
-
-      {/* Top-left: active child avatar (tap to switch) */}
+      {/* Top-right: active child avatar (tap to switch) */}
       <button
         onClick={() => setActiveChild(null)}
-        className="fixed top-4 left-4 z-30 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-md flex items-center justify-center active:scale-95 transition-transform text-xl"
+        className="fixed top-4 right-4 z-30 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-md flex items-center justify-center active:scale-95 transition-transform text-xl"
         aria-label="Switch child profile"
       >
         {activeChild.avatar}
       </button>
+
+      {/* Parent settings panel */}
+      <ParentSettings
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
 
       {/* Chest open modal */}
       {openedChest && (
