@@ -37,6 +37,8 @@ interface UseChessGameReturn {
   gameOver: { over: boolean; result: "checkmate" | "stalemate" | "draw" | null };
   /** Handle a square being tapped — select or move */
   handleSquareTap: (square: Square) => void;
+  /** Execute a move programmatically (bypasses playerColor check, for AI) */
+  programmaticMove: (from: Square, to: Square) => void;
   /** Reset the game to initial or new position */
   reset: (newFen?: string) => void;
 }
@@ -143,6 +145,24 @@ export function useChessGame(options: UseChessGameOptions = {}): UseChessGameRet
     ]
   );
 
+  const programmaticMove = useCallback(
+    (from: Square, to: Square) => {
+      const result = makeMove(fen, from, to);
+      if (result) {
+        setFen(result.fen);
+        setLastMove({ from, to });
+        clearSelection();
+        onMove?.(from, to, result.captured);
+
+        const gameState = isGameOver(result.fen);
+        if (gameState.over && gameState.result) {
+          onGameOver?.(gameState.result);
+        }
+      }
+    },
+    [fen, clearSelection, onMove, onGameOver]
+  );
+
   const reset = useCallback(
     (newFen?: string) => {
       setFen(newFen ?? initialFen);
@@ -161,6 +181,7 @@ export function useChessGame(options: UseChessGameOptions = {}): UseChessGameRet
     turn,
     gameOver,
     handleSquareTap,
+    programmaticMove,
     reset,
   };
 }

@@ -58,6 +58,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     turn,
     gameOver,
     handleSquareTap,
+    programmaticMove,
     reset,
   } = useChessGame({
     playerColor: "white",
@@ -111,13 +112,9 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           speak(text, { lang: language });
         }
 
-        // Execute the AI move by tapping the squares
-        handleSquareTap(aiMove.from);
-        // Small delay then tap destination
-        setTimeout(() => {
-          handleSquareTap(aiMove.to);
-          setIsAIThinking(false);
-        }, 100);
+        // Execute the AI move directly (bypasses playerColor check)
+        programmaticMove(aiMove.from, aiMove.to);
+        setIsAIThinking(false);
       } else {
         setIsAIThinking(false);
       }

@@ -34,15 +34,27 @@ const boardIntro: Lesson = {
   puzzles: [
     {
       narrationKey: "board_intro_puzzle_light",
-      boardSetup: {} as Record<Square, ChessPiece>,
-      correctMoves: [{ from: "e4" as Square, to: "e4" as Square }],
+      // King on d4 (dark square) — move it to any adjacent light square
+      boardSetup: pos(["d4", "king", "white"]),
+      correctMoves: [
+        { from: "d4" as Square, to: "c3" as Square },
+        { from: "d4" as Square, to: "c5" as Square },
+        { from: "d4" as Square, to: "e3" as Square },
+        { from: "d4" as Square, to: "e5" as Square },
+      ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
     {
       narrationKey: "board_intro_puzzle_dark",
-      boardSetup: {} as Record<Square, ChessPiece>,
-      correctMoves: [{ from: "d4" as Square, to: "d4" as Square }],
+      // King on e5 (light square) — move it to any adjacent dark square
+      boardSetup: pos(["e5", "king", "white"]),
+      correctMoves: [
+        { from: "e5" as Square, to: "d4" as Square },
+        { from: "e5" as Square, to: "d6" as Square },
+        { from: "e5" as Square, to: "f4" as Square },
+        { from: "e5" as Square, to: "f6" as Square },
+      ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
