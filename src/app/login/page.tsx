@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function LoginPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signInAnon } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -23,6 +23,12 @@ export default function LoginPage() {
         className="flex items-center gap-3 bg-white rounded-xl px-6 py-4 shadow-md hover:shadow-lg transition-shadow text-lg font-semibold text-gray-700"
       >
         Sign in with Google
+      </button>
+      <button
+        onClick={signInAnon}
+        className="text-amber-600 font-semibold text-base underline underline-offset-2"
+      >
+        Try without account
       </button>
     </div>
   );

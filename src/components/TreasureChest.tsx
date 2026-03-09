@@ -37,7 +37,7 @@ export default function TreasureChest({
     >
       <span className="text-3xl">{emoji}</span>
       <span className="text-[10px] font-bold text-amber-800 mt-0.5">
-        {chest.starsRequired}\u2b50
+        {chest.starsRequired}{"\u2b50"}
       </span>
     </button>
   );

@@ -11,6 +11,7 @@ import {
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInAnonymously,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
   type User,
@@ -23,6 +24,7 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   signIn: () => Promise<User | null>;
+  signInAnon: () => Promise<User | null>;
   signOut: () => Promise<void>;
   children: ChildProfile[];
   activeChild: ChildProfile | null;
@@ -34,6 +36,7 @@ const AuthCtx = createContext<AuthContextValue>({
   user: null,
   loading: true,
   signIn: async () => null,
+  signInAnon: async () => null,
   signOut: async () => {},
   children: [],
   activeChild: null,
@@ -92,6 +95,11 @@ export function AuthProvider({
     return result.user;
   };
 
+  const signInAnon = async (): Promise<User | null> => {
+    const result = await signInAnonymously(getFirebaseAuth());
+    return result.user;
+  };
+
   const signOut = async () => {
     await firebaseSignOut(getFirebaseAuth());
     setChildProfiles([]);
@@ -130,6 +138,7 @@ export function AuthProvider({
         user,
         loading,
         signIn,
+        signInAnon,
         signOut,
         children: childProfiles,
         activeChild,
