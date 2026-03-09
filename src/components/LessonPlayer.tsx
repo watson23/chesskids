@@ -148,8 +148,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
   const handleContinue = useCallback(() => {
     sfx("button-tap");
-    router.push("/");
-  }, [sfx, router]);
+    router.push(`/?completed=${encodeURIComponent(lesson.id)}&stars=${state.stars}`);
+  }, [sfx, router, lesson.id, state.stars]);
 
   // Progress dots
   const totalDots = totalWatchSteps + totalPuzzles;

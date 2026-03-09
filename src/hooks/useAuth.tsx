@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
   type ReactNode,
 } from "react";
 import {
@@ -15,6 +16,7 @@ import {
   type User,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
+import { getOrCreateUser, getChildren } from "@/lib/firestore";
 import type { ChildProfile } from "@/types/user";
 
 interface AuthContextValue {
@@ -24,7 +26,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   children: ChildProfile[];
   activeChild: ChildProfile | null;
-  setActiveChild: (child: ChildProfile) => void;
+  setActiveChild: (child: ChildProfile | null) => void;
   refreshChildren: () => Promise<void>;
 }
 
@@ -50,15 +52,40 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
-  const [activeChild, setActiveChild] = useState<ChildProfile | null>(null);
+  const [activeChild, setActiveChildState] = useState<ChildProfile | null>(null);
+
+  /** Load user document and children from Firestore */
+  const loadUserData = useCallback(async (u: User) => {
+    try {
+      await getOrCreateUser(u.uid, u.email ?? "", u.displayName ?? "");
+      const kids = await getChildren(u.uid);
+      setChildProfiles(kids);
+
+      // Restore previously-selected child from localStorage, or default to first
+      const savedChildId =
+        typeof window !== "undefined"
+          ? localStorage.getItem(`chesskids_activeChild_${u.uid}`)
+          : null;
+      const savedChild = savedChildId ? kids.find((k) => k.id === savedChildId) : null;
+      setActiveChildState(savedChild ?? kids[0] ?? null);
+    } catch (err) {
+      console.error("Failed to load user data from Firestore:", err);
+    }
+  }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (u) => {
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (u) => {
       setUser(u);
+      if (u) {
+        await loadUserData(u);
+      } else {
+        setChildProfiles([]);
+        setActiveChildState(null);
+      }
       setLoading(false);
     });
     return unsubscribe;
-  }, []);
+  }, [loadUserData]);
 
   const signIn = async (): Promise<User | null> => {
     const result = await signInWithPopup(getFirebaseAuth(), googleProvider);
@@ -68,12 +95,34 @@ export function AuthProvider({
   const signOut = async () => {
     await firebaseSignOut(getFirebaseAuth());
     setChildProfiles([]);
-    setActiveChild(null);
+    setActiveChildState(null);
   };
 
-  const refreshChildren = async () => {
-    // TODO: Fetch from Firestore in Task 11
-  };
+  const setActiveChild = useCallback(
+    (child: ChildProfile | null) => {
+      setActiveChildState(child);
+      if (user && child) {
+        localStorage.setItem(`chesskids_activeChild_${user.uid}`, child.id);
+      }
+    },
+    [user]
+  );
+
+  const refreshChildren = useCallback(async () => {
+    if (!user) return;
+    const kids = await getChildren(user.uid);
+    setChildProfiles(kids);
+
+    // If the active child was deleted or doesn't exist, reset selection
+    if (activeChild && !kids.find((k) => k.id === activeChild.id)) {
+      setActiveChildState(kids[0] ?? null);
+    }
+    // If active child still exists, update its data from Firestore
+    const updatedActive = activeChild ? kids.find((k) => k.id === activeChild.id) : null;
+    if (updatedActive) {
+      setActiveChildState(updatedActive);
+    }
+  }, [user, activeChild]);
 
   return (
     <AuthCtx.Provider
