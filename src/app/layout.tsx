@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/useAuth";
+import { AudioProvider } from "@/hooks/useAudio";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import ViewportHeightFix from "@/components/ViewportHeightFix";
 
@@ -42,7 +43,9 @@ export default function RootLayout({
         className={`${nunitoSans.className} antialiased bg-amber-50 overflow-hidden`}
       >
         <AuthProvider>
-          {children}
+          <AudioProvider>
+            {children}
+          </AudioProvider>
         </AuthProvider>
         <ServiceWorkerRegistrar />
         <ViewportHeightFix />
