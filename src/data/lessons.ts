@@ -695,25 +695,31 @@ const forksLesson: Lesson = {
   puzzles: [
     {
       narrationKey: "fork_puzzle",
+      // Knight d3 moves to e5, forking king on d7 and rook on f7
+      // d3 -> e5 is a valid knight move
+      // From e5: attacks c4, c6, d3, d7, f3, f7, g4, g6
       boardSetup: pos(
-        ["e8", "king", "black"],
-        ["h8", "rook", "black"],
-        ["e5", "knight", "white"],
-        ["e1", "king", "white"]
+        ["d7", "king", "black"],
+        ["f7", "rook", "black"],
+        ["d3", "knight", "white"],
+        ["a1", "king", "white"]
       ),
-      correctMoves: [{ from: "e5" as Square, to: "g6" as Square }],
+      correctMoves: [{ from: "d3" as Square, to: "e5" as Square }],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
     {
       narrationKey: "fork_puzzle_2",
+      // Knight b5 moves to c7, forking king on e8 and rook on a8
+      // b5 -> c7 is a valid knight move
+      // From c7: attacks a6, a8, b5, d5, e6, e8
       boardSetup: pos(
-        ["d8", "king", "black"],
-        ["f8", "rook", "black"],
-        ["g4", "knight", "white"],
+        ["e8", "king", "black"],
+        ["a8", "rook", "black"],
+        ["b5", "knight", "white"],
         ["e1", "king", "white"]
       ),
-      correctMoves: [{ from: "g4" as Square, to: "e5" as Square }],
+      correctMoves: [{ from: "b5" as Square, to: "c7" as Square }],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
@@ -728,30 +734,34 @@ const pinsLesson: Lesson = {
   steps: [
     {
       narrationKey: "pin_intro",
+      // Bishop on a4 pins knight on c6 to king on e8
+      // Diagonal: a4 - b5 - c6 - d7 - e8
       boardSetup: pos(
         ["e8", "king", "black"],
-        ["e5", "knight", "black"],
-        ["e1", "bishop", "white"],
-        ["a1", "king", "white"]
+        ["c6", "knight", "black"],
+        ["a4", "bishop", "white"],
+        ["e1", "king", "white"]
       ),
       animation: {
-        piece: "e1" as Square,
+        piece: "a4" as Square,
         path: [] as Square[],
-        highlights: ["e5", "e8"] as Square[],
+        highlights: ["c6", "e8"] as Square[],
       },
     },
     {
       narrationKey: "pin_explain",
+      // Bishop on a3 pins rook on d6 to king on f8
+      // Diagonal: a3 - b4 - c5 - d6 - e7 - f8
       boardSetup: pos(
-        ["e8", "king", "black"],
+        ["f8", "king", "black"],
         ["d6", "rook", "black"],
-        ["b4", "bishop", "white"],
-        ["a1", "king", "white"]
+        ["a3", "bishop", "white"],
+        ["e1", "king", "white"]
       ),
       animation: {
-        piece: "b4" as Square,
+        piece: "a3" as Square,
         path: [] as Square[],
-        highlights: ["d6", "e8"] as Square[],
+        highlights: ["d6", "f8"] as Square[],
       },
     },
   ],
