@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/hooks/useAuth";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import ViewportHeightFix from "@/components/ViewportHeightFix";
 
 const nunitoSans = Nunito_Sans({
   subsets: ["latin"],
@@ -38,7 +41,11 @@ export default function RootLayout({
       <body
         className={`${nunitoSans.className} antialiased bg-amber-50 overflow-hidden`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+        <ServiceWorkerRegistrar />
+        <ViewportHeightFix />
       </body>
     </html>
   );
