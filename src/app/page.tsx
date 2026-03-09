@@ -20,12 +20,12 @@ import {
 } from "@/lib/firestore";
 import type { LessonProgress } from "@/types/user";
 
+/** Inner component that uses useSearchParams — only rendered when authenticated */
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
     user,
-    loading,
     children: childProfiles,
     activeChild,
     setActiveChild,
@@ -215,15 +215,6 @@ function HomeContent() {
       ? CHESTS.find((c) => c.index === openChestIndex) ?? null
       : null;
 
-  // Loading state
-  if (loading) return null;
-
-  // Not logged in — redirect to login
-  if (!user) {
-    router.replace("/login");
-    return null;
-  }
-
   // Logged in but no active child — show child selector
   if (!activeChild) {
     return (
@@ -287,10 +278,26 @@ function HomeContent() {
   );
 }
 
-export default function Home() {
+/** Outer component handles auth gating — avoids useSearchParams when not authenticated */
+function AuthGate() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [loading, user, router]);
+
+  if (loading || !user) return null;
+
   return (
     <Suspense>
       <HomeContent />
     </Suspense>
   );
+}
+
+export default function Home() {
+  return <AuthGate />;
 }
