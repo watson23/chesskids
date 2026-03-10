@@ -17,12 +17,12 @@ export default function SpeechBubble({ text, visible }: SpeechBubbleProps) {
         </p>
       </div>
 
-      {/* Triangle pointer — bottom-left */}
-      <div className="absolute -bottom-2.5 left-6">
-        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-          <path d="M 2 0 L 8 10 L 14 0" fill="white" stroke="var(--ck-border)" strokeWidth="2.5" />
-          {/* Cover the top border */}
-          <rect x="0" y="0" width="16" height="3" fill="white" />
+      {/* Triangle pointer — left side, pointing toward mascot */}
+      <div className="absolute top-1/2 -left-2.5 -translate-y-1/2">
+        <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+          <path d="M 12 2 L 2 8 L 12 14" fill="white" stroke="var(--ck-border)" strokeWidth="2.5" />
+          {/* Cover the right border */}
+          <rect x="9" y="0" width="3" height="16" fill="white" />
         </svg>
       </div>
     </div>
