@@ -442,13 +442,13 @@ const checkmatePuzzles: PuzzleDefinition[] = [
     category: "checkmate",
     difficulty: 1,
     narrationKey: "puzzle_checkmate",
-    // Black king on h8, White queen can mate by going to g7
+    // White king f6 supports g7. Qg1-g7# is checkmate (king can't capture, all squares covered).
     boardSetup: board(
-      ["e1", w("king")],
-      ["f6", w("queen")],
+      ["f6", w("king")],
+      ["g1", w("queen")],
       ["h8", b("king")]
     ),
-    correctMoves: [{ from: "f6" as Square, to: "g7" as Square }],
+    correctMoves: [{ from: "g1" as Square, to: "g7" as Square }],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "well_done",
   },
