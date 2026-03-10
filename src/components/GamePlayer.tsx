@@ -295,7 +295,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         {/* Pikku coach below the board */}
         <div className="flex items-center gap-2 w-full max-w-[360px]">
           <div className="flex-shrink-0">
-            <Pikku expression={pikkuExpression} size={48} />
+            <Pikku expression={pikkuExpression} size={72} />
           </div>
           <SpeechBubble text={pikkuText} visible={!!pikkuText} />
         </div>
