@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Star, Lock, CaretRight } from "@phosphor-icons/react";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
-import Pikku from "@/components/Pikku";
+
 import SpeechBubble from "@/components/SpeechBubble";
 
 const STAGGER_CLASSES = [
@@ -113,7 +113,13 @@ export default function PlayPage() {
       >
         {/* Pikku header */}
         <div className="flex items-center gap-3 px-5 pt-6 pb-2 animate-fade-in-up">
-          <Pikku expression="wink" size={72} />
+          <Image
+            src="/mascot/pikku-waist-up.webp"
+            alt="Pikku"
+            width={72}
+            height={86}
+            className="flex-shrink-0 drop-shadow-md"
+          />
           <SpeechBubble text={t("play_pikku_speech")} visible />
         </div>
 

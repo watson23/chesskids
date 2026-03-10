@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useCallback, useEffect } from "react";
 import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
 import { PawnSVG, KnightSVG, BishopSVG, RookSVG, QueenSVG, KingSVG } from "@/lib/pieces";
-import Pikku from "@/components/Pikku";
+
 import SpeechBubble from "@/components/SpeechBubble";
 
 const STAGGER_CLASSES = [
@@ -131,7 +132,13 @@ export default function PracticePage() {
       >
         {/* Pikku header */}
         <div className="flex items-center gap-3 px-5 pt-6 pb-2 animate-fade-in-up">
-          <Pikku expression="teaching" size={72} />
+          <Image
+            src="/mascot/pikku-waist-up.webp"
+            alt="Pikku"
+            width={72}
+            height={86}
+            className="flex-shrink-0 drop-shadow-md"
+          />
           <SpeechBubble text={t("practice_pikku_speech")} visible />
         </div>
 

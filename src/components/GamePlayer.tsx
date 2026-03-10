@@ -6,7 +6,7 @@ import Image from "next/image";
 import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
-import Pikku from "@/components/Pikku";
+
 import SpeechBubble from "@/components/SpeechBubble";
 import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
@@ -288,7 +288,13 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         {/* Pikku coach below the board */}
         <div className="flex items-center gap-2 w-full max-w-[360px]">
           <div className="flex-shrink-0">
-            <Pikku expression={pikkuExpression} size={72} />
+            <Image
+              src="/mascot/pikku-waist-up.webp"
+              alt="Pikku"
+              width={72}
+              height={86}
+              className="drop-shadow-md"
+            />
           </div>
           <SpeechBubble text={pikkuText} visible={!!pikkuText} />
         </div>
