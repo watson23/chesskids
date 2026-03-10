@@ -114,8 +114,11 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         if (isValidSource && piece) {
           setSelectedSquare(square);
           sfx("piece-pickup");
-          const destinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
-          setValidMoves(destinations);
+          // Don't show destination hints for checkmate puzzles
+          if (!currentPuzzle.narrationKey.includes("checkmate")) {
+            const destinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
+            setValidMoves(destinations);
+          }
         }
         return;
       }
@@ -178,7 +181,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
           setNarrationOverride(null);
           setPhaseOverride(null);
           recordAttempt(true);
-        }, 1800);
+        }, 2500);
       } else {
         sfx("wrong-move");
         say(currentPuzzle.wrongMoveNarrationKey);

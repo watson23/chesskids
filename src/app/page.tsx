@@ -89,6 +89,7 @@ function HomeContent() {
         setFirestoreReady(true);
       } catch (err) {
         console.error("Failed to load lesson progress:", err);
+        if (!cancelled) setFirestoreReady(true);
       }
     }
 

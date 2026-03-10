@@ -102,10 +102,13 @@ export default function PuzzlePlayer({
         if (isValidSource && piece) {
           setSelectedSquare(square);
           sfx("piece-pickup");
-          const destinations = correctMoves
-            .filter((m) => m.from === square)
-            .map((m) => m.to);
-          setValidMoves(destinations);
+          // Don't show destination hints for checkmate puzzles — let the child find the answer
+          if (currentPuzzle.category !== "checkmate") {
+            const destinations = correctMoves
+              .filter((m) => m.from === square)
+              .map((m) => m.to);
+            setValidMoves(destinations);
+          }
         }
         return;
       }
@@ -158,7 +161,7 @@ export default function PuzzlePlayer({
             setStars(earnedStars);
             setPhase("celebrate");
           }
-        }, 1200);
+        }, 2500);
       } else {
         // Wrong move
         sfx("wrong-move");

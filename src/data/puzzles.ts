@@ -490,13 +490,13 @@ const checkmatePuzzles: PuzzleDefinition[] = [
     category: "checkmate",
     difficulty: 2,
     narrationKey: "puzzle_checkmate",
-    // Queen supported by king: Black king on h8, White king on f7, queen delivers mate on g8
+    // Qd5-h5#: Queen checks along h-file. King h8 blocked: g8 guarded by Kf7, g7 guarded by Kf7, h7 guarded by Qh5.
     boardSetup: board(
       ["f7", w("king")],
       ["d5", w("queen")],
       ["h8", b("king")]
     ),
-    correctMoves: [{ from: "d5" as Square, to: "g8" as Square }],
+    correctMoves: [{ from: "d5" as Square, to: "h5" as Square }],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "well_done",
   },
