@@ -210,7 +210,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         : totalDots;
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg)" }}>
+    <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <button

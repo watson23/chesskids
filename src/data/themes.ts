@@ -9,13 +9,13 @@ export const DEFAULT_BOARD_THEME: BoardTheme = {
 
 export const BOARD_THEMES: BoardTheme[] = [
   DEFAULT_BOARD_THEME,
-  { id: "wooden", lightSquare: "#f5e6c8", darkSquare: "#b48764", name: "Wooden" },
-  { id: "forest", lightSquare: "#d4e6c3", darkSquare: "#5a8a3c", name: "Forest" },
-  { id: "ocean", lightSquare: "#cce5f0", darkSquare: "#3a7ca5", name: "Ocean" },
-  { id: "sunset", lightSquare: "#fde8d0", darkSquare: "#c76f3a", name: "Sunset" },
-  { id: "candy", lightSquare: "#f8d7e8", darkSquare: "#c44b8e", name: "Candy" },
+  { id: "wooden", lightSquare: "#F0E6D8", darkSquare: "#B49E86", name: "Wooden" },
+  { id: "forest", lightSquare: "#D8E8D0", darkSquare: "#8AAF78", name: "Forest" },
+  { id: "ocean", lightSquare: "#D0E4F0", darkSquare: "#6FA0BD", name: "Ocean" },
+  { id: "sunset", lightSquare: "#F0DDD0", darkSquare: "#C49478", name: "Sunset" },
+  { id: "candy", lightSquare: "#F0D8E4", darkSquare: "#C080A0", name: "Candy" },
   { id: "lavender", lightSquare: "#f3eff8", darkSquare: "#B8A9C9", name: "Lavender" },
-  { id: "arctic", lightSquare: "#e8f0f8", darkSquare: "#7a9cc6", name: "Arctic" },
+  { id: "arctic", lightSquare: "#E0ECF4", darkSquare: "#88AAC4", name: "Arctic" },
 ];
 
 export const DEFAULT_PIECE_COLORS: PieceColorSet = {

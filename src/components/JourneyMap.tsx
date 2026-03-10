@@ -6,6 +6,7 @@ import { CHESTS } from "@/data/chests";
 import LessonStop from "@/components/LessonStop";
 import TreasureChest from "@/components/TreasureChest";
 import JourneyMapOnboarding from "@/components/JourneyMapOnboarding";
+import Pikku from "@/components/Pikku";
 import { useAudio } from "@/hooks/useAudio";
 import type { LessonProgress } from "@/types/user";
 
@@ -30,19 +31,19 @@ interface JourneyMapProps {
  * Lessons use the bottom ~70%, leaving the top for future lessons.
  */
 const LESSON_POSITIONS: { x: number; y: number }[] = [
-  { x: 50, y: 93 },  // 1  Board Intro — bottom center
-  { x: 58, y: 86 },  // 2  Pawn — slight right
-  { x: 40, y: 79 },  // 3  Knight — curve left
-  { x: 30, y: 72 },  // 4  Bishop — continue left
-  { x: 48, y: 65 },  // 5  Rook — back to center
-  { x: 62, y: 58 },  // 6  Queen — curve right
-  { x: 44, y: 51 },  // 7  King — curve left
-  { x: 30, y: 44 },  // 8  Castling — continue left
-  { x: 46, y: 37 },  // 9  En Passant — back toward center
-  { x: 60, y: 30 },  // 10 Promotion — curve right
-  { x: 46, y: 24 },  // 11 Check & Checkmate — curve left
-  { x: 34, y: 18 },  // 12 Forks — continue left
-  { x: 48, y: 12 },  // 13 Pins — toward mountain top
+  { x: 54, y: 93 },  // 1  Board Intro      — good
+  { x: 40, y: 87 },  // 2  Pawn             — nudge left
+  { x: 35, y: 81 },  // 3  Knight
+  { x: 42, y: 75 },  // 4  Bishop
+  { x: 60, y: 69 },  // 5  Rook             — 0.5 bubble up
+  { x: 71, y: 63 },  // 6  Queen
+  { x: 52, y: 57 },  // 7  King
+  { x: 44, y: 51 },  // 8  Castling         — nudge left
+  { x: 58, y: 45 },  // 9  En Passant       — 0.5 bubble left
+  { x: 72, y: 39 },  // 10 Promotion        — 0.5 more right
+  { x: 57, y: 33 },  // 11 Check & Checkmate — 1 bubble right
+  { x: 42, y: 27 },  // 12 Forks            — 1 bubble right
+  { x: 44, y: 21 },  // 13 Pins             — 1.5 bubbles right
 ];
 
 function getLessonPosition(index: number, _total: number) {
@@ -60,11 +61,11 @@ function getLessonPosition(index: number, _total: number) {
  * Keyed by chest index.
  */
 const CHEST_POSITIONS: Record<number, { x: number; y: number }> = {
-  0: { x: 70, y: 82 },   // 6★  — right side, between lessons 2-3
-  1: { x: 22, y: 62 },   // 15★ — left side, between lessons 5-6
-  2: { x: 62, y: 47 },   // 24★ — right side, between lessons 7-8
-  3: { x: 22, y: 34 },   // 33★ — left side, between lessons 9-10
-  4: { x: 64, y: 15 },   // 39★ — right side, near lessons 12-13
+  0: { x: 70, y: 84 },   // 6★  — right side, between lessons 2-3
+  1: { x: 22, y: 66 },   // 15★ — left side, between lessons 5-6
+  2: { x: 62, y: 54 },   // 24★ — right side, between lessons 7-8
+  3: { x: 22, y: 42 },   // 33★ — left side, between lessons 9-10
+  4: { x: 64, y: 24 },   // 39★ — right side, near lessons 12-13
 };
 
 function getChestPosition(positionOnMap: number, _total: number, chestIndex: number) {
@@ -280,6 +281,22 @@ export default function JourneyMap({
             />
           );
         })}
+
+        {/* Pikku mascot standing next to current lesson */}
+        {(() => {
+          const pos = getLessonPosition(currentLesson, LESSONS.length);
+          return (
+            <div
+              className="absolute pointer-events-none -translate-y-1/2"
+              style={{
+                left: `calc(${pos.x}% + 36px)`,
+                top: `${pos.y}%`,
+              }}
+            >
+              <Pikku expression="happy" size={56} />
+            </div>
+          );
+        })()}
 
         {/* First-time onboarding overlay */}
         {currentLesson === 0 && !onboardingDismissed && !justCompletedLesson && (() => {

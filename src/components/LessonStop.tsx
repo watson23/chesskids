@@ -120,8 +120,7 @@ export default function LessonStop({
             boxShadow: "0 2px 0 #B8B4C4, 0 4px 8px rgba(0,0,0,0.06)",
           };
 
-  const animClasses = [
-    status === "current" ? "animate-pulse-glow" : "",
+  const outerAnimClasses = [
     sparkle ? "animate-celebrate-pop" : "",
     unlocking ? "animate-lesson-unlock" : "",
     shaking ? "animate-chest-shake" : "",
@@ -131,7 +130,7 @@ export default function LessonStop({
     <button
       className={`absolute flex flex-col items-center -translate-x-1/2 -translate-y-1/2 ${
         status === "locked" && !unlocking ? "opacity-60 cursor-default" : "cursor-pointer"
-      } ${animClasses}`}
+      } ${outerAnimClasses}`}
       style={{ left: `${x}%`, top: `${y}%` }}
       onClick={status !== "locked" ? onTap : handleLockedTap}
       aria-disabled={status === "locked" && !unlocking}
@@ -147,7 +146,7 @@ export default function LessonStop({
 
       {/* The round node */}
       <div
-        className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
+        className={`w-[60px] h-[60px] rounded-full flex items-center justify-center ${status === "current" ? "animate-gentle-bounce" : ""}`}
         style={nodeStyle}
       >
         <LessonIcon icon={lesson.icon} />
