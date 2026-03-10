@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { House, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { House, ArrowCounterClockwise, Star } from "@phosphor-icons/react";
 import Image from "next/image";
 import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
-import GameMascotBar from "@/components/GameMascotBar";
+import Pikku from "@/components/Pikku";
+import SpeechBubble from "@/components/SpeechBubble";
 import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useAudio } from "@/hooks/useAudio";
@@ -159,10 +160,22 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
   const opponent = OPPONENTS[difficulty] || OPPONENTS[1];
 
+  // Pikku speech text based on game state
+  const pikkuText = gameResult === "win" ? t("you_win")
+    : gameResult === "loss" ? t("you_lose")
+      : gameResult === "draw" ? t("draw")
+        : isAIThinking ? t("game_ai_thinking")
+          : t("game_your_turn");
+
+  const pikkuExpression = gameResult === "win" ? "celebrating"
+    : gameResult === "loss" ? "thinking"
+      : gameResult === "draw" ? "happy"
+        : isAIThinking ? "thinking" : "happy";
+
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3">
+      {/* Top bar: home + stars */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-1">
         <button
           onClick={handleExit}
           className="card-pillow p-2 active:scale-95 transition-transform"
@@ -171,68 +184,66 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
         </button>
 
-        {/* Opponent indicator — portrait + name + thinking dot */}
-        <div className="flex items-center gap-2">
+        <div className="flex gap-0.5" aria-label={`Difficulty level ${difficulty}`}>
+          {Array.from({ length: difficulty }, (_, i) => (
+            <Star key={i} size={20} weight="fill" color={opponent.accentColor} />
+          ))}
+        </div>
+      </div>
+
+      {/* Opponent card */}
+      <div className="flex justify-center px-4 pb-2">
+        <div
+          className={`card-pillow flex items-center gap-3 px-3 py-2 w-full max-w-[360px] transition-all duration-300 ${
+            turn === "black" && !gameOver.over ? "ring-2 ring-amber-400 shadow-lg" : ""
+          }`}
+        >
+          {/* Large animal portrait */}
           <div
-            className={`relative w-10 h-10 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-              turn === "black" && !gameOver.over
-                ? "border-amber-400 shadow-md scale-110"
-                : "border-white/50"
-            }`}
+            className="relative w-14 h-14 rounded-2xl flex-shrink-0 overflow-hidden"
             style={{ background: opponent.bgColor }}
           >
             <Image
               src={opponent.image}
               alt={t(opponent.nameKey)}
-              width={40}
-              height={40}
+              width={56}
+              height={56}
               className="object-cover"
+              priority
             />
           </div>
-          <span
-            className="text-sm font-extrabold"
-            style={{ color: "var(--ck-text)" }}
-          >
-            {t(opponent.nameKey)}
-          </span>
-          {isAIThinking && (
-            <div className="flex gap-0.5 items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "300ms" }} />
-            </div>
-          )}
-        </div>
 
-        {/* Difficulty stars */}
-        <div className="flex gap-0.5" aria-label={`Difficulty level ${difficulty}`}>
-          {Array.from({ length: difficulty }, (_, i) => (
-            <span key={i} className="text-lg" role="img" aria-hidden="true">
-              &#11088;
+          {/* Name + status */}
+          <div className="flex-1 min-w-0">
+            <span
+              className="text-[15px] font-extrabold block leading-tight"
+              style={{ color: "var(--ck-text)" }}
+            >
+              {t(opponent.nameKey)}
             </span>
-          ))}
+            {isAIThinking && (
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-[12px] font-bold" style={{ color: "var(--ck-text-light)" }}>
+                  {t("game_ai_thinking")}
+                </span>
+                <div className="flex gap-0.5 items-center">
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "300ms" }} />
+                </div>
+              </div>
+            )}
+            {!isAIThinking && turn === "white" && !gameOver.over && !gameResult && (
+              <span className="text-[12px] font-bold mt-0.5 block" style={{ color: "var(--ck-text-light)" }}>
+                {t("your_turn")}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
-        {/* Mascot bar — changes expression based on game state */}
-        <GameMascotBar
-          expression={
-            gameResult === "win" ? "celebrating"
-              : gameResult === "loss" ? "thinking"
-                : gameResult === "draw" ? "happy"
-                  : isAIThinking ? "thinking" : "happy"
-          }
-          narrationKey={
-            gameResult === "win" ? "you_win"
-              : gameResult === "loss" ? "you_lose"
-                : gameResult === "draw" ? "draw"
-                  : isAIThinking ? "game_ai_thinking" : "game_your_turn"
-          }
-        />
-
-        {/* Board is always visible — with celebration overlay when game ends */}
+      {/* Board */}
+      <div className="flex-1 flex flex-col items-center justify-start px-4 gap-2">
         <div className="relative w-full flex justify-center">
           <ChessBoard
             pieces={pieces}
@@ -279,6 +290,14 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Pikku coach below the board */}
+        <div className="flex items-center gap-2 w-full max-w-[360px]">
+          <div className="flex-shrink-0">
+            <Pikku expression={pikkuExpression} size={48} />
+          </div>
+          <SpeechBubble text={pikkuText} visible={!!pikkuText} />
         </div>
 
         {!gameResult && turn === "white" && !isAIThinking && (
