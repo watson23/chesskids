@@ -114,7 +114,7 @@ export default function PlayPage() {
         {/* Pikku header */}
         <div className="flex items-center gap-3 px-5 pt-6 pb-2 animate-fade-in-up">
           <Image
-            src="/mascot/pikku-waist-up.webp"
+            src="/mascot/pikku-winking.webp"
             alt="Pikku"
             width={72}
             height={86}

@@ -168,8 +168,8 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           : t("game_your_turn");
 
   const pikkuExpression = gameResult === "win" ? "celebrating"
-    : gameResult === "loss" ? "thinking"
-      : gameResult === "draw" ? "happy"
+    : gameResult === "loss" ? "sad"
+      : gameResult === "draw" ? "surprised"
         : isAIThinking ? "thinking" : "happy";
 
   return (
@@ -289,7 +289,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         <div className="flex items-center gap-2 w-full max-w-[360px]">
           <div className="flex-shrink-0">
             <Image
-              src="/mascot/pikku-waist-up.webp"
+              src={`/mascot/pikku-${pikkuExpression}.webp`}
               alt="Pikku"
               width={72}
               height={86}
