@@ -275,7 +275,7 @@ export default function PuzzlePlayer({
               phase={narrationOverride ? "try" : phase === "success" ? "watch" : "try"}
             />
 
-            <div className={`${wrongFlash ? "animate-wrong-flash rounded-xl" : ""}`}>
+            <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
               <ChessBoard
                 pieces={boardPieces}
                 theme={boardTheme}

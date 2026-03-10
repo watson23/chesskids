@@ -260,7 +260,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
               phase={narrationOverride ? "try" : (state.phase as "watch" | "try")}
             />
 
-            <div className={`${wrongFlash ? "animate-wrong-flash rounded-xl" : ""}`}>
+            <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
               <ChessBoard
                 pieces={boardPieces}
                 theme={boardTheme}
