@@ -293,7 +293,7 @@ export default function JourneyMap({
                 top: `${pos.y}%`,
               }}
             >
-              <Pikku expression="happy" size={56} />
+              <Pikku expression="happy" size={72} />
             </div>
           );
         })()}

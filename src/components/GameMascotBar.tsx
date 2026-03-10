@@ -22,10 +22,10 @@ export default function GameMascotBar({ expression, narrationKey }: GameMascotBa
   return (
     <div
       className="flex items-end gap-2 w-full max-w-[360px] px-2"
-      style={{ minHeight: 60 }}
+      style={{ minHeight: 80 }}
     >
       <div className="flex-shrink-0">
-        <Pikku expression={expression} size={64} />
+        <Pikku expression={expression} size={80} />
       </div>
       <SpeechBubble text={text} visible={!!text} />
     </div>

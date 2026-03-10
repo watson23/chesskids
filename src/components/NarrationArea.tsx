@@ -35,9 +35,9 @@ export default function NarrationArea({ narrationKey, phase }: NarrationAreaProp
   const expression = getExpression(phase);
 
   return (
-    <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: 110 }}>
+    <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: 120 }}>
       <div className="flex-shrink-0">
-        <Pikku expression={expression} size={96} />
+        <Pikku expression={expression} size={110} />
       </div>
       <SpeechBubble text={text} visible={!!text} />
     </div>

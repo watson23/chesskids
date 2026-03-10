@@ -249,7 +249,7 @@ export default function PuzzlePlayer({
         {phase === "celebrate" ? (
           <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             <Confetti active />
-            <Pikku expression="celebrating" size={96} />
+            <Pikku expression="celebrating" size={120} />
             <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-text)" }}>
               {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
             </h2>
