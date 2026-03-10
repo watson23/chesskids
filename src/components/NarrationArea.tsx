@@ -9,7 +9,7 @@ import fi from "@/data/locale/fi.json";
 
 const locales: Record<string, Record<string, string>> = { en, fi };
 
-type LessonPhase = "watch" | "try" | "celebrate";
+type LessonPhase = "watch" | "try" | "celebrate" | "wrong";
 
 interface NarrationAreaProps {
   narrationKey: string;
@@ -24,6 +24,8 @@ function getExpression(phase: LessonPhase) {
       return "thinking" as const;
     case "celebrate":
       return "celebrating" as const;
+    case "wrong":
+      return "wrong" as const;
   }
 }
 

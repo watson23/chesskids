@@ -24,7 +24,7 @@ export default function LoginPage() {
     >
       {/* Pikku mascot — the Chess Penguin */}
       <div className="animate-float">
-        <Pikku expression="happy" size={110} />
+        <Pikku expression="holding-pawn" size={130} />
       </div>
 
       <h1

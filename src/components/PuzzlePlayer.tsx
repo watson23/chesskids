@@ -275,7 +275,7 @@ export default function PuzzlePlayer({
                       ? currentPuzzle.narrationKey
                       : ""
               }
-              phase={narrationOverride ? "try" : phase === "success" ? "celebrate" : "try"}
+              phase={narrationOverride === "try_again" ? "wrong" : narrationOverride ? "try" : phase === "success" ? "celebrate" : "try"}
             />
 
             <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>

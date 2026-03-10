@@ -264,7 +264,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                       ? currentPuzzle.narrationKey
                       : ""
               }
-              phase={phaseOverride ?? (narrationOverride ? "try" : (state.phase as "watch" | "try"))}
+              phase={phaseOverride ?? (narrationOverride === "try_again" ? "wrong" : narrationOverride ? "try" : (state.phase as "watch" | "try"))}
             />
 
             <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
