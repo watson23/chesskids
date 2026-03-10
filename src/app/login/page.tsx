@@ -26,10 +26,16 @@ export default function LoginPage() {
     await signIn();
   }, [signIn]);
 
+  // Override body overflow-hidden from root layout so landing page can scroll
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   if (loading) return null;
 
   return (
-    <div className="min-h-dvh overflow-x-hidden">
+    <div>
       <HeroSection t={t} onPlayFree={handlePlayFree} onGoogleSignIn={handleGoogleSignIn} />
       <FeaturesSection t={t} />
       <TrustSection t={t} />
