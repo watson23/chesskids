@@ -29,7 +29,7 @@ interface LessonStopProps {
 
 function BoardIcon() {
   return (
-    <svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+    <svg width={26} height={26} viewBox="0 0 24 24" fill="none">
       <rect x="2" y="2" width="9" height="9" rx="1.5" fill="white" opacity="0.95" />
       <rect x="13" y="2" width="9" height="9" rx="1.5" fill="white" opacity="0.45" />
       <rect x="2" y="13" width="9" height="9" rx="1.5" fill="white" opacity="0.45" />
@@ -40,7 +40,7 @@ function BoardIcon() {
 
 function SparkleIcon() {
   return (
-    <svg width={32} height={32} viewBox="0 0 24 24" fill="white">
+    <svg width={26} height={26} viewBox="0 0 24 24" fill="white">
       <path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z" opacity="0.95" />
       <path d="M18 14 L18.8 16.2 L21 17 L18.8 17.8 L18 20 L17.2 17.8 L15 17 L17.2 16.2 Z" opacity="0.7" />
     </svg>
@@ -49,7 +49,7 @@ function SparkleIcon() {
 
 function TacticsIcon() {
   return (
-    <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+    <svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
       <circle cx="12" cy="12" r="8" opacity="0.7" />
       <circle cx="12" cy="12" r="3" opacity="0.95" />
       <line x1="12" y1="2" x2="12" y2="6" opacity="0.7" />
@@ -72,7 +72,7 @@ const PIECE_COMPONENTS: Record<string, (props: { fill: string; stroke: string; s
 function LessonIcon({ icon }: { icon: Lesson["icon"] }) {
   const PieceSVG = PIECE_COMPONENTS[icon];
   if (PieceSVG) {
-    return <PieceSVG fill="white" stroke="rgba(0,0,0,0.2)" size={34} />;
+    return <PieceSVG fill="white" stroke="rgba(0,0,0,0.2)" size={28} />;
   }
   if (icon === "board") return <BoardIcon />;
   if (icon === "special") return <SparkleIcon />;
@@ -145,9 +145,9 @@ export default function LessonStop({
         />
       )}
 
-      {/* The big round node */}
+      {/* The round node */}
       <div
-        className="w-[76px] h-[76px] rounded-full flex items-center justify-center"
+        className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
         style={nodeStyle}
       >
         <LessonIcon icon={lesson.icon} />
@@ -155,7 +155,7 @@ export default function LessonStop({
 
       {/* Lesson number badge */}
       <div
-        className="mt-1.5 w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-extrabold shadow-sm"
+        className="mt-1 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-extrabold shadow-sm"
         style={{
           background: status === "completed" ? "var(--ck-purple)" : status === "current" ? "var(--ck-mint-dark)" : "#C4C0D0",
           color: "white",
@@ -171,7 +171,7 @@ export default function LessonStop({
           {Array.from({ length: 3 }, (_, i) => (
             <Star
               key={i}
-              size={16}
+              size={14}
               weight={i < stars ? "fill" : "regular"}
               color={i < stars ? "#FCD34D" : "#D4D0E0"}
             />

@@ -23,35 +23,62 @@ interface JourneyMapProps {
 }
 
 /**
- * Lesson positions: gentle S-curve with plenty of vertical spacing.
- * Each node gets ~7.5% of vertical space (total ~97.5% for 13 nodes).
- * Horizontal wave is gentle: ±18% from center with only 1.5 oscillations.
+ * Hand-tuned lesson positions tracing the winding snowy path
+ * in the illustrated background (journey-map-bg.webp).
+ * Coordinates are {x%, y%} of the map container.
+ * Bottom of map = high y (start), top = low y (end).
+ * Lessons use the bottom ~70%, leaving the top for future lessons.
  */
-function getLessonPosition(index: number, total: number) {
-  const progress = index / (total - 1);
-  // Bottom of map = high y (start), top = low y (end)
-  const y = 92 - progress * 84;
-  // Gentle sine wave — 1.5 oscillations, ±18 from center
-  const x = 50 + Math.sin(progress * Math.PI * 3) * 18;
-  return { x, y };
+const LESSON_POSITIONS: { x: number; y: number }[] = [
+  { x: 50, y: 93 },  // 1  Board Intro — bottom center
+  { x: 58, y: 86 },  // 2  Pawn — slight right
+  { x: 40, y: 79 },  // 3  Knight — curve left
+  { x: 30, y: 72 },  // 4  Bishop — continue left
+  { x: 48, y: 65 },  // 5  Rook — back to center
+  { x: 62, y: 58 },  // 6  Queen — curve right
+  { x: 44, y: 51 },  // 7  King — curve left
+  { x: 30, y: 44 },  // 8  Castling — continue left
+  { x: 46, y: 37 },  // 9  En Passant — back toward center
+  { x: 60, y: 30 },  // 10 Promotion — curve right
+  { x: 46, y: 24 },  // 11 Check & Checkmate — curve left
+  { x: 34, y: 18 },  // 12 Forks — continue left
+  { x: 48, y: 12 },  // 13 Pins — toward mountain top
+];
+
+function getLessonPosition(index: number, _total: number) {
+  if (index < LESSON_POSITIONS.length) {
+    return LESSON_POSITIONS[index];
+  }
+  // Fallback for future lessons beyond the hand-tuned list
+  const lastPos = LESSON_POSITIONS[LESSON_POSITIONS.length - 1];
+  const extra = index - LESSON_POSITIONS.length + 1;
+  return { x: 50 + Math.sin(extra * 1.2) * 15, y: Math.max(5, lastPos.y - extra * 6) };
 }
 
 /**
- * Chest positions: placed to the opposite side of the path from nearby lessons.
+ * Hand-tuned chest positions placed on the opposite side of the path.
+ * Keyed by chest index.
  */
-function getChestPosition(positionOnMap: number, total: number) {
+const CHEST_POSITIONS: Record<number, { x: number; y: number }> = {
+  0: { x: 70, y: 82 },   // 6★  — right side, between lessons 2-3
+  1: { x: 22, y: 62 },   // 15★ — left side, between lessons 5-6
+  2: { x: 62, y: 47 },   // 24★ — right side, between lessons 7-8
+  3: { x: 22, y: 34 },   // 33★ — left side, between lessons 9-10
+  4: { x: 64, y: 15 },   // 39★ — right side, near lessons 12-13
+};
+
+function getChestPosition(positionOnMap: number, _total: number, chestIndex: number) {
+  if (CHEST_POSITIONS[chestIndex]) {
+    return CHEST_POSITIONS[chestIndex];
+  }
+  // Fallback
   const y = 92 - positionOnMap * 84;
-  // Path goes right when sin > 0, so put chest on the opposite side
-  const pathX = Math.sin(positionOnMap * Math.PI * 3) * 18;
-  const chestOffset = pathX > 0 ? -20 : 20;
-  const x = 50 + pathX + chestOffset;
-  return { x: Math.max(10, Math.min(90, x)), y };
+  return { x: 75, y };
 }
 
 function buildPathData(total: number): string {
-  const points = Array.from({ length: total }, (_, i) =>
-    getLessonPosition(i, total)
-  );
+  const count = Math.min(total, LESSON_POSITIONS.length);
+  const points = Array.from({ length: count }, (_, i) => LESSON_POSITIONS[i]);
   if (points.length === 0) return "";
   let d = `M ${points[0].x} ${points[0].y}`;
   for (let i = 1; i < points.length; i++) {
@@ -155,54 +182,41 @@ export default function JourneyMap({
         className="relative w-full"
         style={{ minHeight: "200vh" }}
       >
-        {/* Cool pastel gradient background */}
+        {/* Illustrated journey map background */}
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(to bottom, #DBD5F7 0%, #E8E2FF 15%, #F5F0FF 35%, #FFF0F5 55%, #F0F0FF 75%, #E8E2FF 100%)",
+            backgroundImage: "url(/journey-map-bg.webp)",
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
           }}
         />
 
-        {/* Decorative SVG scenery */}
+        {/* Dotted trail connecting lesson nodes */}
         <svg
           className="absolute inset-0 w-full h-full"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          {/* Soft clouds */}
-          <ellipse cx="12" cy="3" rx="7" ry="2" fill="white" opacity="0.65" />
-          <ellipse cx="17" cy="2.5" rx="4" ry="1.5" fill="white" opacity="0.5" />
-          <ellipse cx="75" cy="5" rx="9" ry="2.5" fill="white" opacity="0.55" />
-          <ellipse cx="82" cy="4.5" rx="5" ry="2" fill="white" opacity="0.4" />
-          <ellipse cx="40" cy="1.5" rx="6" ry="1.5" fill="white" opacity="0.4" />
-
-          {/* Decorative circles — spread out to not overlap nodes */}
-          <circle cx="6" cy="85" r="3" fill="#B197FC" opacity="0.1" />
-          <circle cx="94" cy="70" r="3.5" fill="#FDA4AF" opacity="0.1" />
-          <circle cx="8" cy="50" r="2.5" fill="#93C5FD" opacity="0.1" />
-          <circle cx="92" cy="35" r="3" fill="#B197FC" opacity="0.08" />
-          <circle cx="6" cy="20" r="2" fill="#6EE7B7" opacity="0.1" />
-          <circle cx="94" cy="15" r="2.5" fill="#FDA4AF" opacity="0.08" />
-
           {/* Path glow */}
           <path
             d={pathData}
             fill="none"
-            stroke="#B197FC"
+            stroke="white"
             strokeWidth="3"
-            opacity={0.08}
+            opacity={0.35}
             strokeLinecap="round"
           />
           {/* Main dotted trail */}
           <path
             d={pathData}
             fill="none"
-            stroke="#B197FC"
+            stroke="white"
             strokeWidth="1.5"
             strokeDasharray="2.5,2"
             strokeLinecap="round"
-            opacity={0.35}
+            opacity={0.7}
           />
         </svg>
 
@@ -239,7 +253,7 @@ export default function JourneyMap({
 
         {/* Treasure chests */}
         {CHESTS.map((chest) => {
-          const { x, y } = getChestPosition(chest.positionOnMap, LESSONS.length);
+          const { x, y } = getChestPosition(chest.positionOnMap, LESSONS.length, chest.index);
 
           let chestStatus: "locked" | "unlocked" | "opened";
           if (openedChests.includes(chest.index)) {
