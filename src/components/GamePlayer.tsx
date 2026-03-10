@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { House, ArrowCounterClockwise } from "@phosphor-icons/react";
-import type { AIDifficulty, PieceType } from "@/types/chess";
+import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
 import GameMascotBar from "@/components/GameMascotBar";
@@ -10,28 +10,8 @@ import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useAudio } from "@/hooks/useAudio";
 import { getAIMove } from "@/lib/chess-ai";
-import { speak } from "@/lib/tts";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
-
-/** Map chess.js piece abbreviation to a spoken name */
-const PIECE_NAMES: Record<PieceType, string> = {
-  pawn: "pawn",
-  knight: "knight",
-  bishop: "bishop",
-  rook: "rook",
-  queen: "queen",
-  king: "king",
-};
-
-const PIECE_NAMES_FI: Record<PieceType, string> = {
-  pawn: "sotilas",
-  knight: "ratsu",
-  bishop: "lähetti",
-  rook: "torni",
-  queen: "kuningatar",
-  king: "kuningas",
-};
 
 interface GamePlayerProps {
   difficulty: AIDifficulty;
@@ -107,19 +87,6 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     aiTimeoutRef.current = setTimeout(() => {
       const aiMove = getAIMove(fen, difficulty);
       if (aiMove) {
-        // Narrate the AI move via TTS
-        const pieceName = pieces[aiMove.from];
-        if (pieceName) {
-          const names = language === "fi" ? PIECE_NAMES_FI : PIECE_NAMES;
-          const spokenName = names[pieceName.type];
-          const text =
-            language === "fi"
-              ? `${spokenName} siirtyy ruutuun ${aiMove.to}`
-              : `The ${spokenName} moves to ${aiMove.to}`;
-          speak(text, { lang: language });
-        }
-
-        // Execute the AI move directly (bypasses playerColor check)
         programmaticMove(aiMove.from, aiMove.to);
         setIsAIThinking(false);
       } else {
@@ -224,67 +191,73 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
-        {gameResult ? (
-          /* Game Over */
-          <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
-            {gameResult === "win" && <Confetti active />}
+        {/* Mascot bar — changes expression based on game state */}
+        <GameMascotBar
+          expression={
+            gameResult === "win" ? "celebrating"
+              : gameResult === "loss" ? "thinking"
+                : gameResult === "draw" ? "happy"
+                  : isAIThinking ? "thinking" : "happy"
+          }
+          narrationKey={
+            gameResult === "win" ? "you_win"
+              : gameResult === "loss" ? "you_lose"
+                : gameResult === "draw" ? "draw"
+                  : isAIThinking ? "game_ai_thinking" : "game_your_turn"
+          }
+        />
 
-            <GameMascotBar
-              expression={gameResult === "win" ? "celebrating" : gameResult === "loss" ? "thinking" : "happy"}
-              narrationKey={gameResult === "win" ? "you_win" : gameResult === "loss" ? "you_lose" : "draw"}
-            />
+        {/* Board is always visible — with celebration overlay when game ends */}
+        <div className="relative w-full flex justify-center">
+          <ChessBoard
+            pieces={pieces}
+            theme={boardTheme}
+            pieceColors={pieceColors}
+            selectedSquare={gameResult ? null : selectedSquare}
+            validMoves={gameResult ? [] : validMoves}
+            lastMove={lastMove}
+            onSquareTap={handleSquareTap}
+            interactive={!gameResult && turn === "white" && !isAIThinking}
+          />
 
-            <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl animate-celebrate-pop ${
-                gameResult === "win"
-                  ? "bg-green-100"
-                  : gameResult === "loss"
-                    ? "bg-red-100"
-                    : "bg-amber-100"
-              }`}
+          {/* Game over overlay on top of the board */}
+          {gameResult && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
+              style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(2px)" }}
             >
-              {gameResult === "win" ? (
-                <span role="img" aria-label="Trophy">&#127942;</span>
-              ) : gameResult === "loss" ? (
-                <span role="img" aria-label="Thinking face">&#129300;</span>
-              ) : (
-                <span role="img" aria-label="Handshake">&#129309;</span>
-              )}
+              {gameResult === "win" && <Confetti active />}
+
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl animate-celebrate-pop shadow-lg ${
+                  gameResult === "win"
+                    ? "bg-green-100"
+                    : gameResult === "loss"
+                      ? "bg-red-100"
+                      : "bg-amber-100"
+                }`}
+              >
+                {gameResult === "win" ? (
+                  <span role="img" aria-label="Trophy">&#127942;</span>
+                ) : gameResult === "loss" ? (
+                  <span role="img" aria-label="Thinking face">&#129300;</span>
+                ) : (
+                  <span role="img" aria-label="Handshake">&#129309;</span>
+                )}
+              </div>
+
+              <button
+                onClick={handleRematch}
+                className="btn-3d btn-3d-purple flex items-center gap-2 px-6 py-2.5 text-white font-bold text-base mt-4"
+              >
+                <ArrowCounterClockwise size={22} weight="bold" />
+                <span>{t("rematch")}</span>
+              </button>
             </div>
+          )}
+        </div>
 
-            <button
-              onClick={handleRematch}
-              className="btn-3d btn-3d-purple flex items-center gap-2 px-8 py-3 text-white font-bold text-lg"
-            >
-              <ArrowCounterClockwise size={24} weight="bold" />
-              <span>
-                {t("rematch")}
-              </span>
-            </button>
-          </div>
-        ) : (
-          /* Active game */
-          <>
-            <GameMascotBar
-              expression={isAIThinking ? "thinking" : "happy"}
-              narrationKey={isAIThinking ? "game_ai_thinking" : "game_your_turn"}
-            />
-
-            <ChessBoard
-              pieces={pieces}
-              theme={boardTheme}
-              pieceColors={pieceColors}
-              selectedSquare={selectedSquare}
-              validMoves={validMoves}
-              lastMove={lastMove}
-              onSquareTap={handleSquareTap}
-              interactive={turn === "white" && !isAIThinking}
-            />
-
-            {turn === "white" && !isAIThinking && (
-              <TapHint visible={showTapHint} />
-            )}
-          </>
+        {!gameResult && turn === "white" && !isAIThinking && (
+          <TapHint visible={showTapHint} />
         )}
       </div>
     </div>
