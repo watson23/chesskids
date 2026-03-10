@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
@@ -101,8 +101,13 @@ const CATEGORIES: {
 
 export default function PracticePage() {
   const router = useRouter();
-  const { sfx } = useAudio();
+  const { sfx, say } = useAudio();
   const { t } = useLocale();
+
+  // Speak the instruction when page loads
+  useEffect(() => {
+    say("practice_pikku_speech");
+  }, [say]);
 
   const handleCategoryTap = useCallback(
     (category: PuzzleCategory) => {

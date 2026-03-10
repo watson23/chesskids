@@ -69,7 +69,7 @@ const OPPONENTS: Opponent[] = [
 
 export default function PlayPage() {
   const router = useRouter();
-  const { sfx } = useAudio();
+  const { sfx, say } = useAudio();
   const { t } = useLocale();
   const [owlBeaten, setOwlBeaten] = useState(false);
   const [wiggleId, setWiggleId] = useState<number | null>(null);
@@ -78,6 +78,11 @@ export default function PlayPage() {
     const beaten = localStorage.getItem("chesspenguin_owl_beaten") === "true";
     setOwlBeaten(beaten);
   }, []);
+
+  // Speak the instruction when page loads
+  useEffect(() => {
+    say("play_pikku_speech");
+  }, [say]);
 
   const handleOpponentTap = useCallback(
     (opponent: Opponent) => {
