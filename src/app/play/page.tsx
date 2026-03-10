@@ -32,7 +32,7 @@ const OPPONENTS: Opponent[] = [
     level: 1,
     nameKey: "opponent_mouse_name",
     taglineKey: "opponent_mouse_tagline",
-    image: "/opponents/mouse.webp",
+    image: "/opponents/mouse-t.webp",
     stars: 1,
     bgColor: "#D1FAE5",
     accentColor: "#6EE7B7",
@@ -41,7 +41,7 @@ const OPPONENTS: Opponent[] = [
     level: 2,
     nameKey: "opponent_fox_name",
     taglineKey: "opponent_fox_tagline",
-    image: "/opponents/fox.webp",
+    image: "/opponents/fox-t.webp",
     stars: 2,
     bgColor: "#FEF3C7",
     accentColor: "#FCD34D",
@@ -50,7 +50,7 @@ const OPPONENTS: Opponent[] = [
     level: 3,
     nameKey: "opponent_owl_name",
     taglineKey: "opponent_owl_tagline",
-    image: "/opponents/owl.webp",
+    image: "/opponents/owl-t.webp",
     stars: 3,
     bgColor: "#DBEAFE",
     accentColor: "#93C5FD",
@@ -59,7 +59,7 @@ const OPPONENTS: Opponent[] = [
     level: 4,
     nameKey: "opponent_bear_name",
     taglineKey: "opponent_bear_tagline",
-    image: "/opponents/bear.webp",
+    image: "/opponents/bear-t.webp",
     stars: 4,
     bgColor: "#FCE7F3",
     accentColor: "#FDA4AF",
@@ -145,17 +145,17 @@ export default function PlayPage() {
                 }}
                 aria-label={isLocked ? t("opponent_locked") : `${t(opponent.nameKey)}, level ${opponent.level}`}
               >
-                {/* Animal portrait */}
+                {/* Animal portrait — transparent background, pops out of card */}
                 <div
-                  className="relative w-[72px] h-[72px] rounded-2xl flex-shrink-0 overflow-hidden"
+                  className="relative w-[80px] h-[80px] rounded-2xl flex-shrink-0 flex items-center justify-center"
                   style={{ background: opponent.bgColor }}
                 >
                   <Image
                     src={opponent.image}
                     alt={t(opponent.nameKey)}
-                    width={72}
-                    height={72}
-                    className="object-cover"
+                    width={80}
+                    height={80}
+                    className="object-contain drop-shadow-md"
                     style={isLocked ? { filter: "grayscale(0.6) blur(1px)" } : undefined}
                   />
                   {isLocked && (

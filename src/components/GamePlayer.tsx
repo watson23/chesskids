@@ -16,10 +16,10 @@ import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
 
 const OPPONENTS: Record<number, { nameKey: string; image: string; bgColor: string; accentColor: string }> = {
-  1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7" },
-  2: { nameKey: "opponent_fox_name", image: "/opponents/fox.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D" },
-  3: { nameKey: "opponent_owl_name", image: "/opponents/owl.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD" },
-  4: { nameKey: "opponent_bear_name", image: "/opponents/bear.webp", bgColor: "#FCE7F3", accentColor: "#FDA4AF" },
+  1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse-t.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7" },
+  2: { nameKey: "opponent_fox_name", image: "/opponents/fox-t.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D" },
+  3: { nameKey: "opponent_owl_name", image: "/opponents/owl-t.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD" },
+  4: { nameKey: "opponent_bear_name", image: "/opponents/bear-t.webp", bgColor: "#FCE7F3", accentColor: "#FDA4AF" },
 };
 
 interface GamePlayerProps {
@@ -174,8 +174,8 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
-      {/* Top bar: home + stars */}
-      <div className="flex items-center justify-between px-4 pt-3 pb-1">
+      {/* Top bar: home button */}
+      <div className="flex items-center px-4 pt-3 pb-1">
         <button
           onClick={handleExit}
           className="card-pillow p-2 active:scale-95 transition-transform"
@@ -183,62 +183,55 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         >
           <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
         </button>
-
-        <div className="flex gap-0.5" aria-label={`Difficulty level ${difficulty}`}>
-          {Array.from({ length: difficulty }, (_, i) => (
-            <Star key={i} size={20} weight="fill" color={opponent.accentColor} />
-          ))}
-        </div>
       </div>
 
-      {/* Opponent card */}
-      <div className="flex justify-center px-4 pb-2">
+      {/* Floating opponent */}
+      <div className="flex flex-col items-center px-4 pb-1">
+        {/* Character image — large and floating on the background */}
         <div
-          className={`card-pillow flex items-center gap-3 px-3 py-2 w-full max-w-[360px] transition-all duration-300 ${
+          className={`relative transition-transform duration-500 ${
+            isAIThinking ? "animate-opponent-think" : ""
+          }`}
+        >
+          <Image
+            src={opponent.image}
+            alt={t(opponent.nameKey)}
+            width={100}
+            height={100}
+            className="drop-shadow-lg"
+            style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" }}
+            priority
+          />
+        </div>
+
+        {/* Name badge + status */}
+        <div
+          className={`card-pillow flex items-center gap-2 px-4 py-1.5 -mt-2 transition-all duration-300 ${
             turn === "black" && !gameOver.over ? "ring-2 ring-amber-400 shadow-lg" : ""
           }`}
         >
-          {/* Large animal portrait */}
-          <div
-            className="relative w-14 h-14 rounded-2xl flex-shrink-0 overflow-hidden"
-            style={{ background: opponent.bgColor }}
+          <span
+            className="text-[15px] font-extrabold leading-tight"
+            style={{ color: "var(--ck-text)" }}
           >
-            <Image
-              src={opponent.image}
-              alt={t(opponent.nameKey)}
-              width={56}
-              height={56}
-              className="object-cover"
-              priority
-            />
-          </div>
+            {t(opponent.nameKey)}
+          </span>
 
-          {/* Name + status */}
-          <div className="flex-1 min-w-0">
-            <span
-              className="text-[15px] font-extrabold block leading-tight"
-              style={{ color: "var(--ck-text)" }}
-            >
-              {t(opponent.nameKey)}
-            </span>
-            {isAIThinking && (
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-[12px] font-bold" style={{ color: "var(--ck-text-light)" }}>
-                  {t("game_ai_thinking")}
-                </span>
-                <div className="flex gap-0.5 items-center">
-                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "300ms" }} />
-                </div>
-              </div>
-            )}
-            {!isAIThinking && turn === "white" && !gameOver.over && !gameResult && (
-              <span className="text-[12px] font-bold mt-0.5 block" style={{ color: "var(--ck-text-light)" }}>
-                {t("your_turn")}
-              </span>
-            )}
-          </div>
+          {isAIThinking && (
+            <div className="flex gap-0.5 items-center ml-1">
+              <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: opponent.accentColor, animationDelay: "300ms" }} />
+            </div>
+          )}
+
+          {!isAIThinking && turn === "white" && !gameOver.over && !gameResult && (
+            <div className="flex gap-0.5 ml-1">
+              {Array.from({ length: difficulty }, (_, i) => (
+                <Star key={i} size={14} weight="fill" color={opponent.accentColor} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
