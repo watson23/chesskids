@@ -1,6 +1,6 @@
 {
-  "name": "ChessKids",
-  "short_name": "ChessKids",
+  "name": "Chess Penguin",
+  "short_name": "Chess Penguin",
   "description": "Learn chess without reading",
   "start_url": "/",
   "display": "standalone",

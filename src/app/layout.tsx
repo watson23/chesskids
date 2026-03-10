@@ -13,13 +13,13 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "ChessKids",
+  title: "Chess Penguin",
   description: "Learn chess without reading",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "ChessKids",
+    title: "Chess Penguin",
   },
 };
 

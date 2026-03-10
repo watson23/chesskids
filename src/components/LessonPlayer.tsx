@@ -9,7 +9,7 @@ import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
 import NarrationArea from "@/components/NarrationArea";
-import MascotPawn from "@/components/MascotPawn";
+import Pikku from "@/components/Pikku";
 import TapHint from "@/components/TapHint";
 import { useLessonPlayer } from "@/hooks/useLessonPlayer";
 import { useAudio } from "@/hooks/useAudio";
@@ -241,7 +241,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         {state.phase === "celebrate" ? (
           <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             <Confetti active />
-            <MascotPawn expression="celebrating" size={64} />
+            <Pikku expression="celebrating" size={64} />
             <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-purple-dark)" }}>
               {t(state.stars === 3 ? "celebrate_3_stars" : state.stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
             </h2>

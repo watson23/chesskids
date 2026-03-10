@@ -1,6 +1,6 @@
 "use client";
 
-import MascotPawn from "@/components/MascotPawn";
+import Pikku from "@/components/Pikku";
 import SpeechBubble from "@/components/SpeechBubble";
 import { useAudio } from "@/hooks/useAudio";
 
@@ -35,7 +35,7 @@ export default function NarrationArea({ narrationKey, phase }: NarrationAreaProp
   return (
     <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: 100 }}>
       <div className="flex-shrink-0">
-        <MascotPawn expression={expression} size={72} />
+        <Pikku expression={expression} size={72} />
       </div>
       <SpeechBubble text={text} visible={!!text} />
     </div>

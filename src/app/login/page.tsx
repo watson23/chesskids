@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { KnightSVG } from "@/lib/pieces";
+import Pikku from "@/components/Pikku";
 
 export default function LoginPage() {
   const { user, loading, signIn, signInAnon } = useAuth();
@@ -22,22 +22,16 @@ export default function LoginPage() {
         background: "linear-gradient(170deg, #E0E7FF 0%, #F5F0FF 40%, #FFF0F5 100%)",
       }}
     >
-      {/* Big knight icon in a purple circle */}
-      <div
-        className="w-28 h-28 rounded-full flex items-center justify-center animate-float"
-        style={{
-          background: "linear-gradient(135deg, #B197FC, #93C5FD)",
-          boxShadow: "0 8px 0 #9775E6, 0 12px 24px rgba(151, 117, 230, 0.3)",
-        }}
-      >
-        <KnightSVG fill="white" stroke="rgba(0,0,0,0.15)" size={60} />
+      {/* Pikku mascot — the Chess Penguin */}
+      <div className="animate-float">
+        <Pikku expression="happy" size={110} />
       </div>
 
       <h1
         className="text-4xl font-extrabold tracking-tight"
         style={{ color: "var(--ck-text)" }}
       >
-        ChessKids
+        Chess Penguin
       </h1>
 
       <p className="text-base font-medium" style={{ color: "var(--ck-text-light)" }}>
