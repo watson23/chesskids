@@ -114,11 +114,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         if (isValidSource && piece) {
           setSelectedSquare(square);
           sfx("piece-pickup");
-          // Don't show destination hints for checkmate puzzles
-          if (!currentPuzzle.narrationKey.includes("checkmate")) {
-            const destinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
-            setValidMoves(destinations);
-          }
+          const destinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
+          setValidMoves(destinations);
         }
         return;
       }
