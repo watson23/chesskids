@@ -147,5 +147,17 @@
   "landing_trust_free_desc": "Full access, no paywalls",
   "landing_cta_title": "Ready for a chess adventure?",
   "landing_cta_speech": "Let's go!",
-  "landing_footer": "Made with love for little chess players"
+  "landing_footer": "Made with love for little chess players",
+  "practice_pikku_speech": "Pick a puzzle to solve!",
+  "practice_solved": "solved",
+  "play_pikku_speech": "Who will you play today?",
+  "opponent_mouse_name": "Miki the Mouse",
+  "opponent_mouse_tagline": "A gentle first game!",
+  "opponent_fox_name": "Felix the Fox",
+  "opponent_fox_tagline": "Tricky and clever!",
+  "opponent_owl_name": "Oliver the Owl",
+  "opponent_owl_tagline": "Wise and strong!",
+  "opponent_bear_name": "Bruno the Bear",
+  "opponent_bear_tagline": "The ultimate challenge!",
+  "opponent_locked": "Beat Oliver to unlock!"
 }

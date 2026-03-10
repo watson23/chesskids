@@ -26,7 +26,7 @@ export interface PieceColorSet {
   name: string;
 }
 
-export type AIDifficulty = 1 | 2 | 3;
+export type AIDifficulty = 1 | 2 | 3 | 4;
 
 export interface GameState {
   selectedSquare: Square | null;

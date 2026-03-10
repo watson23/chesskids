@@ -147,5 +147,17 @@
   "landing_trust_free_desc": "Täysi pääsy, ei maksumuureja",
   "landing_cta_title": "Valmis shakkiseikkailuun?",
   "landing_cta_speech": "Mennään!",
-  "landing_footer": "Tehty rakkaudella pienille shakinpelaajille"
+  "landing_footer": "Tehty rakkaudella pienille shakinpelaajille",
+  "practice_pikku_speech": "Valitse tehtävä!",
+  "practice_solved": "ratkaistu",
+  "play_pikku_speech": "Ketä vastaan pelaat tänään?",
+  "opponent_mouse_name": "Miki-hiiri",
+  "opponent_mouse_tagline": "Lempeä ensipeli!",
+  "opponent_fox_name": "Veikko-kettu",
+  "opponent_fox_tagline": "Ovela ja nokkela!",
+  "opponent_owl_name": "Oiva-pöllö",
+  "opponent_owl_tagline": "Viisas ja vahva!",
+  "opponent_bear_name": "Bruni-karhu",
+  "opponent_bear_tagline": "Suurin haaste!",
+  "opponent_locked": "Voita Oiva avataksesi!"
 }

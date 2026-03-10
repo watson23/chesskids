@@ -44,41 +44,110 @@ export function getAIMove(
     return { from: move.from as Square, to: move.to as Square };
   }
 
-  // Level 3: basic evaluation
+  if (level === 3) {
+    // Level 3: basic evaluation
+    let bestScore = -Infinity;
+    let bestMoves: typeof moves = [];
+
+    for (const move of moves) {
+      let score = 0;
+
+      if (move.captured) {
+        score += PIECE_VALUES[move.captured] * 10;
+      }
+
+      const centerSquares = ["d4", "d5", "e4", "e5"];
+      if (centerSquares.includes(move.to)) {
+        score += 1;
+      }
+
+      const testChess = new Chess(fen);
+      testChess.move(move);
+
+      if (testChess.isCheckmate()) {
+        score += 1000;
+      } else if (testChess.isCheck()) {
+        score += 3;
+      }
+
+      score += Math.random() * 0.5;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMoves = [move];
+      } else if (Math.abs(score - bestScore) < 0.6) {
+        bestMoves.push(move);
+      }
+    }
+
+    const chosen = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+    return { from: chosen.from as Square, to: chosen.to as Square };
+  }
+
+  // Level 4: 2-ply minimax — evaluate our move + opponent's best reply
   let bestScore = -Infinity;
   let bestMoves: typeof moves = [];
 
   for (const move of moves) {
-    let score = 0;
+    const afterMove = new Chess(fen);
+    afterMove.move(move);
 
-    // Strongly prefer captures by piece value
+    // If we checkmate immediately, pick it
+    if (afterMove.isCheckmate()) {
+      return { from: move.from as Square, to: move.to as Square };
+    }
+
+    let moveScore = 0;
+
+    // Material gained
     if (move.captured) {
-      score += PIECE_VALUES[move.captured] * 10;
+      moveScore += PIECE_VALUES[move.captured] * 10;
     }
 
-    // Reward center control
-    const centerSquares = ["d4", "d5", "e4", "e5"];
-    if (centerSquares.includes(move.to)) {
-      score += 1;
+    // Center control bonus
+    const center = ["d4", "d5", "e4", "e5"];
+    const extendedCenter = ["c3", "c4", "c5", "c6", "d3", "d6", "e3", "e6", "f3", "f4", "f5", "f6"];
+    if (center.includes(move.to)) moveScore += 2;
+    else if (extendedCenter.includes(move.to)) moveScore += 0.5;
+
+    // Check bonus
+    if (afterMove.isCheck()) moveScore += 3;
+
+    // Look at opponent's best reply (minimax ply 2)
+    const opponentMoves = afterMove.moves({ verbose: true });
+    let worstOpponentScore = 0; // best opponent reply from their perspective
+
+    for (const opMove of opponentMoves) {
+      let opScore = 0;
+
+      if (opMove.captured) {
+        opScore += PIECE_VALUES[opMove.captured] * 10;
+      }
+
+      const afterOp = new Chess(afterMove.fen());
+      afterOp.move(opMove);
+
+      if (afterOp.isCheckmate()) {
+        opScore += 1000;
+      } else if (afterOp.isCheck()) {
+        opScore += 2;
+      }
+
+      if (opScore > worstOpponentScore) {
+        worstOpponentScore = opScore;
+      }
     }
 
-    // Evaluate resulting position
-    const testChess = new Chess(fen);
-    testChess.move(move);
+    // Net evaluation: our gain minus opponent's best response
+    moveScore -= worstOpponentScore;
 
-    if (testChess.isCheckmate()) {
-      score += 1000;
-    } else if (testChess.isCheck()) {
-      score += 3;
-    }
+    // Tiny random factor for variety
+    moveScore += Math.random() * 0.3;
 
-    // Small random factor for variety (but not enough to override real advantages)
-    score += Math.random() * 0.5;
-
-    if (score > bestScore) {
-      bestScore = score;
+    if (moveScore > bestScore) {
+      bestScore = moveScore;
       bestMoves = [move];
-    } else if (Math.abs(score - bestScore) < 0.6) {
+    } else if (Math.abs(moveScore - bestScore) < 0.4) {
       bestMoves.push(move);
     }
   }

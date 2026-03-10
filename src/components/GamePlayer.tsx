@@ -64,6 +64,10 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         setGameResult("win");
         sfx("confetti");
         say("you_win");
+        // Unlock bear opponent when the player beats the owl (level 3)
+        if (difficulty >= 3) {
+          localStorage.setItem("chesspenguin_owl_beaten", "true");
+        }
       } else {
         setGameResult("loss");
         say("you_lose");

@@ -11,7 +11,7 @@ function GameContent() {
 
   const levelParam = searchParams.get("level");
   const level = (
-    levelParam === "1" || levelParam === "2" || levelParam === "3"
+    levelParam === "1" || levelParam === "2" || levelParam === "3" || levelParam === "4"
       ? Number(levelParam)
       : 1
   ) as AIDifficulty;
