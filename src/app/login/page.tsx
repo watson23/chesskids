@@ -35,7 +35,7 @@ export default function LoginPage() {
       </h1>
 
       <p className="text-base font-medium" style={{ color: "var(--ck-text-light)" }}>
-        Learn chess by playing!
+        Chess for kids — no reading needed!
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs mt-2">

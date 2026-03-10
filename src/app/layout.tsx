@@ -14,7 +14,7 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata: Metadata = {
   title: "Chess Penguin",
-  description: "Learn chess without reading",
+  description: "Chess for kids — no reading needed!",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

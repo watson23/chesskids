@@ -1,7 +1,7 @@
 {
   "name": "Chess Penguin",
   "short_name": "Chess Penguin",
-  "description": "Learn chess without reading",
+  "description": "Chess for kids — no reading needed!",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fffbeb",
