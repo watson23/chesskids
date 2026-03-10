@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { House, ArrowCounterClockwise } from "@phosphor-icons/react";
+import Image from "next/image";
 import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
@@ -12,6 +13,13 @@ import { useAudio } from "@/hooks/useAudio";
 import { getAIMove } from "@/lib/chess-ai";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
+
+const OPPONENTS: Record<number, { nameKey: string; image: string; bgColor: string; accentColor: string }> = {
+  1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7" },
+  2: { nameKey: "opponent_fox_name", image: "/opponents/fox.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D" },
+  3: { nameKey: "opponent_owl_name", image: "/opponents/owl.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD" },
+  4: { nameKey: "opponent_bear_name", image: "/opponents/bear.webp", bgColor: "#FCE7F3", accentColor: "#FDA4AF" },
+};
 
 interface GamePlayerProps {
   difficulty: AIDifficulty;
@@ -149,6 +157,8 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     };
   }, []);
 
+  const opponent = OPPONENTS[difficulty] || OPPONENTS[1];
+
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
@@ -161,26 +171,37 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
         </button>
 
-        {/* Turn indicator */}
+        {/* Opponent indicator — portrait + name + thinking dot */}
         <div className="flex items-center gap-2">
-          {/* White indicator */}
           <div
-            className={`w-8 h-8 rounded-full border-2 transition-all duration-300 ${
-              turn === "white" && !gameOver.over
-                ? "border-amber-400 bg-white shadow-md scale-110 animate-pulse-glow"
-                : "border-gray-300 bg-white/60"
-            }`}
-            aria-label={turn === "white" ? "White's turn" : "White"}
-          />
-          {/* Black indicator */}
-          <div
-            className={`w-8 h-8 rounded-full border-2 transition-all duration-300 ${
+            className={`relative w-10 h-10 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
               turn === "black" && !gameOver.over
-                ? "border-amber-400 bg-gray-700 shadow-md scale-110 animate-pulse-glow"
-                : "border-gray-400 bg-gray-600/60"
+                ? "border-amber-400 shadow-md scale-110"
+                : "border-white/50"
             }`}
-            aria-label={turn === "black" ? "Black's turn (computer thinking)" : "Black"}
-          />
+            style={{ background: opponent.bgColor }}
+          >
+            <Image
+              src={opponent.image}
+              alt={t(opponent.nameKey)}
+              width={40}
+              height={40}
+              className="object-cover"
+            />
+          </div>
+          <span
+            className="text-sm font-extrabold"
+            style={{ color: "var(--ck-text)" }}
+          >
+            {t(opponent.nameKey)}
+          </span>
+          {isAIThinking && (
+            <div className="flex gap-0.5 items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          )}
         </div>
 
         {/* Difficulty stars */}
