@@ -33,7 +33,7 @@ export default function PracticeCategoryPage({
   // Validate category
   if (!VALID_CATEGORIES.includes(category as PuzzleCategory)) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center bg-amber-50 gap-4">
+      <div className="min-h-dvh flex flex-col items-center justify-center bg-stone-50 gap-4">
         <h1 className="text-2xl font-bold text-amber-800">
           Category not found
         </h1>
@@ -51,7 +51,7 @@ export default function PracticeCategoryPage({
 
   if (puzzles.length === 0) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center bg-amber-50 gap-4">
+      <div className="min-h-dvh flex flex-col items-center justify-center bg-stone-50 gap-4">
         <h1 className="text-2xl font-bold text-amber-800">
           No puzzles available
         </h1>

@@ -3,6 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { KnightSVG } from "@/lib/pieces";
 
 export default function LoginPage() {
   const { user, loading, signIn, signInAnon } = useAuth();
@@ -15,21 +16,50 @@ export default function LoginPage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-amber-50 gap-8 px-8">
-      <div className="text-8xl">&#9822;</div>
-      <h1 className="text-3xl font-bold text-amber-900">ChessKids</h1>
-      <button
-        onClick={signIn}
-        className="flex items-center gap-3 bg-white rounded-xl px-6 py-4 shadow-md hover:shadow-lg transition-shadow text-lg font-semibold text-gray-700"
+    <div
+      className="min-h-dvh flex flex-col items-center justify-center gap-6 px-8"
+      style={{
+        background: "linear-gradient(170deg, #E0E7FF 0%, #F5F0FF 40%, #FFF0F5 100%)",
+      }}
+    >
+      {/* Big knight icon in a purple circle */}
+      <div
+        className="w-28 h-28 rounded-full flex items-center justify-center animate-float"
+        style={{
+          background: "linear-gradient(135deg, #B197FC, #93C5FD)",
+          boxShadow: "0 8px 0 #9775E6, 0 12px 24px rgba(151, 117, 230, 0.3)",
+        }}
       >
-        Sign in with Google
-      </button>
-      <button
-        onClick={signInAnon}
-        className="text-amber-600 font-semibold text-base underline underline-offset-2"
+        <KnightSVG fill="white" stroke="rgba(0,0,0,0.15)" size={60} />
+      </div>
+
+      <h1
+        className="text-4xl font-extrabold tracking-tight"
+        style={{ color: "var(--ck-text)" }}
       >
-        Try without account
-      </button>
+        ChessKids
+      </h1>
+
+      <p className="text-base font-medium" style={{ color: "var(--ck-text-light)" }}>
+        Learn chess by playing!
+      </p>
+
+      <div className="flex flex-col gap-3 w-full max-w-xs mt-2">
+        <button
+          onClick={signIn}
+          className="card-pillow flex items-center justify-center gap-3 px-6 py-4 text-lg font-bold transition-all active:scale-95"
+          style={{ color: "var(--ck-text)" }}
+        >
+          Sign in with Google
+        </button>
+
+        <button
+          onClick={signInAnon}
+          className="btn-3d btn-3d-purple w-full text-center"
+        >
+          Try without account
+        </button>
+      </div>
     </div>
   );
 }

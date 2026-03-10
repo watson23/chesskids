@@ -1,72 +1,179 @@
 "use client";
 
+import { type ReactNode, useState, useCallback } from "react";
 import { Star } from "@phosphor-icons/react";
 import type { Lesson } from "@/types/lesson";
-
-const ICON_MAP: Record<Lesson["icon"], string> = {
-  board: "\u2b1b",
-  pawn: "\u265f",
-  knight: "\u265e",
-  bishop: "\u265d",
-  rook: "\u265c",
-  queen: "\u265b",
-  king: "\u265a",
-  special: "\u2728",
-  tactics: "\u2694\ufe0f",
-};
+import {
+  PawnSVG,
+  KnightSVG,
+  BishopSVG,
+  RookSVG,
+  QueenSVG,
+  KingSVG,
+} from "@/lib/pieces";
 
 type LessonStatus = "completed" | "current" | "locked";
 
 interface LessonStopProps {
   lesson: Lesson;
+  index: number;
   status: LessonStatus;
   stars: number;
   x: number;
   y: number;
   onTap: () => void;
+  sparkle?: boolean;
+  unlocking?: boolean;
+  onLockedTap?: () => void;
+}
+
+function BoardIcon() {
+  return (
+    <svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="9" height="9" rx="1.5" fill="white" opacity="0.95" />
+      <rect x="13" y="2" width="9" height="9" rx="1.5" fill="white" opacity="0.45" />
+      <rect x="2" y="13" width="9" height="9" rx="1.5" fill="white" opacity="0.45" />
+      <rect x="13" y="13" width="9" height="9" rx="1.5" fill="white" opacity="0.95" />
+    </svg>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg width={32} height={32} viewBox="0 0 24 24" fill="white">
+      <path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z" opacity="0.95" />
+      <path d="M18 14 L18.8 16.2 L21 17 L18.8 17.8 L18 20 L17.2 17.8 L15 17 L17.2 16.2 Z" opacity="0.7" />
+    </svg>
+  );
+}
+
+function TacticsIcon() {
+  return (
+    <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+      <circle cx="12" cy="12" r="8" opacity="0.7" />
+      <circle cx="12" cy="12" r="3" opacity="0.95" />
+      <line x1="12" y1="2" x2="12" y2="6" opacity="0.7" />
+      <line x1="12" y1="18" x2="12" y2="22" opacity="0.7" />
+      <line x1="2" y1="12" x2="6" y2="12" opacity="0.7" />
+      <line x1="18" y1="12" x2="22" y2="12" opacity="0.7" />
+    </svg>
+  );
+}
+
+const PIECE_COMPONENTS: Record<string, (props: { fill: string; stroke: string; size: number }) => ReactNode> = {
+  pawn: PawnSVG,
+  knight: KnightSVG,
+  bishop: BishopSVG,
+  rook: RookSVG,
+  queen: QueenSVG,
+  king: KingSVG,
+};
+
+function LessonIcon({ icon }: { icon: Lesson["icon"] }) {
+  const PieceSVG = PIECE_COMPONENTS[icon];
+  if (PieceSVG) {
+    return <PieceSVG fill="white" stroke="rgba(0,0,0,0.2)" size={34} />;
+  }
+  if (icon === "board") return <BoardIcon />;
+  if (icon === "special") return <SparkleIcon />;
+  return <TacticsIcon />;
 }
 
 export default function LessonStop({
   lesson,
+  index,
   status,
   stars,
   x,
   y,
   onTap,
+  sparkle,
+  unlocking,
+  onLockedTap,
 }: LessonStopProps) {
-  const emoji = ICON_MAP[lesson.icon] || "\u2b1b";
+  const [shaking, setShaking] = useState(false);
 
-  const bgClass =
+  const handleLockedTap = useCallback(() => {
+    if (shaking) return;
+    setShaking(true);
+    onLockedTap?.();
+    setTimeout(() => setShaking(false), 400);
+  }, [shaking, onLockedTap]);
+
+  // Color configs per status
+  const nodeStyle: React.CSSProperties =
     status === "completed"
-      ? "bg-green-500"
+      ? {
+          background: "linear-gradient(135deg, #B197FC 0%, #93C5FD 100%)",
+          border: "4px solid white",
+          boxShadow: "0 4px 0 #9775E6, 0 6px 16px rgba(151, 117, 230, 0.35)",
+        }
       : status === "current"
-        ? "bg-amber-400 animate-pulse-glow"
-        : "bg-gray-400";
+        ? {
+            background: "linear-gradient(135deg, #6EE7B7 0%, #34D399 100%)",
+            border: "4px solid white",
+            boxShadow: "0 4px 0 #10B981, 0 6px 16px rgba(16, 185, 129, 0.4)",
+          }
+        : {
+            background: "#D4D0E0",
+            border: "4px solid #E8E4F0",
+            boxShadow: "0 2px 0 #B8B4C4, 0 4px 8px rgba(0,0,0,0.06)",
+          };
+
+  const animClasses = [
+    status === "current" ? "animate-pulse-glow" : "",
+    sparkle ? "animate-celebrate-pop" : "",
+    unlocking ? "animate-lesson-unlock" : "",
+    shaking ? "animate-chest-shake" : "",
+  ].filter(Boolean).join(" ");
 
   return (
     <button
       className={`absolute flex flex-col items-center -translate-x-1/2 -translate-y-1/2 ${
-        status === "locked" ? "opacity-30 cursor-default" : "cursor-pointer"
-      }`}
+        status === "locked" && !unlocking ? "opacity-60 cursor-default" : "cursor-pointer"
+      } ${animClasses}`}
       style={{ left: `${x}%`, top: `${y}%` }}
-      onClick={status !== "locked" ? onTap : undefined}
-      disabled={status === "locked"}
-      aria-label={`Lesson: ${lesson.id}${status === "locked" ? " (locked)" : ""}`}
+      onClick={status !== "locked" ? onTap : handleLockedTap}
+      aria-disabled={status === "locked" && !unlocking}
+      aria-label={`Lesson ${index + 1}: ${lesson.id}${status === "locked" ? " (locked)" : ""}`}
     >
+      {/* Sparkle burst ring */}
+      {sparkle && (
+        <div
+          className="absolute -inset-4 rounded-full animate-light-burst pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(252,211,77,0.8) 0%, rgba(252,211,77,0.2) 50%, transparent 70%)" }}
+        />
+      )}
+
+      {/* The big round node */}
       <div
-        className={`w-14 h-14 rounded-full ${bgClass} flex items-center justify-center text-2xl shadow-lg border-2 border-white/60`}
+        className="w-[76px] h-[76px] rounded-full flex items-center justify-center"
+        style={nodeStyle}
       >
-        {emoji}
+        <LessonIcon icon={lesson.icon} />
       </div>
 
+      {/* Lesson number badge */}
+      <div
+        className="mt-1.5 w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-extrabold shadow-sm"
+        style={{
+          background: status === "completed" ? "var(--ck-purple)" : status === "current" ? "var(--ck-mint-dark)" : "#C4C0D0",
+          color: "white",
+          border: "2px solid white",
+        }}
+      >
+        {index + 1}
+      </div>
+
+      {/* Stars for completed lessons */}
       {status === "completed" && (
-        <div className="flex gap-0.5 mt-1">
+        <div className="flex gap-0.5 mt-0.5">
           {Array.from({ length: 3 }, (_, i) => (
             <Star
               key={i}
-              size={14}
+              size={16}
               weight={i < stars ? "fill" : "regular"}
-              className={i < stars ? "text-yellow-400" : "text-gray-300"}
+              color={i < stars ? "#FCD34D" : "#D4D0E0"}
             />
           ))}
         </div>

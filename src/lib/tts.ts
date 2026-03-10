@@ -1,26 +1,105 @@
 import type { TTSOptions } from "@/types/audio";
 
-export function speak(text: string, options: TTSOptions): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) {
-      resolve();
+let voicesLoaded = false;
+let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null;
+
+function loadVoices(): Promise<SpeechSynthesisVoice[]> {
+  if (typeof window === "undefined" || !window.speechSynthesis) {
+    return Promise.resolve([]);
+  }
+  if (voicesLoaded) {
+    return Promise.resolve(window.speechSynthesis.getVoices());
+  }
+  if (voicesPromise) return voicesPromise;
+
+  voicesPromise = new Promise((resolve) => {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      voicesLoaded = true;
+      resolve(voices);
       return;
     }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = options.lang === "fi" ? "fi-FI" : "en-US";
-    utterance.rate = options.rate ?? 0.9;
-    utterance.pitch = options.pitch ?? 1.1;
-    utterance.onend = () => resolve();
-    utterance.onerror = (e) => {
-      if (e.error === "canceled") resolve();
-      else reject(e);
+    // Chrome loads voices asynchronously
+    const onVoicesChanged = () => {
+      voicesLoaded = true;
+      window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
+      resolve(window.speechSynthesis.getVoices());
     };
-    const voices = window.speechSynthesis.getVoices();
-    const langPrefix = options.lang === "fi" ? "fi" : "en";
-    const voice = voices.find((v) => v.lang.startsWith(langPrefix));
-    if (voice) utterance.voice = voice;
+    window.speechSynthesis.addEventListener("voiceschanged", onVoicesChanged);
+    // Fallback timeout in case event never fires
+    setTimeout(() => {
+      voicesLoaded = true;
+      window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
+      resolve(window.speechSynthesis.getVoices());
+    }, 3000);
+  });
+  return voicesPromise;
+}
+
+/**
+ * Score voices by quality. Higher = better.
+ * Prefers Google, Apple premium, and "neural"/"enhanced" voices.
+ * Penalizes robotic engines like espeak and mbrola.
+ */
+function pickBestVoice(
+  voices: SpeechSynthesisVoice[],
+  langPrefix: string
+): SpeechSynthesisVoice | null {
+  const matching = voices.filter((v) => v.lang.startsWith(langPrefix));
+  if (matching.length === 0) return null;
+  if (matching.length === 1) return matching[0];
+
+  const scored = matching.map((v) => {
+    let score = 0;
+    const name = v.name.toLowerCase();
+
+    // Penalize known-bad engines
+    if (name.includes("espeak")) score -= 100;
+    if (name.includes("mbrola")) score -= 80;
+
+    // Prefer Google voices (high quality on Chrome)
+    if (name.includes("google")) score += 50;
+
+    // Prefer Apple premium voices (Safari / macOS)
+    const appleHQ = ["samantha", "karen", "daniel", "satu", "moira", "tessa", "fiona"];
+    if (appleHQ.some((n) => name.includes(n))) score += 40;
+
+    // Prefer voices labeled as premium/enhanced/natural/neural
+    if (/premium|enhanced|natural|neural|wavenet/i.test(name)) score += 30;
+
+    // Prefer non-default / non-generic
+    if (v.localService === false) score += 10; // network voices are usually higher quality
+
+    return { voice: v, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].voice;
+}
+
+export async function speak(text: string, options: TTSOptions): Promise<void> {
+  if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+  window.speechSynthesis.cancel();
+
+  const voices = await loadVoices();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = options.lang === "fi" ? "fi-FI" : "en-US";
+  utterance.rate = options.rate ?? 0.9;
+  utterance.pitch = options.pitch ?? 1.1;
+
+  const langPrefix = options.lang === "fi" ? "fi" : "en";
+  const voice = pickBestVoice(voices, langPrefix);
+  if (voice) utterance.voice = voice;
+
+  return new Promise((resolve) => {
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
     window.speechSynthesis.speak(utterance);
+    // Chrome bug: speech can get stuck. Resume after short delay.
+    setTimeout(() => {
+      window.speechSynthesis.resume();
+    }, 100);
   });
 }
 

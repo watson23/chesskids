@@ -39,7 +39,7 @@ export default function AddChildModal({ onAdd, onCancel }: AddChildModalProps) {
               className={`text-2xl p-1 rounded-xl transition-all ${
                 selectedAvatar === emoji
                   ? "bg-amber-200 scale-110 ring-2 ring-amber-400"
-                  : "hover:bg-amber-50 active:scale-95"
+                  : "hover:bg-stone-50 active:scale-95"
               }`}
               aria-label={`Select avatar ${emoji}`}
             >

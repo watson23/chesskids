@@ -5,11 +5,14 @@ import { House, ArrowCounterClockwise } from "@phosphor-icons/react";
 import type { AIDifficulty, PieceType } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
+import GameMascotBar from "@/components/GameMascotBar";
+import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useAudio } from "@/hooks/useAudio";
 import { getAIMove } from "@/lib/chess-ai";
 import { speak } from "@/lib/tts";
-import { DEFAULT_BOARD_THEME, DEFAULT_PIECE_COLORS } from "@/data/themes";
+import { useActiveTheme } from "@/hooks/useActiveTheme";
+import { useLocale } from "@/hooks/useLocale";
 
 /** Map chess.js piece abbreviation to a spoken name */
 const PIECE_NAMES: Record<PieceType, string> = {
@@ -37,9 +40,13 @@ interface GamePlayerProps {
 
 export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const { say, sfx, language } = useAudio();
+  const { boardTheme, pieceColors } = useActiveTheme();
+  const { t } = useLocale();
   const [gameResult, setGameResult] = useState<"win" | "loss" | "draw" | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
+  const [showTapHint, setShowTapHint] = useState(false);
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMove = useCallback(() => {
     sfx("piece-place");
@@ -128,12 +135,28 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, gameOver.over]);
 
+  // 10-second idle timer during player's turn — show tap hint
+  useEffect(() => {
+    if (tapHintTimer.current) clearTimeout(tapHintTimer.current);
+    setShowTapHint(false);
+
+    if (turn === "white" && !isAIThinking && !gameOver.over && !gameResult && !selectedSquare) {
+      tapHintTimer.current = setTimeout(() => setShowTapHint(true), 10000);
+    }
+
+    return () => { if (tapHintTimer.current) clearTimeout(tapHintTimer.current); };
+  }, [turn, isAIThinking, gameOver.over, gameResult, selectedSquare]);
+
   const handleRematch = useCallback(() => {
     sfx("button-tap");
     setGameResult(null);
     setIsAIThinking(false);
+    setShowTapHint(false);
     if (aiTimeoutRef.current) {
       clearTimeout(aiTimeoutRef.current);
+    }
+    if (tapHintTimer.current) {
+      clearTimeout(tapHintTimer.current);
     }
     reset();
   }, [sfx, reset]);
@@ -156,15 +179,15 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   }, []);
 
   return (
-    <div className="min-h-dvh flex flex-col bg-amber-50">
+    <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg)" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <button
           onClick={handleExit}
-          className="p-2 rounded-full bg-white/80 shadow-sm active:scale-95 transition-transform"
+          className="card-pillow p-2 active:scale-95 transition-transform"
           aria-label="Go back"
         >
-          <House size={28} weight="fill" className="text-amber-700" />
+          <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
         </button>
 
         {/* Turn indicator */}
@@ -200,11 +223,16 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
+      <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
         {gameResult ? (
           /* Game Over */
-          <div className="flex flex-col items-center gap-6 animate-slide-in">
+          <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             {gameResult === "win" && <Confetti active />}
+
+            <GameMascotBar
+              expression={gameResult === "win" ? "celebrating" : gameResult === "loss" ? "thinking" : "happy"}
+              narrationKey={gameResult === "win" ? "you_win" : gameResult === "loss" ? "you_lose" : "draw"}
+            />
 
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl animate-celebrate-pop ${
@@ -226,26 +254,37 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
             <button
               onClick={handleRematch}
-              className="flex items-center gap-2 px-8 py-3 bg-green-500 text-white font-bold text-lg rounded-2xl shadow-lg active:scale-95 transition-transform"
+              className="btn-3d btn-3d-purple flex items-center gap-2 px-8 py-3 text-white font-bold text-lg"
             >
               <ArrowCounterClockwise size={24} weight="bold" />
               <span>
-                {language === "fi" ? "Uusi peli" : "Rematch"}
+                {t("rematch")}
               </span>
             </button>
           </div>
         ) : (
           /* Active game */
-          <ChessBoard
-            pieces={pieces}
-            theme={DEFAULT_BOARD_THEME}
-            pieceColors={DEFAULT_PIECE_COLORS}
-            selectedSquare={selectedSquare}
-            validMoves={validMoves}
-            lastMove={lastMove}
-            onSquareTap={handleSquareTap}
-            interactive={turn === "white" && !isAIThinking}
-          />
+          <>
+            <GameMascotBar
+              expression={isAIThinking ? "thinking" : "happy"}
+              narrationKey={isAIThinking ? "game_ai_thinking" : "game_your_turn"}
+            />
+
+            <ChessBoard
+              pieces={pieces}
+              theme={boardTheme}
+              pieceColors={pieceColors}
+              selectedSquare={selectedSquare}
+              validMoves={validMoves}
+              lastMove={lastMove}
+              onSquareTap={handleSquareTap}
+              interactive={turn === "white" && !isAIThinking}
+            />
+
+            {turn === "white" && !isAIThinking && (
+              <TapHint visible={showTapHint} />
+            )}
+          </>
         )}
       </div>
     </div>

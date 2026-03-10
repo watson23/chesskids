@@ -37,17 +37,17 @@ const boardIntro: Lesson = {
       // King on d4 (dark square) — move it to any adjacent light square
       boardSetup: pos(["d4", "king", "white"]),
       correctMoves: [
-        { from: "d4" as Square, to: "c3" as Square },
-        { from: "d4" as Square, to: "c5" as Square },
-        { from: "d4" as Square, to: "e3" as Square },
-        { from: "d4" as Square, to: "e5" as Square },
+        { from: "d4" as Square, to: "c4" as Square },
+        { from: "d4" as Square, to: "d3" as Square },
+        { from: "d4" as Square, to: "d5" as Square },
+        { from: "d4" as Square, to: "e4" as Square },
       ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
     {
       narrationKey: "board_intro_puzzle_dark",
-      // King on e5 (light square) — move it to any adjacent dark square
+      // King on e5 (dark square) — move it to any adjacent dark square
       boardSetup: pos(["e5", "king", "white"]),
       correctMoves: [
         { from: "e5" as Square, to: "d4" as Square },
@@ -632,7 +632,10 @@ const checkCheckmateLesson: Lesson = {
     {
       narrationKey: "checkmate_example",
       boardSetup: pos(
-        ["e8", "king", "black"],
+        ["g8", "king", "black"],
+        ["f7", "pawn", "black"],
+        ["g7", "pawn", "black"],
+        ["h7", "pawn", "black"],
         ["d1", "queen", "white"],
         ["e1", "king", "white"]
       ),

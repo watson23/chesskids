@@ -27,7 +27,7 @@ export default function GamePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh flex items-center justify-center bg-amber-50">
+        <div className="min-h-dvh flex items-center justify-center bg-stone-50">
           <div className="w-10 h-10 rounded-full border-4 border-amber-300 border-t-amber-600 animate-spin" />
         </div>
       }

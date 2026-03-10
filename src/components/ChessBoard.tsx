@@ -46,7 +46,7 @@ export default function ChessBoard({
   const cols = Array.from({ length: 8 }, (_, i) => i);
 
   return (
-    <div className="aspect-square w-full max-w-[min(90vw,90vh)]">
+    <div className="aspect-square w-full max-w-[min(85vw,55vh)]">
       <div className="grid grid-cols-8 grid-rows-8 h-full w-full rounded-xl overflow-hidden shadow-lg">
         {rows.map((row) => {
           const displayRow = flipped ? 7 - row : row;
@@ -91,7 +91,7 @@ export default function ChessBoard({
               >
                 {/* Piece */}
                 {hasPiece && (
-                  <div className="w-[85%] h-[85%] flex items-center justify-center pointer-events-none">
+                  <div className="w-[92%] h-[92%] flex items-center justify-center pointer-events-none">
                     <ChessPiece
                       type={piece.type}
                       color={piece.color}
@@ -104,13 +104,25 @@ export default function ChessBoard({
                 {/* Valid move indicator */}
                 {isValidMove && !hasPiece && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-[30%] h-[30%] rounded-full bg-black/25 animate-pulse" />
+                    <div
+                      className="w-[38%] h-[38%] rounded-full"
+                      style={{
+                        background: "radial-gradient(circle, #6EE7B7 0%, #34D399 100%)",
+                        boxShadow: "0 0 8px rgba(110, 231, 183, 0.6), 0 2px 4px rgba(0,0,0,0.15)",
+                      }}
+                    />
                   </div>
                 )}
 
                 {/* Valid capture indicator (ring around capturable piece) */}
                 {isValidMove && hasPiece && (
-                  <div className="absolute inset-[6%] rounded-full border-[3px] border-black/30 pointer-events-none animate-pulse" />
+                  <div
+                    className="absolute inset-[3%] rounded-full pointer-events-none"
+                    style={{
+                      border: "5px solid #F472B6",
+                      boxShadow: "inset 0 0 8px rgba(244, 114, 182, 0.4), 0 0 8px rgba(244, 114, 182, 0.3)",
+                    }}
+                  />
                 )}
               </div>
             );

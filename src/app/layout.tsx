@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5",
+  themeColor: "#B197FC",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -41,7 +41,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body
-        className={`${nunitoSans.className} antialiased bg-amber-50 overflow-hidden`}
+        className={`${nunitoSans.className} antialiased overflow-hidden`}
+        style={{ background: "var(--ck-bg)" }}
       >
         <AuthProvider>
           <AudioProvider>

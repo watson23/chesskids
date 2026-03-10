@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 const COLORS = [
   "#f44336", "#e91e63", "#9c27b0", "#673ab7",
   "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4",
@@ -7,10 +9,11 @@ const COLORS = [
   "#ffeb3b", "#ffc107", "#ff9800", "#ff5722",
 ];
 
-const PARTICLE_COUNT = 40;
+const DEFAULT_COUNT = 40;
 
 interface ConfettiProps {
   active: boolean;
+  particleCount?: number;
 }
 
 interface Particle {
@@ -37,10 +40,9 @@ function createSeededRandom(seed: number) {
   };
 }
 
-/** Pre-computed particle data generated once at module load */
-const PARTICLES: Particle[] = (() => {
-  const rand = createSeededRandom(42);
-  return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+function generateParticles(count: number, seed: number = 42): Particle[] {
+  const rand = createSeededRandom(seed);
+  return Array.from({ length: count }, (_, i) => ({
     id: i,
     left: rand() * 100,
     color: COLORS[Math.floor(rand() * COLORS.length)],
@@ -48,14 +50,22 @@ const PARTICLES: Particle[] = (() => {
     size: 6 + rand() * 8,
     duration: 1.5 + rand() * 1.5,
   }));
-})();
+}
 
-export default function Confetti({ active }: ConfettiProps) {
+/** Pre-computed default particles generated once at module load */
+const DEFAULT_PARTICLES = generateParticles(DEFAULT_COUNT);
+
+export default function Confetti({ active, particleCount }: ConfettiProps) {
+  const particles = useMemo(() => {
+    if (!particleCount || particleCount === DEFAULT_COUNT) return DEFAULT_PARTICLES;
+    return generateParticles(particleCount, 77);
+  }, [particleCount]);
+
   if (!active) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
-      {PARTICLES.map((p) => (
+      {particles.map((p) => (
         <div
           key={p.id}
           className="absolute animate-confetti"

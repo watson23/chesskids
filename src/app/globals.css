@@ -2,24 +2,133 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  /* ---- New Pastel Palette: Purple / Blue / Pink world ---- */
+  --ck-purple: #B197FC;
+  --ck-purple-dark: #9775E6;
+  --ck-blue: #93C5FD;
+  --ck-blue-dark: #60A5FA;
+  --ck-pink: #FDA4AF;
+  --ck-pink-dark: #F472B6;
+  --ck-mint: #6EE7B7;
+  --ck-mint-dark: #34D399;
+  --ck-gold: #FCD34D;
+  --ck-gold-dark: #F59E0B;
+  --ck-peach: #FDBA74;
+  --ck-peach-dark: #FB923C;
+
+  --ck-bg: #F5F0FF;
+  --ck-card: #FFFFFF;
+  --ck-text: #3D3360;
+  --ck-text-light: #8B82A8;
+  --ck-border: #E8E0F5;
+}
+
 html, body {
   min-height: 100dvh;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  color: var(--ck-text);
 }
 
-@keyframes slide-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ---- 3D Tactile Button System — chunky 6px depth ---- */
+.btn-3d {
+  position: relative;
+  border: none;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 18px;
+  padding: 16px 36px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transform: translateY(0);
+  letter-spacing: 0.02em;
 }
-.animate-slide-in { animation: slide-in 0.35s ease-out; }
+.btn-3d:active {
+  transform: translateY(6px) !important;
+}
+
+.btn-3d-purple {
+  background: var(--ck-purple);
+  color: white;
+  box-shadow: 0 6px 0 var(--ck-purple-dark), 0 8px 16px rgba(151, 117, 230, 0.3);
+}
+.btn-3d-purple:active {
+  box-shadow: 0 0 0 var(--ck-purple-dark), 0 2px 4px rgba(151, 117, 230, 0.15);
+}
+
+.btn-3d-pink {
+  background: var(--ck-pink);
+  color: white;
+  box-shadow: 0 6px 0 var(--ck-pink-dark), 0 8px 16px rgba(244, 114, 182, 0.3);
+}
+.btn-3d-pink:active {
+  box-shadow: 0 0 0 var(--ck-pink-dark), 0 2px 4px rgba(244, 114, 182, 0.15);
+}
+
+.btn-3d-mint {
+  background: var(--ck-mint);
+  color: #1a5c3a;
+  box-shadow: 0 6px 0 var(--ck-mint-dark), 0 8px 16px rgba(52, 211, 153, 0.3);
+}
+.btn-3d-mint:active {
+  box-shadow: 0 0 0 var(--ck-mint-dark), 0 2px 4px rgba(52, 211, 153, 0.15);
+}
+
+.btn-3d-blue {
+  background: var(--ck-blue);
+  color: white;
+  box-shadow: 0 6px 0 var(--ck-blue-dark), 0 8px 16px rgba(96, 165, 250, 0.3);
+}
+.btn-3d-blue:active {
+  box-shadow: 0 0 0 var(--ck-blue-dark), 0 2px 4px rgba(96, 165, 250, 0.15);
+}
+
+.btn-3d-gold {
+  background: var(--ck-gold);
+  color: #6B5B3E;
+  box-shadow: 0 6px 0 var(--ck-gold-dark), 0 8px 16px rgba(245, 158, 11, 0.3);
+}
+.btn-3d-gold:active {
+  box-shadow: 0 0 0 var(--ck-gold-dark), 0 2px 4px rgba(245, 158, 11, 0.15);
+}
+
+.btn-3d-peach {
+  background: var(--ck-peach);
+  color: white;
+  box-shadow: 0 6px 0 var(--ck-peach-dark), 0 8px 16px rgba(251, 146, 60, 0.3);
+}
+.btn-3d-peach:active {
+  box-shadow: 0 0 0 var(--ck-peach-dark), 0 2px 4px rgba(251, 146, 60, 0.15);
+}
+
+/* Pillowy card — soft white with purple tint border */
+.card-pillow {
+  background: white;
+  border-radius: 24px;
+  border: 2.5px solid var(--ck-border);
+  box-shadow: 0 4px 12px rgba(61, 51, 96, 0.06), 0 0 0 1px rgba(61, 51, 96, 0.02);
+}
+
+/* ---- Animations ---- */
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-slide-in { animation: slide-in 0.4s ease-out; }
 
 @keyframes pulse-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.4)); }
-  50% { filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.8)); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4), 0 0 0 0 rgba(255, 255, 255, 0.6); transform: scale(1); }
+  50% { box-shadow: 0 0 32px 12px rgba(52, 211, 153, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.3); transform: scale(1.1); }
 }
-.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 1.8s ease-in-out infinite; }
+
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-gentle-bounce { animation: gentle-bounce 1.5s ease-in-out infinite; }
 
 @keyframes confetti-fall {
   0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
@@ -46,6 +155,83 @@ html, body {
   50% { opacity: 0.7; transform: scale(1); }
 }
 .animate-valid-move { animation: valid-move-pulse 1.5s ease-in-out infinite; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ---- Chest opening celebration animations ---- */
+@keyframes chest-bounce-in {
+  0% { opacity: 0; transform: scale(0) translateY(40px); }
+  60% { opacity: 1; transform: scale(1.15) translateY(-10px); }
+  80% { transform: scale(0.95) translateY(4px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.animate-chest-bounce-in { animation: chest-bounce-in 0.6s ease-out; }
+
+@keyframes lid-open {
+  0% { transform: rotateX(0deg); }
+  70% { transform: rotateX(-120deg); }
+  100% { transform: rotateX(-110deg); }
+}
+.animate-lid-open {
+  transform-origin: bottom center;
+  animation: lid-open 0.8s ease-out forwards;
+}
+
+@keyframes light-burst {
+  0% { transform: scale(0); opacity: 0.9; }
+  60% { opacity: 0.7; }
+  100% { transform: scale(3); opacity: 0; }
+}
+.animate-light-burst { animation: light-burst 0.8s ease-out forwards; }
+
+@keyframes sparkle-fly {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+.animate-sparkle-fly { animation: sparkle-fly 0.7s ease-out forwards; }
+
+@keyframes reward-rise {
+  0% { transform: translateY(80px) scale(0.6); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.animate-reward-rise { animation: reward-rise 0.5s ease-out forwards; }
+
+/* ---- Lesson unlock animation on journey map ---- */
+@keyframes lesson-unlock {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+  40% { transform: translate(-50%, -50%) scale(1.25); }
+  70% { transform: translate(-50%, -50%) scale(0.95); }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+.animate-lesson-unlock { animation: lesson-unlock 0.6s ease-out; }
+
+/* ---- Tap hint pulse animation ---- */
+@keyframes tap-hint {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.85; }
+  50% { transform: translateY(-6px) scale(1.1); opacity: 1; }
+}
+.animate-tap-hint { animation: tap-hint 1.2s ease-in-out infinite; }
+
+@keyframes wrong-flash {
+  0% { box-shadow: inset 0 0 0 0 rgba(244, 114, 182, 0); }
+  30% { box-shadow: inset 0 0 60px 20px rgba(244, 114, 182, 0.35); }
+  100% { box-shadow: inset 0 0 0 0 rgba(244, 114, 182, 0); }
+}
+.animate-wrong-flash { animation: wrong-flash 0.6s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   * {

@@ -2,12 +2,15 @@
 
 import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { GearSix } from "@phosphor-icons/react";
+import { GearSix, Crown } from "@phosphor-icons/react";
 import JourneyMap from "@/components/JourneyMap";
 import ChestOpenModal from "@/components/ChestOpenModal";
+import RewardCollection from "@/components/RewardCollection";
 import ChildSelector from "@/components/ChildSelector";
 import AddChildModal from "@/components/AddChildModal";
 import ParentSettings from "@/components/ParentSettings";
+import StarCounter from "@/components/StarCounter";
+import ChestPeekModal from "@/components/ChestPeekModal";
 import { CHESTS } from "@/data/chests";
 import { LESSONS } from "@/data/lessons";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,6 +42,8 @@ function HomeContent() {
   const [openChestIndex, setOpenChestIndex] = useState<number | null>(null);
   const [showAddChild, setShowAddChild] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showRewards, setShowRewards] = useState(false);
+  const [peekChestIndex, setPeekChestIndex] = useState<number | null>(null);
 
   const openSettings = useCallback(() => setShowSettings(true), []);
   const longPressHandlers = useLongPress(openSettings);
@@ -47,6 +52,13 @@ function HomeContent() {
   const completionProcessed = useRef(false);
   // Track whether Firestore data has loaded for the current child
   const [firestoreReady, setFirestoreReady] = useState(false);
+
+  // Skip next Firestore sync to prevent race condition after completion
+  const skipNextSync = useRef(false);
+
+  // Unlock animation state
+  const [justCompletedLesson, setJustCompletedLesson] = useState<string | null>(null);
+  const [justUnlockedLesson, setJustUnlockedLesson] = useState<number | null>(null);
 
   /** Load progress from Firestore when activeChild changes */
   useEffect(() => {
@@ -59,8 +71,14 @@ function HomeContent() {
         const progress = await getLessonProgress(user!.uid, activeChild!.id);
         if (cancelled) return;
         setLessonProgress(progress);
-        setCurrentLesson(activeChild!.currentLesson);
-        setTotalStars(activeChild!.totalStars);
+
+        // After completion, skip Firestore overwrite to avoid race condition
+        if (skipNextSync.current) {
+          skipNextSync.current = false;
+        } else {
+          setCurrentLesson(activeChild!.currentLesson);
+          setTotalStars(activeChild!.totalStars);
+        }
 
         // Determine opened chests from rewards
         const unlockedRewardIds = activeChild!.unlockedRewards ?? [];
@@ -91,6 +109,13 @@ function HomeContent() {
         const newTotal = prev + starsDelta;
         setCurrentLesson((prevLesson) => {
           const newCurrent = Math.max(prevLesson, lessonIndex + 1);
+          // Trigger unlock animation if a new lesson was unlocked
+          if (newCurrent > prevLesson) {
+            setJustCompletedLesson(completedLessonId);
+            setJustUnlockedLesson(newCurrent);
+          }
+          // Prevent Firestore re-fetch from overwriting optimistic state
+          skipNextSync.current = true;
           // Save to Firestore (using computed new values)
           if (user && activeChild) {
             updateChildProgress(
@@ -210,6 +235,21 @@ function HomeContent() {
     [user, refreshChildren, setActiveChild]
   );
 
+  const handleUnlockAnimationDone = useCallback(() => {
+    setJustCompletedLesson(null);
+    setJustUnlockedLesson(null);
+  }, []);
+
+  const handleLockedChestTap = useCallback((chestIndex: number) => {
+    // Show peek modal after short delay (let shake play first)
+    setTimeout(() => setPeekChestIndex(chestIndex), 500);
+  }, []);
+
+  const peekChest =
+    peekChestIndex !== null
+      ? CHESTS.find((c) => c.index === peekChestIndex) ?? null
+      : null;
+
   const openedChest =
     openChestIndex !== null
       ? CHESTS.find((c) => c.index === openChestIndex) ?? null
@@ -244,16 +284,35 @@ function HomeContent() {
         openedChests={openedChests}
         onLessonTap={handleLessonTap}
         onChestTap={handleChestTap}
+        onLockedChestTap={handleLockedChestTap}
+        justCompletedLesson={justCompletedLesson}
+        justUnlockedLesson={justUnlockedLesson}
+        onUnlockAnimationDone={handleUnlockAnimationDone}
       />
 
-      {/* Top-left: settings gear (long-press to open parent settings) */}
-      <button
-        {...longPressHandlers}
-        className="fixed top-4 left-4 z-30 w-9 h-9 rounded-full bg-white/60 backdrop-blur shadow-sm flex items-center justify-center transition-transform select-none"
-        aria-label="Parent settings (long press)"
-      >
-        <GearSix size={18} weight="bold" className="text-gray-400" />
-      </button>
+      {/* Top-left: rewards + settings gear */}
+      <div className="fixed top-4 left-4 z-30 flex items-center gap-2">
+        <button
+          onClick={() => setShowRewards(true)}
+          className="w-9 h-9 rounded-full bg-white/60 backdrop-blur shadow-sm flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="My rewards"
+        >
+          <Crown size={18} weight="fill" style={{ color: "var(--ck-gold)" }} />
+        </button>
+        <button
+          onClick={openSettings}
+          {...longPressHandlers}
+          className="w-9 h-9 rounded-full bg-white/60 backdrop-blur shadow-sm flex items-center justify-center active:scale-95 transition-transform select-none"
+          aria-label="Settings"
+        >
+          <GearSix size={18} weight="bold" className="text-gray-400" />
+        </button>
+      </div>
+
+      {/* Top-center: star counter */}
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30">
+        <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
+      </div>
 
       {/* Top-right: active child avatar (tap to switch) */}
       <button
@@ -274,6 +333,21 @@ function HomeContent() {
       {openedChest && (
         <ChestOpenModal chest={openedChest} onClose={handleChestClose} />
       )}
+
+      {/* Chest peek modal (locked chest preview) */}
+      {peekChest && (
+        <ChestPeekModal
+          chest={peekChest}
+          totalStars={totalStars}
+          onClose={() => setPeekChestIndex(null)}
+        />
+      )}
+
+      {/* Reward collection overlay */}
+      <RewardCollection
+        open={showRewards}
+        onClose={() => setShowRewards(false)}
+      />
     </div>
   );
 }

@@ -2,60 +2,84 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { House } from "@phosphor-icons/react";
+import { Star } from "@phosphor-icons/react";
 import { useAudio } from "@/hooks/useAudio";
+import { useLocale } from "@/hooks/useLocale";
 
-const LEVELS = [
-  { level: 1, stars: 1 },
-  { level: 2, stars: 2 },
-  { level: 3, stars: 3 },
-] as const;
+const DIFFICULTIES = [
+  {
+    level: 1,
+    labelKey: "difficulty_easy",
+    stars: 1,
+    color: "#6EE7B7",
+    colorDark: "#34D399",
+    descriptionKey: "difficulty_easy_desc",
+  },
+  {
+    level: 2,
+    labelKey: "difficulty_medium",
+    stars: 2,
+    color: "#FCD34D",
+    colorDark: "#F59E0B",
+    descriptionKey: "difficulty_medium_desc",
+  },
+  {
+    level: 3,
+    labelKey: "difficulty_hard",
+    stars: 3,
+    color: "#FDA4AF",
+    colorDark: "#F472B6",
+    descriptionKey: "difficulty_hard_desc",
+  },
+];
 
 export default function PlayPage() {
   const router = useRouter();
   const { sfx } = useAudio();
+  const { t } = useLocale();
 
-  const handleSelect = useCallback(
+  const handleDifficultyTap = useCallback(
     (level: number) => {
       sfx("button-tap");
-      router.push(`/play/game?level=${level}`);
+      router.push(`/play/game?difficulty=${level}`);
     },
-    [sfx, router]
+    [router, sfx]
   );
 
-  const handleHome = useCallback(() => {
-    sfx("button-tap");
-    router.push("/");
-  }, [sfx, router]);
-
   return (
-    <div className="min-h-dvh flex flex-col bg-amber-50 pb-14">
-      {/* Top bar */}
-      <div className="flex items-center px-4 py-3">
-        <button
-          onClick={handleHome}
-          className="p-2 rounded-full bg-white/80 shadow-sm active:scale-95 transition-transform"
-          aria-label="Go home"
-        >
-          <House size={28} weight="fill" className="text-amber-700" />
-        </button>
-      </div>
-
-      {/* Difficulty cards */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
-        {LEVELS.map(({ level, stars }) => (
+    <div className="min-h-dvh flex flex-col pb-20" style={{ background: "var(--ck-bg)" }}>
+      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-5">
+        {DIFFICULTIES.map(({ level, labelKey, stars, color, colorDark, descriptionKey }) => (
           <button
             key={level}
-            onClick={() => handleSelect(level)}
-            className="w-full max-w-xs py-8 bg-white rounded-3xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-1 animate-slide-in"
-            style={{ animationDelay: `${(level - 1) * 0.1}s` }}
-            aria-label={`Level ${level}, ${stars} star${stars > 1 ? "s" : ""}`}
+            onClick={() => handleDifficultyTap(level)}
+            className="w-full max-w-sm rounded-[24px] px-8 py-6 flex flex-col items-center gap-2 transition-transform"
+            style={{
+              background: color,
+              boxShadow: `0 6px 0 ${colorDark}, 0 8px 16px rgba(0,0,0,0.1)`,
+              transform: "translateY(0)",
+            }}
+            onPointerDown={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(6px)";
+              (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 ${colorDark}, 0 2px 4px rgba(0,0,0,0.06)`;
+            }}
+            onPointerUp={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+              (e.currentTarget as HTMLElement).style.boxShadow = `0 6px 0 ${colorDark}, 0 8px 16px rgba(0,0,0,0.1)`;
+            }}
+            onPointerLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+              (e.currentTarget as HTMLElement).style.boxShadow = `0 6px 0 ${colorDark}, 0 8px 16px rgba(0,0,0,0.1)`;
+            }}
+            aria-label={`${t(labelKey)} difficulty, level ${level}`}
           >
-            {Array.from({ length: stars }, (_, i) => (
-              <span key={i} className="text-4xl" role="img" aria-hidden="true">
-                &#11088;
-              </span>
-            ))}
+            <div className="flex gap-1">
+              {Array.from({ length: stars }, (_, i) => (
+                <Star key={i} size={36} weight="fill" color="white" />
+              ))}
+            </div>
+            <span className="text-xl font-extrabold text-white">{t(labelKey)}</span>
+            <span className="text-sm font-semibold text-white/70">{t(descriptionKey)}</span>
           </button>
         ))}
       </div>

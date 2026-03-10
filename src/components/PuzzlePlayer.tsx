@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { House, ArrowRight } from "@phosphor-icons/react";
 import type { PuzzleDefinition } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
+import NarrationArea from "@/components/NarrationArea";
+import MascotPawn from "@/components/MascotPawn";
+import TapHint from "@/components/TapHint";
 import { useAudio } from "@/hooks/useAudio";
-import { DEFAULT_BOARD_THEME, DEFAULT_PIECE_COLORS } from "@/data/themes";
+import { useActiveTheme } from "@/hooks/useActiveTheme";
+import { useLocale } from "@/hooks/useLocale";
 
 interface PuzzlePlayerProps {
   puzzles: PuzzleDefinition[];
@@ -28,6 +32,8 @@ export default function PuzzlePlayer({
   onComplete,
 }: PuzzlePlayerProps) {
   const { say, sfx } = useAudio();
+  const { boardTheme, pieceColors } = useActiveTheme();
+  const { t } = useLocale();
 
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const [wrongAttempts, setWrongAttempts] = useState(0);
@@ -43,11 +49,27 @@ export default function PuzzlePlayer({
   const [boardPieces, setBoardPieces] = useState<Record<string, ChessPiece>>(
     {}
   );
+  const [showTapHint, setShowTapHint] = useState(false);
+  const [wrongFlash, setWrongFlash] = useState(false);
+  const [narrationOverride, setNarrationOverride] = useState<string | null>(null);
+  const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentPuzzle = useMemo(
     () => puzzles[puzzleIndex] ?? null,
     [puzzles, puzzleIndex]
   );
+
+  // 4-second idle timer during solving phase — show tap hint
+  useEffect(() => {
+    if (tapHintTimer.current) clearTimeout(tapHintTimer.current);
+    setShowTapHint(false);
+
+    if (phase === "solving" && !selectedSquare) {
+      tapHintTimer.current = setTimeout(() => setShowTapHint(true), 4000);
+    }
+
+    return () => { if (tapHintTimer.current) clearTimeout(tapHintTimer.current); };
+  }, [phase, puzzleIndex, selectedSquare]);
 
   // Set up board when puzzle changes
   useEffect(() => {
@@ -106,7 +128,15 @@ export default function PuzzlePlayer({
         if (piece) {
           const newPieces = { ...boardPieces };
           delete newPieces[selectedSquare];
-          newPieces[square] = piece;
+
+          // Promotion: pawn reaching back rank becomes queen
+          const destRank = square[1];
+          if (piece.type === "pawn" && (destRank === "8" || destRank === "1")) {
+            newPieces[square] = { ...piece, type: "queen" };
+          } else {
+            newPieces[square] = piece;
+          }
+
           setBoardPieces(newPieces);
         }
         setLastMove({ from: selectedSquare, to: square });
@@ -135,6 +165,10 @@ export default function PuzzlePlayer({
         say(currentPuzzle.wrongMoveNarrationKey);
         setSelectedSquare(null);
         setValidMoves([]);
+        setWrongFlash(true);
+        setNarrationOverride("try_again");
+        setTimeout(() => setWrongFlash(false), 600);
+        setTimeout(() => setNarrationOverride(null), 2000);
         setWrongAttempts((prev) => prev + 1);
       }
     },
@@ -165,15 +199,15 @@ export default function PuzzlePlayer({
   const totalPuzzles = puzzles.length;
 
   return (
-    <div className="min-h-dvh flex flex-col bg-amber-50">
+    <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg)" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <button
           onClick={handleGoHome}
-          className="p-2 rounded-full bg-white/80 shadow-sm active:scale-95 transition-transform"
+          className="card-pillow p-2 active:scale-95 transition-transform"
           aria-label="Go back"
         >
-          <House size={28} weight="fill" className="text-amber-700" />
+          <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
         </button>
 
         {/* Progress dots */}
@@ -199,7 +233,8 @@ export default function PuzzlePlayer({
 
         {/* Puzzle count */}
         <div
-          className="w-10 text-xs text-amber-600 text-right font-semibold"
+          className="w-10 text-xs text-right font-semibold"
+          style={{ color: "var(--ck-text-light)" }}
           aria-label={`Puzzle ${Math.min(puzzleIndex + 1, totalPuzzles)} of ${totalPuzzles}`}
         >
           {Math.min(puzzleIndex + 1, totalPuzzles)}/{totalPuzzles}
@@ -207,54 +242,54 @@ export default function PuzzlePlayer({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
+      <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
         {phase === "celebrate" ? (
-          <div className="flex flex-col items-center gap-6 animate-slide-in">
+          <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             <Confetti active />
-            <h2 className="text-2xl font-extrabold text-amber-800">
-              {stars === 3
-                ? "Amazing!"
-                : stars === 2
-                  ? "Great job!"
-                  : "Good try!"}
+            <MascotPawn expression="celebrating" size={64} />
+            <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-text)" }}>
+              {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
             </h2>
             <StarDisplay stars={stars} size={56} />
             <button
               onClick={handleContinue}
-              className="mt-4 px-8 py-3 bg-green-500 text-white font-bold text-lg rounded-2xl shadow-lg active:scale-95 transition-transform flex items-center gap-2"
+              className="btn-3d btn-3d-purple mt-2 px-8 py-3 text-white font-bold text-lg flex items-center gap-2"
             >
-              Continue
+              {t("continue")}
               <ArrowRight size={24} weight="bold" />
             </button>
           </div>
         ) : (
           <>
-            <ChessBoard
-              pieces={boardPieces}
-              theme={DEFAULT_BOARD_THEME}
-              pieceColors={DEFAULT_PIECE_COLORS}
-              selectedSquare={selectedSquare}
-              validMoves={validMoves}
-              lastMove={lastMove}
-              onSquareTap={handleSquareTap}
-              interactive={phase === "solving"}
+            {/* Mascot + speech bubble narration area */}
+            <NarrationArea
+              narrationKey={
+                narrationOverride
+                  ? narrationOverride
+                  : phase === "success" && currentPuzzle
+                    ? currentPuzzle.successNarrationKey
+                    : currentPuzzle
+                      ? currentPuzzle.narrationKey
+                      : ""
+              }
+              phase={narrationOverride ? "try" : phase === "success" ? "watch" : "try"}
             />
 
-            {/* Success feedback */}
-            {phase === "success" && (
-              <div className="flex items-center gap-2 animate-slide-in">
-                <span className="text-3xl">&#11088;</span>
-                <p className="text-green-600 font-bold text-lg">
-                  Correct!
-                </p>
-              </div>
-            )}
+            <div className={`${wrongFlash ? "animate-wrong-flash rounded-xl" : ""}`}>
+              <ChessBoard
+                pieces={boardPieces}
+                theme={boardTheme}
+                pieceColors={pieceColors}
+                selectedSquare={selectedSquare}
+                validMoves={validMoves}
+                lastMove={lastMove}
+                onSquareTap={handleSquareTap}
+                interactive={phase === "solving"}
+              />
+            </div>
 
-            {/* Solving instruction */}
             {phase === "solving" && (
-              <p className="text-amber-700 font-semibold text-center animate-slide-in">
-                Tap a piece and then its destination.
-              </p>
+              <TapHint visible={showTapHint} />
             )}
           </>
         )}
