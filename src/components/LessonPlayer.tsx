@@ -43,6 +43,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const [showTapHint, setShowTapHint] = useState(false);
   const [wrongFlash, setWrongFlash] = useState(false);
   const [narrationOverride, setNarrationOverride] = useState<string | null>(null);
+  const [phaseOverride, setPhaseOverride] = useState<"watch" | "try" | "celebrate" | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 4-second idle timer during try phase — show tap hint
@@ -171,7 +172,13 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         setValidMoves([]);
         sfx("piece-place");
         say(currentPuzzle.successNarrationKey);
-        setTimeout(() => { recordAttempt(true); }, 1800);
+        setNarrationOverride(currentPuzzle.successNarrationKey);
+        setPhaseOverride("celebrate");
+        setTimeout(() => {
+          setNarrationOverride(null);
+          setPhaseOverride(null);
+          recordAttempt(true);
+        }, 1800);
       } else {
         sfx("wrong-move");
         say(currentPuzzle.wrongMoveNarrationKey);
@@ -257,7 +264,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                       ? currentPuzzle.narrationKey
                       : ""
               }
-              phase={narrationOverride ? "try" : (state.phase as "watch" | "try")}
+              phase={phaseOverride ?? (narrationOverride ? "try" : (state.phase as "watch" | "try"))}
             />
 
             <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
