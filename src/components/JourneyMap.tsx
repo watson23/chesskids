@@ -282,8 +282,8 @@ export default function JourneyMap({
           );
         })}
 
-        {/* Pikku mascot standing next to current lesson */}
-        {(() => {
+        {/* Pikku mascot standing next to current lesson (hidden when onboarding overlay has its own Pikku) */}
+        {!(currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
           const pos = getLessonPosition(currentLesson, LESSONS.length);
           return (
             <div

@@ -2,58 +2,38 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import Pikku from "@/components/Pikku";
+import { useEffect, useCallback } from "react";
+import { useLocale } from "@/hooks/useLocale";
+import HeroSection from "@/components/landing/HeroSection";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import TrustSection from "@/components/landing/TrustSection";
+import CTASection from "@/components/landing/CTASection";
 
 export default function LoginPage() {
   const { user, loading, signIn, signInAnon } = useAuth();
   const router = useRouter();
+  const { t } = useLocale();
 
   useEffect(() => {
     if (user && !loading) router.replace("/");
   }, [user, loading, router]);
 
+  const handlePlayFree = useCallback(async () => {
+    await signInAnon();
+  }, [signInAnon]);
+
+  const handleGoogleSignIn = useCallback(async () => {
+    await signIn();
+  }, [signIn]);
+
   if (loading) return null;
 
   return (
-    <div
-      className="min-h-dvh flex flex-col items-center justify-center gap-6 px-8"
-      style={{
-        background: "linear-gradient(170deg, #E0E7FF 0%, #F5F0FF 40%, #FFF0F5 100%)",
-      }}
-    >
-      {/* Pikku mascot — the Chess Penguin */}
-      <div className="animate-float">
-        <Pikku expression="holding-pawn" size={130} />
-      </div>
-
-      <h1
-        className="text-4xl font-extrabold tracking-tight"
-        style={{ color: "var(--ck-text)" }}
-      >
-        Chess Penguin
-      </h1>
-
-      <p className="text-base font-medium" style={{ color: "var(--ck-text-light)" }}>
-        Chess for kids — no reading needed!
-      </p>
-
-      <div className="flex flex-col gap-3 w-full max-w-xs mt-2">
-        <button
-          onClick={signIn}
-          className="card-pillow flex items-center justify-center gap-3 px-6 py-4 text-lg font-bold transition-all active:scale-95"
-          style={{ color: "var(--ck-text)" }}
-        >
-          Sign in with Google
-        </button>
-
-        <button
-          onClick={signInAnon}
-          className="btn-3d btn-3d-purple w-full text-center"
-        >
-          Try without account
-        </button>
-      </div>
+    <div className="min-h-dvh overflow-x-hidden">
+      <HeroSection t={t} onPlayFree={handlePlayFree} onGoogleSignIn={handleGoogleSignIn} />
+      <FeaturesSection t={t} />
+      <TrustSection t={t} />
+      <CTASection t={t} onPlayFree={handlePlayFree} onGoogleSignIn={handleGoogleSignIn} />
     </div>
   );
 }
