@@ -24,6 +24,12 @@ interface JourneyMapProps {
 }
 
 /**
+ * Position of the igloo door at the end of the path.
+ * Pikku stands here when all lessons are completed.
+ */
+const IGLOO_POSITION = { x: 30, y: 12 };
+
+/**
  * Hand-tuned lesson positions tracing the winding snowy path
  * in the illustrated background (journey-map-bg.webp).
  * Coordinates are {x%, y%} of the map container.
@@ -291,18 +297,21 @@ export default function JourneyMap({
           );
         })}
 
-        {/* Piku mascot standing next to current lesson (hidden when onboarding overlay has its own Piku) */}
+        {/* Piku mascot standing next to current lesson, or at the igloo when all done */}
         {!(currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
-          const pos = getLessonPosition(currentLesson, LESSONS.length);
+          const allDone = currentLesson >= LESSONS.length;
+          const pos = allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
           return (
             <div
               className="absolute pointer-events-none -translate-y-1/2 journey-piku"
               style={{
-                left: `calc(${pos.x}% + clamp(20px, 8vw, 36px))`,
+                left: allDone
+                  ? `${pos.x}%`
+                  : `calc(${pos.x}% + clamp(20px, 8vw, 36px))`,
                 top: `${pos.y}%`,
               }}
             >
-              <Piku expression="happy" size={72} />
+              <Piku expression={allDone ? "celebrating" : "happy"} size={72} />
             </div>
           );
         })()}
