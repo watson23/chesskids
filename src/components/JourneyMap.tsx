@@ -342,6 +342,20 @@ export default function JourneyMap({
           );
         })}
 
+        {/* Igloo glow when all lessons are completed */}
+        {currentLesson >= LESSONS.length && (
+          <div
+            className="absolute pointer-events-none rounded-full animate-igloo-glow"
+            style={{
+              left: `${IGLOO_POSITION.x}%`,
+              top: `${IGLOO_POSITION.y}%`,
+              width: "clamp(40px, 12vw, 72px)",
+              height: "clamp(40px, 12vw, 72px)",
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        )}
+
         {/* Piku mascot standing next to current lesson, or at the igloo when all done */}
         {!(currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
           const allDone = currentLesson >= LESSONS.length;

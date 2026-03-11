@@ -123,6 +123,20 @@ function HomeContent() {
             ).then(() => refreshChildren()).catch((err) =>
               console.error("Failed to save progress:", err)
             );
+
+            // Unlock champion outfits when the final lesson is completed
+            const isLastLesson = LESSONS[LESSONS.length - 1]?.id === completedLessonId;
+            if (isLastLesson) {
+              updateChildRewards(
+                user.uid, activeChild.id,
+                [...(activeChild.unlockedRewards ?? [])],
+                undefined, undefined,
+                ["champion-crown", "champion-cape"],
+                { head: "champion-crown", body: "champion-cape" }
+              ).then(() => refreshChildren()).catch((err) =>
+                console.error("Failed to save champion rewards:", err)
+              );
+            }
           }
           return newCurrent;
         });

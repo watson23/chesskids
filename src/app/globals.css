@@ -336,6 +336,13 @@ html, body {
 }
 .animate-opponent-think { animation: opponent-think 1.5s ease-in-out infinite; }
 
+/* ---- Igloo glow when all lessons complete ---- */
+@keyframes igloo-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(252, 211, 77, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(252, 211, 77, 0.6); }
+}
+.animate-igloo-glow { animation: igloo-glow 2s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
