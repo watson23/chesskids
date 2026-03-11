@@ -179,18 +179,19 @@ export default function JourneyMap({
       ref={scrollRef}
       className="relative w-full h-dvh overflow-y-auto overflow-x-hidden"
     >
+      {/* Container uses aspect-ratio to match the background image (1024×1536 = 2:3)
+           so lesson nodes placed at % positions always align with the illustrated path,
+           without stretching the image. */}
       <div
         className="relative w-full"
-        style={{ minHeight: "200vh" }}
+        style={{ aspectRatio: "1024 / 1536" }}
       >
         {/* Illustrated journey map background */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url(/journey-map-bg.webp)",
-            backgroundSize: "100% 100%",
-            backgroundRepeat: "no-repeat",
-          }}
+        <img
+          src="/journey-map-bg.webp"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full"
         />
 
         {/* Dotted trail connecting lesson nodes */}
