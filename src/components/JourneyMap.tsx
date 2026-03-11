@@ -316,7 +316,7 @@ export default function JourneyMap({
           );
         })()}
 
-        {/* First-time onboarding overlay */}
+        {/* First-time onboarding overlay — stays until player taps first lesson */}
         {currentLesson === 0 && !onboardingDismissed && !justCompletedLesson && (() => {
           const pos = getLessonPosition(0, LESSONS.length);
           return (
