@@ -16,10 +16,13 @@ import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
 import { calculateStars } from "@/lib/scoring";
+import { markPuzzleSolved } from "@/lib/firestore";
 
 interface PuzzlePlayerProps {
   puzzles: PuzzleDefinition[];
   onComplete: () => void;
+  uid?: string;
+  childId?: string;
 }
 
 type Phase = "solving" | "success" | "celebrate";
@@ -27,6 +30,8 @@ type Phase = "solving" | "success" | "celebrate";
 export default function PuzzlePlayer({
   puzzles,
   onComplete,
+  uid,
+  childId,
 }: PuzzlePlayerProps) {
   const { say, sfx } = useAudio();
   const { boardTheme, pieceColors } = useActiveTheme();
@@ -145,6 +150,9 @@ export default function PuzzlePlayer({
         sfx("piece-place");
         say(currentPuzzle.successNarrationKey);
 
+        // Save puzzle progress to Firestore
+        if (uid && childId) markPuzzleSolved(uid, childId, currentPuzzle.id);
+
         // Show success briefly, then advance
         setPhase("success");
         setTimeout(() => {
@@ -199,7 +207,7 @@ export default function PuzzlePlayer({
   const totalPuzzles = puzzles.length;
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
+    <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />

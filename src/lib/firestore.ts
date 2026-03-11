@@ -4,7 +4,7 @@ import {
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import { LESSONS } from "@/data/lessons";
-import type { UserDocument, ChildProfile, LessonProgress, UserSettings } from "@/types/user";
+import type { UserDocument, ChildProfile, LessonProgress, PuzzleProgress, UserSettings } from "@/types/user";
 
 export async function getOrCreateUser(uid: string, email: string, displayName: string): Promise<UserDocument> {
   const db = getDb();
@@ -64,6 +64,25 @@ export async function updateUserSettings(uid: string, settings: Partial<UserSett
   const db = getDb();
   const ref = doc(db, "users", uid);
   await updateDoc(ref, { settings });
+}
+
+export async function getPuzzleProgress(
+  uid: string, childId: string
+): Promise<Record<string, PuzzleProgress>> {
+  const db = getDb();
+  const colRef = collection(db, "users", uid, "children", childId, "puzzleProgress");
+  const snap = await getDocs(colRef);
+  const progress: Record<string, PuzzleProgress> = {};
+  snap.docs.forEach((d) => { const data = d.data() as PuzzleProgress; progress[data.puzzleId] = data; });
+  return progress;
+}
+
+export async function markPuzzleSolved(
+  uid: string, childId: string, puzzleId: string
+): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, "users", uid, "children", childId, "puzzleProgress", puzzleId);
+  await setDoc(ref, { puzzleId, solved: true, attempts: 1 }, { merge: true });
 }
 
 export async function updateChildRewards(uid: string, childId: string, rewards: string[], theme?: string, pieceColor?: string): Promise<void> {

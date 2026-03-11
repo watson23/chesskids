@@ -4,6 +4,7 @@ import { use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
 import PuzzlePlayer from "@/components/PuzzlePlayer";
+import { useAuth } from "@/hooks/useAuth";
 
 const VALID_CATEGORIES: PuzzleCategory[] = [
   "pawn",
@@ -25,6 +26,7 @@ export default function PracticeCategoryPage({
 }: PracticeCategoryPageProps) {
   const { category } = use(params);
   const router = useRouter();
+  const { user, activeChild } = useAuth();
 
   const handleComplete = useCallback(() => {
     router.push("/practice");
@@ -65,5 +67,5 @@ export default function PracticeCategoryPage({
     );
   }
 
-  return <PuzzlePlayer puzzles={puzzles} onComplete={handleComplete} />;
+  return <PuzzlePlayer puzzles={puzzles} onComplete={handleComplete} uid={user?.uid} childId={activeChild?.id} />;
 }

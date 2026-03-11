@@ -212,7 +212,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         : totalDots;
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
+    <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />
@@ -278,7 +278,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
             {state.phase === "watch" && (
               <button onClick={handleNext} className="btn-3d btn-3d-pink flex items-center gap-2 animate-gentle-bounce">
-                Next
+                {t("next")}
                 <Image src="/icons/icon-next.webp" alt="" width={22} height={22} className="object-contain" />
               </button>
             )}

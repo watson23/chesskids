@@ -123,7 +123,7 @@ export default function ChessBoard({
   const cols = Array.from({ length: 8 }, (_, i) => i);
 
   return (
-    <div className="aspect-square w-full max-w-[min(85vw,55vh)]">
+    <div className="aspect-square w-full max-w-[min(85vw,48vh)]">
       <div className="grid grid-cols-8 grid-rows-8 h-full w-full rounded-xl overflow-hidden shadow-lg">
         {rows.map((row) => {
           const displayRow = flipped ? 7 - row : row;

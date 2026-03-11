@@ -2,10 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
+import { useAuth } from "@/hooks/useAuth";
+import { getPuzzleProgress } from "@/lib/firestore";
+import type { PuzzleProgress } from "@/types/user";
 import { PawnSVG, KnightSVG, BishopSVG, RookSVG, QueenSVG, KingSVG } from "@/lib/pieces";
 
 import SpeechBubble from "@/components/SpeechBubble";
@@ -106,6 +109,14 @@ export default function PracticePage() {
   const router = useRouter();
   const { sfx, say } = useAudio();
   const { t } = useLocale();
+  const { user, activeChild } = useAuth();
+  const [puzzleProgress, setPuzzleProgress] = useState<Record<string, PuzzleProgress>>({});
+
+  // Fetch puzzle progress from Firestore
+  useEffect(() => {
+    if (!user || !activeChild) return;
+    getPuzzleProgress(user.uid, activeChild.id).then(setPuzzleProgress);
+  }, [user, activeChild]);
 
   // Speak the instruction when page loads
   useEffect(() => {
@@ -149,7 +160,9 @@ export default function PracticePage() {
         <div className="flex-1 px-4 py-4 flex justify-center">
           <div className="grid grid-cols-2 gap-4 w-full max-w-sm content-start">
             {CATEGORIES.map(({ key, labelKey, color, colorDark, icon }, index) => {
-              const puzzleCount = getPuzzlesByCategory(key).length;
+              const puzzles = getPuzzlesByCategory(key);
+              const puzzleCount = puzzles.length;
+              const solvedCount = puzzles.filter(p => puzzleProgress[p.id]?.solved).length;
               const label = t(labelKey);
               return (
                 <button
@@ -192,7 +205,7 @@ export default function PracticePage() {
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
-                          width: "0%",
+                          width: `${puzzleCount > 0 ? (solvedCount / puzzleCount) * 100 : 0}%`,
                           background: `linear-gradient(90deg, ${color}, ${colorDark})`,
                         }}
                       />
@@ -202,7 +215,7 @@ export default function PracticePage() {
                       className="text-[11px] font-bold"
                       style={{ color: "var(--ck-text-light)" }}
                     >
-                      0 / {puzzleCount} {t("practice_solved")}
+                      {solvedCount} / {puzzleCount} {t("practice_solved")}
                     </span>
                   </div>
                 </button>
