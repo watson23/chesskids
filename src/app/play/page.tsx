@@ -8,6 +8,7 @@ import { useLocale } from "@/hooks/useLocale";
 
 import SpeechBubble from "@/components/SpeechBubble";
 import NavIcon from "@/components/NavIcon";
+import type { LocaleKey } from "@/types/locale";
 
 const STAGGER_CLASSES = [
   "animate-fade-in-up",
@@ -18,8 +19,8 @@ const STAGGER_CLASSES = [
 
 interface Opponent {
   level: 1 | 2 | 3 | 4;
-  nameKey: string;
-  taglineKey: string;
+  nameKey: LocaleKey;
+  taglineKey: LocaleKey;
   image: string;
   stars: number;
   bgColor: string;

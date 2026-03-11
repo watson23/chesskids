@@ -5,6 +5,7 @@ import Image from "next/image";
 import NavIcon from "@/components/NavIcon";
 import type { PuzzleDefinition } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
+import type { LocaleKey } from "@/types/locale";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
@@ -47,7 +48,7 @@ export default function PuzzlePlayer({
   );
   const [showTapHint, setShowTapHint] = useState(false);
   const [wrongFlash, setWrongFlash] = useState(false);
-  const [narrationOverride, setNarrationOverride] = useState<string | null>(null);
+  const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentPuzzle = useMemo(

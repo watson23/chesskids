@@ -3,12 +3,15 @@
 import Image from "next/image";
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import type { TranslateFn } from "@/types/locale";
 
 interface FeaturesSectionProps {
-  t: (key: string) => string;
+  t: TranslateFn;
 }
 
-const FEATURES = [
+import type { LocaleKey } from "@/types/locale";
+
+const FEATURES: { titleKey: LocaleKey; descKey: LocaleKey; emoji: string; delay: string }[] = [
   {
     titleKey: "landing_feature_1_title",
     descKey: "landing_feature_1_desc",

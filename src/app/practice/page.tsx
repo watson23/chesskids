@@ -10,6 +10,7 @@ import { PawnSVG, KnightSVG, BishopSVG, RookSVG, QueenSVG, KingSVG } from "@/lib
 
 import SpeechBubble from "@/components/SpeechBubble";
 import NavIcon from "@/components/NavIcon";
+import type { LocaleKey } from "@/types/locale";
 
 const STAGGER_CLASSES = [
   "animate-fade-in-up",
@@ -24,7 +25,7 @@ const STAGGER_CLASSES = [
 
 const CATEGORIES: {
   key: PuzzleCategory;
-  labelKey: string;
+  labelKey: LocaleKey;
   color: string;
   colorDark: string;
   icon: React.ReactNode;

@@ -17,7 +17,12 @@ export interface ChildProfile {
   id: string;
   name: string;
   avatar: string;
-  currentLesson: number;
+  /**
+   * Lesson ID of the next lesson to play.
+   * Legacy Firestore docs may still store a numeric index — use
+   * resolveCurrentLessonIndex() from lib/lessons-utils.ts to handle both.
+   */
+  currentLesson: string | number;
   totalStars: number;
   unlockedRewards: string[];
   activeBoardTheme: string;

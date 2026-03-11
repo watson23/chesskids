@@ -3,6 +3,7 @@ import {
   getDocs, addDoc, serverTimestamp, writeBatch
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
+import { LESSONS } from "@/data/lessons";
 import type { UserDocument, ChildProfile, LessonProgress, UserSettings } from "@/types/user";
 
 export async function getOrCreateUser(uid: string, email: string, displayName: string): Promise<UserDocument> {
@@ -30,7 +31,7 @@ export async function addChild(uid: string, name: string, avatar: string): Promi
   const db = getDb();
   const colRef = collection(db, "users", uid, "children");
   const child: Omit<ChildProfile, "id"> = {
-    name, avatar, currentLesson: 0, totalStars: 0,
+    name, avatar, currentLesson: LESSONS[0]?.id ?? "", totalStars: 0,
     unlockedRewards: [], activeBoardTheme: "classic", activePieceColor: "classic",
   };
   const docRef = await addDoc(colRef, child);
@@ -39,12 +40,12 @@ export async function addChild(uid: string, name: string, avatar: string): Promi
 
 export async function updateChildProgress(
   uid: string, childId: string, lessonId: string,
-  stars: number, newCurrentLesson: number, newTotalStars: number
+  stars: number, newCurrentLessonId: string, newTotalStars: number
 ): Promise<void> {
   const db = getDb();
   const batch = writeBatch(db);
   const childRef = doc(db, "users", uid, "children", childId);
-  batch.update(childRef, { currentLesson: newCurrentLesson, totalStars: newTotalStars });
+  batch.update(childRef, { currentLesson: newCurrentLessonId, totalStars: newTotalStars });
   const progressRef = doc(db, "users", uid, "children", childId, "progress", lessonId);
   batch.set(progressRef, { lessonId, stars, completedAt: serverTimestamp(), attempts: 1 });
   await batch.commit();

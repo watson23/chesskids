@@ -3,11 +3,12 @@
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 import { useLocale } from "@/hooks/useLocale";
+import type { LocaleKey } from "@/types/locale";
 
 type LessonPhase = "watch" | "try" | "celebrate" | "wrong";
 
 interface NarrationAreaProps {
-  narrationKey: string;
+  narrationKey: LocaleKey | "";
   phase: LessonPhase;
 }
 
@@ -26,7 +27,7 @@ function getExpression(phase: LessonPhase) {
 
 export default function NarrationArea({ narrationKey, phase }: NarrationAreaProps) {
   const { t } = useLocale();
-  const text = t(narrationKey);
+  const text = narrationKey ? t(narrationKey) : "";
   const expression = getExpression(phase);
 
   return (

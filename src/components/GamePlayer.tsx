@@ -14,8 +14,9 @@ import { useAudio } from "@/hooks/useAudio";
 import { getAIMove } from "@/lib/chess-ai";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
+import type { LocaleKey } from "@/types/locale";
 
-const OPPONENTS: Record<number, { nameKey: string; image: string; bgColor: string; accentColor: string }> = {
+const OPPONENTS: Record<number, { nameKey: LocaleKey; image: string; bgColor: string; accentColor: string }> = {
   1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse-t.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7" },
   2: { nameKey: "opponent_fox_name", image: "/opponents/fox-t.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D" },
   3: { nameKey: "opponent_owl_name", image: "/opponents/owl-t.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD" },

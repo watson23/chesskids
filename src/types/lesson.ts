@@ -1,9 +1,10 @@
 import type { PieceType, Square, ChessPiece } from "./chess";
+import type { LocaleKey } from "./locale";
 
 export type LessonPhase = "watch" | "try" | "celebrate";
 
 export interface LessonStep {
-  narrationKey: string;
+  narrationKey: LocaleKey;
   boardSetup: Record<Square, ChessPiece>;
   animation?: {
     piece: Square;
@@ -13,11 +14,11 @@ export interface LessonStep {
 }
 
 export interface LessonPuzzle {
-  narrationKey: string;
+  narrationKey: LocaleKey;
   boardSetup: Record<Square, ChessPiece>;
   correctMoves: { from: Square; to: Square }[];
-  wrongMoveNarrationKey: string;
-  successNarrationKey: string;
+  wrongMoveNarrationKey: LocaleKey;
+  successNarrationKey: LocaleKey;
 }
 
 export interface Lesson {
@@ -33,11 +34,11 @@ export interface PuzzleDefinition {
   id: string;
   category: PieceType | "checkmate" | "tactics";
   difficulty: 1 | 2 | 3;
-  narrationKey: string;
+  narrationKey: LocaleKey;
   boardSetup: Record<Square, ChessPiece>;
   correctMoves: { from: Square; to: Square }[];
-  wrongMoveNarrationKey: string;
-  successNarrationKey: string;
+  wrongMoveNarrationKey: LocaleKey;
+  successNarrationKey: LocaleKey;
 }
 
 export type RewardType = "board-theme" | "piece-color" | "celebration" | "sound-pack";

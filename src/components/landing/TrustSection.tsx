@@ -1,12 +1,13 @@
 "use client";
 
 import Piku from "@/components/Piku";
+import type { TranslateFn, LocaleKey } from "@/types/locale";
 
 interface TrustSectionProps {
-  t: (key: string) => string;
+  t: TranslateFn;
 }
 
-const BADGES = [
+const BADGES: { titleKey: LocaleKey; descKey: LocaleKey; icon: string }[] = [
   { titleKey: "landing_trust_no_ads", descKey: "landing_trust_no_ads_desc", icon: "🛡️" },
   { titleKey: "landing_trust_no_reading", descKey: "landing_trust_no_reading_desc", icon: "👁️" },
   { titleKey: "landing_trust_age", descKey: "landing_trust_age_desc", icon: "👶" },

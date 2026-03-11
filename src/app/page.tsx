@@ -13,6 +13,7 @@ import StarCounter from "@/components/StarCounter";
 import ChestPeekModal from "@/components/ChestPeekModal";
 import { CHESTS } from "@/data/chests";
 import { LESSONS } from "@/data/lessons";
+import { resolveCurrentLessonIndex, getLessonIdAtIndex } from "@/lib/lesson-utils";
 import { useAuth } from "@/hooks/useAuth";
 
 import {
@@ -73,7 +74,7 @@ function HomeContent() {
         if (skipNextSync.current) {
           skipNextSync.current = false;
         } else {
-          setCurrentLesson(activeChild!.currentLesson);
+          setCurrentLesson(resolveCurrentLessonIndex(activeChild!.currentLesson));
           setTotalStars(activeChild!.totalStars);
         }
 
@@ -114,11 +115,11 @@ function HomeContent() {
           }
           // Prevent Firestore re-fetch from overwriting optimistic state
           skipNextSync.current = true;
-          // Save to Firestore (using computed new values)
+          // Save to Firestore (store lesson ID, not index)
           if (user && activeChild) {
             updateChildProgress(
               user.uid, activeChild.id, completedLessonId,
-              stars, newCurrent, newTotal
+              stars, getLessonIdAtIndex(newCurrent), newTotal
             ).then(() => refreshChildren()).catch((err) =>
               console.error("Failed to save progress:", err)
             );

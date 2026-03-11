@@ -10,6 +10,7 @@ import {
 import { speak, stopSpeaking } from "@/lib/tts";
 import { playSound } from "@/lib/sounds";
 import type { SoundEffect } from "@/types/audio";
+import type { LocaleKey } from "@/types/locale";
 
 import en from "@/data/locale/en.json";
 import fi from "@/data/locale/fi.json";
@@ -21,10 +22,10 @@ interface AudioContextValue {
   setLanguage: (lang: "fi" | "en") => void;
   soundEnabled: boolean;
   setSoundEnabled: (enabled: boolean) => void;
-  say: (key: string) => Promise<void>;
+  say: (key: LocaleKey) => Promise<void>;
   sfx: (effect: SoundEffect) => void;
   stop: () => void;
-  t: (key: string) => string;
+  t: (key: LocaleKey) => string;
 }
 
 const AudioCtx = createContext<AudioContextValue>({
@@ -35,7 +36,7 @@ const AudioCtx = createContext<AudioContextValue>({
   say: async () => {},
   sfx: () => {},
   stop: () => {},
-  t: (key: string) => key,
+  t: (key: LocaleKey) => key,
 });
 
 export function AudioProvider({ children }: { children: ReactNode }) {
@@ -56,7 +57,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const say = useCallback(
-    async (key: string) => {
+    async (key: LocaleKey) => {
       if (!soundEnabled) return;
       const text = locales[language]?.[key] || locales.en[key] || key;
       await speak(text, { lang: language });
@@ -77,7 +78,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string): string => {
+    (key: LocaleKey): string => {
       return locales[language]?.[key] || locales.en[key] || key;
     },
     [language]

@@ -2,9 +2,10 @@
 
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import type { TranslateFn } from "@/types/locale";
 
 interface CTASectionProps {
-  t: (key: string) => string;
+  t: TranslateFn;
   onPlayFree: () => void;
   onGoogleSignIn: () => void;
 }

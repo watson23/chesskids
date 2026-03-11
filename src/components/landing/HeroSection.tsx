@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import type { TranslateFn } from "@/types/locale";
 
 interface HeroSectionProps {
-  t: (key: string) => string;
+  t: TranslateFn;
   onPlayFree: () => void;
   onGoogleSignIn: () => void;
 }

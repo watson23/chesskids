@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
+import type { LocaleKey } from "@/types/locale";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
@@ -43,7 +44,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const [boardPieces, setBoardPieces] = useState<Record<string, ChessPiece>>({});
   const [showTapHint, setShowTapHint] = useState(false);
   const [wrongFlash, setWrongFlash] = useState(false);
-  const [narrationOverride, setNarrationOverride] = useState<string | null>(null);
+  const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
   const [phaseOverride, setPhaseOverride] = useState<"watch" | "try" | "celebrate" | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
