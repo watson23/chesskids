@@ -311,7 +311,7 @@ export default function JourneyMap({
                 top: `${pos.y}%`,
               }}
             >
-              <Piku expression={allDone ? "celebrating" : "happy"} size={72} />
+              <Piku expression={allDone ? "standing-celebrating" : "standing-happy"} size={72} />
             </div>
           );
         })()}

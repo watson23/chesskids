@@ -17,7 +17,14 @@ type Expression =
   | "thinking"
   | "holding-pawn"
   | "wrong"
-  | "wave";
+  | "wave"
+  | "standing-celebrating"
+  | "standing-happy"
+  | "standing-neutral"
+  | "standing-teaching"
+  | "standing-winking"
+  | "standing-sad"
+  | "standing-holding-pawn";
 
 const expressionToImage: Record<Expression, string> = {
   happy: "/mascot/piku-happy.webp",
@@ -35,6 +42,13 @@ const expressionToImage: Record<Expression, string> = {
   "holding-pawn": "/mascot/piku-holding-pawn.png", // no webp yet
   wrong: "/mascot/piku-wrong.png", // no webp yet
   wave: "/mascot/piku-wave.png", // no webp yet
+  "standing-celebrating": "/mascot/piku-standing-celebrating.webp",
+  "standing-happy": "/mascot/piku-standing-happy.webp",
+  "standing-neutral": "/mascot/piku-standing-neutral.webp",
+  "standing-teaching": "/mascot/piku-standing-teaching.webp",
+  "standing-winking": "/mascot/piku-standing-winking.webp",
+  "standing-sad": "/mascot/piku-standing-sad-1.webp",
+  "standing-holding-pawn": "/mascot/piku-standing-holding-chess-piece-1.webp",
 };
 
 interface PikuProps {
