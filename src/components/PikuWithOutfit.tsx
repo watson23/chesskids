@@ -85,6 +85,9 @@ const bodySlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
   "body-mint-bow": BOW_CONFIG,
   "body-gold-bow": BOW_CONFIG,
   "body-peach-bow": BOW_CONFIG,
+  "body-medal-snowflake": {
+    base: { top: "43.5%", left: "48.5%", widthScale: 0.22, rotate: 6 },
+  },
 };
 
 function resolveBodyPos(itemKey: string, expression: StandingExpression): SlotPos {

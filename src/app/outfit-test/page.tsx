@@ -83,6 +83,23 @@ export default function OutfitTestPage() {
         </div>
       </div>
 
+      {/* Snowflake Medal */}
+      <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Snowflake Medal</h2>
+      <div className="flex gap-8 flex-wrap justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-happy" bodyImage="/outfits/body-medal-snowflake.webp" size={200} />
+          <span className="text-sm font-semibold">Happy</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-happy" headImage="/outfits/head-crown.webp" bodyImage="/outfits/body-medal-snowflake.webp" size={200} />
+          <span className="text-sm font-semibold">Happy + Crown</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-celebrating" bodyImage="/outfits/body-medal-snowflake.webp" size={200} />
+          <span className="text-sm font-semibold">Celebrating</span>
+        </div>
+      </div>
+
       {/* All Bow Colors */}
       <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Bow Colors</h2>
       <div className="flex gap-6 flex-wrap justify-center">
