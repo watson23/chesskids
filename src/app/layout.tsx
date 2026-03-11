@@ -5,6 +5,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AudioProvider } from "@/hooks/useAudio";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import ViewportHeightFix from "@/components/ViewportHeightFix";
+import HtmlLangSync from "@/components/HtmlLangSync";
 
 
 const nunitoSans = Nunito_Sans({
@@ -49,6 +50,7 @@ export default function RootLayout({
         </AuthProvider>
         <ServiceWorkerRegistrar />
         <ViewportHeightFix />
+        <HtmlLangSync />
       </body>
     </html>
   );

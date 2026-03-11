@@ -67,7 +67,7 @@ export function AuthProvider({
       // Restore previously-selected child from localStorage, or default to first
       const savedChildId =
         typeof window !== "undefined"
-          ? localStorage.getItem(`chesskids_activeChild_${u.uid}`)
+          ? localStorage.getItem(`mfcm_activeChild_${u.uid}`)
           : null;
       const savedChild = savedChildId ? kids.find((k) => k.id === savedChildId) : null;
       setActiveChildState(savedChild ?? kids[0] ?? null);
@@ -110,7 +110,7 @@ export function AuthProvider({
     (child: ChildProfile | null) => {
       setActiveChildState(child);
       if (user && child) {
-        localStorage.setItem(`chesskids_activeChild_${user.uid}`, child.id);
+        localStorage.setItem(`mfcm_activeChild_${user.uid}`, child.id);
       }
     },
     [user]

@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { Lesson } from "@/types/lesson";
 import type { LessonPhase } from "@/types/lesson";
+import { calculateStars } from "@/lib/scoring";
 
 export interface LessonPlayerState {
   phase: LessonPhase;
@@ -10,12 +11,6 @@ export interface LessonPlayerState {
   puzzleIndex: number;
   attempts: number;
   stars: number;
-}
-
-function calculateStars(wrongAttempts: number): number {
-  if (wrongAttempts === 0) return 3;
-  if (wrongAttempts <= 2) return 2;
-  return 1;
 }
 
 export function useLessonPlayer(lesson: Lesson) {

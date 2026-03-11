@@ -41,7 +41,7 @@ const AudioCtx = createContext<AudioContextValue>({
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<"fi" | "en">(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("chesskids_language");
+      const saved = localStorage.getItem("mfcm_language");
       if (saved === "fi" || saved === "en") return saved;
     }
     return "en";
@@ -51,7 +51,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((lang: "fi" | "en") => {
     setLanguageState(lang);
     if (typeof window !== "undefined") {
-      localStorage.setItem("chesskids_language", lang);
+      localStorage.setItem("mfcm_language", lang);
     }
   }, []);
 

@@ -14,16 +14,11 @@ import TapHint from "@/components/TapHint";
 import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
+import { calculateStars } from "@/lib/scoring";
 
 interface PuzzlePlayerProps {
   puzzles: PuzzleDefinition[];
   onComplete: () => void;
-}
-
-function calculateStars(wrongAttempts: number): number {
-  if (wrongAttempts === 0) return 3;
-  if (wrongAttempts <= 2) return 2;
-  return 1;
 }
 
 type Phase = "solving" | "success" | "celebrate";
