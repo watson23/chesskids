@@ -128,10 +128,11 @@ const knightPuzzles: PuzzleDefinition[] = [
     difficulty: 3,
     narrationKey: "puzzle_knight_fork",
     // Knight can fork king and rook by going to c7
+    // From c7, knight attacks: a6, a8, b5, d5, e6, e8
     boardSetup: board(
       ["d5", w("knight")],
       ["e8", b("king")],
-      ["b8", b("rook")]
+      ["a8", b("rook")]
     ),
     correctMoves: [{ from: "d5" as Square, to: "c7" as Square }],
     wrongMoveNarrationKey: "try_again",
