@@ -27,6 +27,8 @@ export interface ChildProfile {
   unlockedRewards: string[];
   activeBoardTheme: string;
   activePieceColor: string;
+  equippedOutfit?: { head?: string; body?: string };
+  unlockedOutfits?: string[];
 }
 
 export interface LessonProgress {

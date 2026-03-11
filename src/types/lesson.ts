@@ -41,7 +41,16 @@ export interface PuzzleDefinition {
   successNarrationKey: LocaleKey;
 }
 
-export type RewardType = "board-theme" | "piece-color" | "celebration" | "sound-pack";
+export type RewardType = "board-theme" | "piece-color" | "celebration" | "sound-pack" | "outfit";
+
+export type OutfitSlot = "head" | "body";
+
+export interface OutfitItem {
+  id: string;
+  slot: OutfitSlot;
+  nameKey: string;
+  image: string;
+}
 
 export interface Reward {
   id: string;
@@ -49,6 +58,7 @@ export interface Reward {
   chestIndex: number;
   themeId?: string;
   pieceColorId?: string;
+  outfitId?: string;
 }
 
 export interface ChestDefinition {
