@@ -46,8 +46,8 @@ const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
   "head-wizard-hat": {
     base: { top: "-32.5%", left: "47%", widthScale: 0.85, rotate: 4 },
     expressions: {
-      "standing-winking":      { top: "-30%", left: "44%", rotate: 0 },
-      "standing-celebrating":  { top: "-24%", left: "50%", widthScale: 0.72, rotate: 12 },
+      "standing-winking":      { top: "-30%", left: "40%", rotate: -2 },
+      "standing-celebrating":  { top: "-19.5%", left: "47%", widthScale: 0.72, rotate: 12 },
     },
   },
 };
@@ -68,10 +68,16 @@ function resolveHeadPos(itemKey: string, expression: StandingExpression): SlotPo
 /**
  * Body slot positioning (same structure, ready for when body items arrive).
  */
-const BODY_DEFAULTS: SlotPos = { top: "40%", left: "50%", widthScale: 0.7, rotate: 0 };
+const BODY_DEFAULTS: SlotPos = { top: "40%", left: "50%", widthScale: 0.35, rotate: 0 };
 
 const bodySlotConfig: Record<string, { base: PartialPos; expressions?: Partial<Record<StandingExpression, PartialPos>> }> = {
-  // Add body items as needed
+  "body-pink-bow": {
+    base: { top: "37.5%", left: "50%", widthScale: 0.35, rotate: 3 },
+    expressions: {
+      "standing-celebrating": { top: "41.5%", left: "46%", rotate: 5 },
+      "standing-winking": { top: "41%", left: "46%", rotate: -2 },
+    },
+  },
 };
 
 function resolveBodyPos(itemKey: string, expression: StandingExpression): SlotPos {
