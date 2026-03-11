@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { House, ArrowRight } from "@phosphor-icons/react";
+import Image from "next/image";
+import NavIcon from "@/components/NavIcon";
 import type { PuzzleDefinition } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
@@ -205,13 +206,7 @@ export default function PuzzlePlayer({
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
-        <button
-          onClick={handleGoHome}
-          className="card-pillow p-2 active:scale-95 transition-transform"
-          aria-label="Go back"
-        >
-          <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
-        </button>
+        <NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />
 
         {/* Progress dots */}
         <div className="flex gap-1.5 items-center">
@@ -259,7 +254,7 @@ export default function PuzzlePlayer({
               className="btn-3d btn-3d-purple mt-2 px-8 py-3 text-white font-bold text-lg flex items-center gap-2"
             >
               {t("continue")}
-              <ArrowRight size={24} weight="bold" />
+              <Image src="/icons/icon-next.webp" alt="" width={24} height={24} className="object-contain" />
             </button>
           </div>
         ) : (
