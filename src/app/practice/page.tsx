@@ -9,6 +9,7 @@ import { useLocale } from "@/hooks/useLocale";
 import { PawnSVG, KnightSVG, BishopSVG, RookSVG, QueenSVG, KingSVG } from "@/lib/pieces";
 
 import SpeechBubble from "@/components/SpeechBubble";
+import NavIcon from "@/components/NavIcon";
 
 const STAGGER_CLASSES = [
   "animate-fade-in-up",
@@ -125,6 +126,10 @@ export default function PracticePage() {
         background: "var(--ck-bg) url(/practice-bg.webp) center top / cover no-repeat fixed",
       }}
     >
+      <div className="fixed top-4 left-4 z-30">
+        <NavIcon icon="icon-home" alt="Back to map" onClick={() => router.push("/")} />
+      </div>
+
       {/* Semi-transparent overlay for readability */}
       <div
         className="min-h-dvh flex flex-col"

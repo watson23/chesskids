@@ -8,6 +8,7 @@ import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
 
 import SpeechBubble from "@/components/SpeechBubble";
+import NavIcon from "@/components/NavIcon";
 
 const STAGGER_CLASSES = [
   "animate-fade-in-up",
@@ -106,6 +107,10 @@ export default function PlayPage() {
         background: "var(--ck-bg) url(/play-bg.webp) center top / cover no-repeat fixed",
       }}
     >
+      <div className="fixed top-4 left-4 z-30">
+        <NavIcon icon="icon-home" alt="Back to map" onClick={() => router.push("/")} />
+      </div>
+
       {/* Semi-transparent overlay */}
       <div
         className="min-h-dvh flex flex-col"
