@@ -109,6 +109,7 @@ export default function JourneyMap({
   const { sfx } = useAudio();
   const [sparkleLesson, setSparkleLesson] = useState<string | null>(null);
   const [unlockingIndex, setUnlockingIndex] = useState<number | null>(null);
+  const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
   // Auto-scroll to current lesson on mount / lesson change
@@ -159,11 +160,17 @@ export default function JourneyMap({
       sfx("chest-open");
     }, 2000));
 
-    // 3000ms: clear animation, call done
+    // 3000ms: clear unlock animation, start persistent glow, call done
     timers.push(setTimeout(() => {
       setUnlockingIndex(null);
+      setGlowingIndex(justUnlockedLesson);
       onUnlockAnimationDone?.();
     }, 3000));
+
+    // 6000ms: clear glow (CSS animation is 3s, so total 6s from start)
+    timers.push(setTimeout(() => {
+      setGlowingIndex(null);
+    }, 6000));
 
     return () => timers.forEach(clearTimeout);
   }, [justCompletedLesson, justUnlockedLesson, sfx, onUnlockAnimationDone]);
@@ -248,6 +255,7 @@ export default function JourneyMap({
               onTap={() => onLessonTap(lesson.id)}
               sparkle={sparkleLesson === lesson.id}
               unlocking={unlockingIndex === index}
+              justUnlocked={glowingIndex === index}
               onLockedTap={handleLockedTap}
             />
           );

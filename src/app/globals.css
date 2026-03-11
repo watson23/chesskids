@@ -219,6 +219,14 @@ html, body {
 }
 .animate-lesson-unlock { animation: lesson-unlock 0.6s ease-out; }
 
+/* Persistent glow ring after lesson unlock — fades out over 3s */
+@keyframes unlock-glow {
+  0% { box-shadow: 0 0 20px 8px rgba(110, 231, 183, 0.7), 0 0 40px 16px rgba(52, 211, 153, 0.3); }
+  70% { box-shadow: 0 0 16px 6px rgba(110, 231, 183, 0.5), 0 0 32px 12px rgba(52, 211, 153, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0), 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+.animate-unlock-glow { animation: unlock-glow 3s ease-out forwards; }
+
 /* ---- Tap hint pulse animation ---- */
 @keyframes tap-hint {
   0%, 100% { transform: translateY(0) scale(1); opacity: 0.85; }

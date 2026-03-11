@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChildProfile } from "@/types/user";
+import { useLocale } from "@/hooks/useLocale";
 
 interface ChildSelectorProps {
   profiles: ChildProfile[];
@@ -9,9 +10,10 @@ interface ChildSelectorProps {
 }
 
 export default function ChildSelector({ profiles, onSelect, onAddChild }: ChildSelectorProps) {
+  const { t } = useLocale();
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center gap-8 px-6" style={{ background: "var(--ck-bg)" }}>
-      <h1 className="text-2xl font-bold" style={{ color: "var(--ck-text)" }}>Who is playing?</h1>
+      <h1 className="text-2xl font-bold" style={{ color: "var(--ck-text)" }}>{t("child_selector_title")}</h1>
 
       <div className="flex flex-wrap justify-center gap-6">
         {profiles.map((child) => (
@@ -34,7 +36,7 @@ export default function ChildSelector({ profiles, onSelect, onAddChild }: ChildS
           style={{ borderColor: "var(--ck-purple)", background: "rgba(177, 151, 252, 0.08)" }}
         >
           <span className="text-4xl" style={{ color: "var(--ck-purple)" }}>+</span>
-          <span className="text-xs font-medium" style={{ color: "var(--ck-purple-dark)" }}>Add</span>
+          <span className="text-xs font-medium" style={{ color: "var(--ck-purple-dark)" }}>{t("child_selector_add")}</span>
         </button>
       </div>
     </div>

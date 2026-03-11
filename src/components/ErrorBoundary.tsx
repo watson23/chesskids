@@ -1,6 +1,8 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
+import en from "@/data/locale/en.json";
+import fi from "@/data/locale/fi.json";
 
 interface Props {
   children: ReactNode;
@@ -33,18 +35,21 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
 
+      const lang = typeof window !== "undefined" ? localStorage.getItem("mfcm_language") : null;
+      const strings = lang === "fi" ? fi : en;
+
       return (
         <div className="min-h-dvh flex flex-col items-center justify-center gap-4 p-6 text-center"
           style={{ background: "var(--ck-bg)" }}>
           <span className="text-5xl">😵</span>
           <p className="text-lg font-bold" style={{ color: "var(--ck-text)" }}>
-            Oops, something went wrong!
+            {strings.error_oops}
           </p>
           <button
             onClick={() => this.setState({ hasError: false })}
             className="btn-3d btn-3d-purple"
           >
-            Try again
+            {strings.error_try_again}
           </button>
         </div>
       );

@@ -13,7 +13,7 @@ interface ParentSettingsProps {
 }
 
 export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
-  const { language, setLanguage, soundEnabled, setSoundEnabled } = useAudio();
+  const { language, setLanguage, soundEnabled, setSoundEnabled, t } = useAudio();
   const {
     user,
     signOut,
@@ -63,7 +63,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-amber-900">Settings</h2>
+          <h2 className="text-lg font-bold text-amber-900">{t("settings_title")}</h2>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all"
@@ -78,7 +78,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
           {/* Language */}
           <div>
             <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-              Language
+              {t("settings_language")}
             </label>
             <div className="flex gap-3 mt-2">
               <button
@@ -109,7 +109,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
           {/* Sound */}
           <div>
             <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-              Sound
+              {t("settings_sound")}
             </label>
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
@@ -125,7 +125,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
                 <Image src="/icons/icon-sound-off.webp" alt="Sound off" width={20} height={20} className="object-contain" />
               )}
               <span className="font-semibold">
-                {soundEnabled ? "Sound On" : "Sound Off"}
+                {soundEnabled ? t("settings_sound_on") : t("settings_sound_off")}
               </span>
             </button>
           </div>
@@ -133,7 +133,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
           {/* Children */}
           <div>
             <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-              Players
+              {t("settings_players")}
             </label>
             <div className="flex flex-col gap-2 mt-2">
               {childProfiles.map((child) => (
@@ -152,7 +152,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
                   </span>
                   {activeChild?.id === child.id && (
                     <span className="ml-auto text-xs font-bold text-amber-600 bg-amber-200 px-2 py-0.5 rounded-full">
-                      Active
+                      {t("settings_active")}
                     </span>
                   )}
                 </button>
@@ -163,7 +163,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
                 className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:bg-gray-50 active:scale-95 transition-all"
               >
                 <Image src="/icons/icon-add-player.webp" alt="" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
-                <span className="font-semibold">Add player</span>
+                <span className="font-semibold">{t("settings_add_player")}</span>
               </button>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 active:scale-95 transition-all"
           >
             <Image src="/icons/icon-sign-out.webp" alt="" width={22} height={22} className="object-contain" style={{ width: 22, height: "auto" }} />
-            Sign out
+            {t("settings_sign_out")}
           </button>
         </div>
       </div>

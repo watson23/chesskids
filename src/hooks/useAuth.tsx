@@ -19,7 +19,7 @@ import {
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { getOrCreateUser, getChildren } from "@/lib/firestore";
-import type { ChildProfile } from "@/types/user";
+import type { ChildProfile, UserSettings } from "@/types/user";
 
 interface AuthContextValue {
   user: User | null;
@@ -31,6 +31,7 @@ interface AuthContextValue {
   activeChild: ChildProfile | null;
   setActiveChild: (child: ChildProfile | null) => void;
   refreshChildren: () => Promise<void>;
+  userSettings: UserSettings | null;
 }
 
 const AuthCtx = createContext<AuthContextValue>({
@@ -43,6 +44,7 @@ const AuthCtx = createContext<AuthContextValue>({
   activeChild: null,
   setActiveChild: () => {},
   refreshChildren: async () => {},
+  userSettings: null,
 });
 
 const googleProvider = new GoogleAuthProvider();
@@ -57,6 +59,7 @@ export function AuthProvider({
   const [loading, setLoading] = useState(true);
   const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
   const [activeChild, setActiveChildState] = useState<ChildProfile | null>(null);
+  const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
   const activeChildRef = useRef<ChildProfile | null>(null);
 
   // Keep ref in sync so refreshChildren can read latest without stale closure
@@ -65,7 +68,8 @@ export function AuthProvider({
   /** Load user document and children from Firestore */
   const loadUserData = useCallback(async (u: User) => {
     try {
-      await getOrCreateUser(u.uid, u.email ?? "", u.displayName ?? "");
+      const userData = await getOrCreateUser(u.uid, u.email ?? "", u.displayName ?? "");
+      if (userData.settings) setUserSettings(userData.settings);
       const kids = await getChildren(u.uid);
       setChildProfiles(kids);
 
@@ -89,6 +93,7 @@ export function AuthProvider({
       } else {
         setChildProfiles([]);
         setActiveChildState(null);
+        setUserSettings(null);
       }
       setLoading(false);
     });
@@ -147,6 +152,7 @@ export function AuthProvider({
         activeChild,
         setActiveChild,
         refreshChildren,
+        userSettings,
       }}
     >
       {reactChildren}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useLocale } from "@/hooks/useLocale";
 
 const AVATARS = [
   "\u{1F981}", "\u{1F431}", "\u{1F436}", "\u{1F98A}", "\u{1F43B}", "\u{1F43C}",
@@ -14,6 +15,7 @@ interface AddChildModalProps {
 }
 
 export default function AddChildModal({ onAdd, onCancel }: AddChildModalProps) {
+  const { t } = useLocale();
   const [name, setName] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
 
@@ -27,7 +29,7 @@ export default function AddChildModal({ onAdd, onCancel }: AddChildModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
       <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm flex flex-col gap-5">
         <h2 className="text-xl font-bold text-amber-900 text-center">
-          New Player
+          {t("child_add_title")}
         </h2>
 
         {/* Avatar picker */}
@@ -58,7 +60,7 @@ export default function AddChildModal({ onAdd, onCancel }: AddChildModalProps) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
+          placeholder={t("child_add_name_placeholder")}
           maxLength={20}
           className="w-full px-4 py-3 border-2 border-amber-200 rounded-xl text-lg text-amber-900 placeholder-amber-300 focus:outline-none focus:border-amber-400 transition-colors"
           autoFocus
@@ -70,14 +72,14 @@ export default function AddChildModal({ onAdd, onCancel }: AddChildModalProps) {
             onClick={onCancel}
             className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-500 font-semibold active:scale-95 transition-transform"
           >
-            Cancel
+            {t("child_add_cancel")}
           </button>
           <button
             onClick={handleAdd}
             disabled={name.trim().length === 0}
             className="flex-1 py-3 rounded-xl bg-green-500 text-white font-bold active:scale-95 transition-transform disabled:opacity-40 disabled:scale-100"
           >
-            Add
+            {t("child_add_confirm")}
           </button>
         </div>
       </div>

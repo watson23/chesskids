@@ -160,5 +160,22 @@
   "opponent_owl_tagline": "Viisas ja vahva!",
   "opponent_bear_name": "Bruno-karhu",
   "opponent_bear_tagline": "Suurin haaste!",
-  "opponent_locked": "Voita Oliver avataksesi!"
+  "opponent_locked": "Voita Oliver avataksesi!",
+  "settings_title": "Asetukset",
+  "settings_language": "Kieli",
+  "settings_sound": "Ääni",
+  "settings_sound_on": "Ääni päällä",
+  "settings_sound_off": "Ääni pois",
+  "settings_players": "Pelaajat",
+  "settings_add_player": "Lisää pelaaja",
+  "settings_active": "Aktiivinen",
+  "settings_sign_out": "Kirjaudu ulos",
+  "child_selector_title": "Kuka pelaa?",
+  "child_selector_add": "Lisää",
+  "child_add_title": "Uusi pelaaja",
+  "child_add_name_placeholder": "Nimi",
+  "child_add_cancel": "Peruuta",
+  "child_add_confirm": "Lisää",
+  "error_oops": "Hups, jotain meni pieleen!",
+  "error_try_again": "Yritä uudelleen"
 }

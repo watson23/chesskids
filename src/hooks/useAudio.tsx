@@ -4,11 +4,14 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
 import { speak, stopSpeaking } from "@/lib/tts";
 import { playSound } from "@/lib/sounds";
+import { useAuth } from "@/hooks/useAuth";
+import { updateUserSettings } from "@/lib/firestore";
 import type { SoundEffect } from "@/types/audio";
 import type { LocaleKey } from "@/types/locale";
 
@@ -40,6 +43,8 @@ const AudioCtx = createContext<AudioContextValue>({
 });
 
 export function AudioProvider({ children }: { children: ReactNode }) {
+  const { user, userSettings } = useAuth();
+
   const [language, setLanguageState] = useState<"fi" | "en">(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("mfcm_language");
@@ -49,12 +54,26 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   });
   const [soundEnabled, setSoundEnabled] = useState(true);
 
+  // Sync language from Firestore when user logs in
+  useEffect(() => {
+    if (userSettings?.language) {
+      setLanguageState(userSettings.language);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("mfcm_language", userSettings.language);
+      }
+    }
+  }, [userSettings]);
+
   const setLanguage = useCallback((lang: "fi" | "en") => {
     setLanguageState(lang);
     if (typeof window !== "undefined") {
       localStorage.setItem("mfcm_language", lang);
     }
-  }, []);
+    // Persist to Firestore
+    if (user) {
+      updateUserSettings(user.uid, { language: lang });
+    }
+  }, [user]);
 
   const say = useCallback(
     async (key: LocaleKey) => {

@@ -160,5 +160,22 @@
   "opponent_owl_tagline": "Wise and strong!",
   "opponent_bear_name": "Bruno the Bear",
   "opponent_bear_tagline": "The ultimate challenge!",
-  "opponent_locked": "Beat Oliver to unlock!"
+  "opponent_locked": "Beat Oliver to unlock!",
+  "settings_title": "Settings",
+  "settings_language": "Language",
+  "settings_sound": "Sound",
+  "settings_sound_on": "Sound On",
+  "settings_sound_off": "Sound Off",
+  "settings_players": "Players",
+  "settings_add_player": "Add player",
+  "settings_active": "Active",
+  "settings_sign_out": "Sign out",
+  "child_selector_title": "Who is playing?",
+  "child_selector_add": "Add",
+  "child_add_title": "New Player",
+  "child_add_name_placeholder": "Name",
+  "child_add_cancel": "Cancel",
+  "child_add_confirm": "Add",
+  "error_oops": "Oops, something went wrong!",
+  "error_try_again": "Try again"
 }

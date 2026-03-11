@@ -63,7 +63,12 @@ export async function getLessonProgress(uid: string, childId: string): Promise<R
 export async function updateUserSettings(uid: string, settings: Partial<UserSettings>): Promise<void> {
   const db = getDb();
   const ref = doc(db, "users", uid);
-  await updateDoc(ref, { settings });
+  // Use dot notation to merge individual fields instead of overwriting entire settings object
+  const updates: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(settings)) {
+    updates[`settings.${key}`] = value;
+  }
+  await updateDoc(ref, updates);
 }
 
 export async function getPuzzleProgress(

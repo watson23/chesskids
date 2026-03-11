@@ -46,7 +46,20 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const [wrongFlash, setWrongFlash] = useState(false);
   const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
   const [phaseOverride, setPhaseOverride] = useState<"watch" | "try" | "celebrate" | null>(null);
+  const [boardTransition, setBoardTransition] = useState(false);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevPhaseRef = useRef(state.phase);
+
+  // Brief board fade on phase change (watch → try)
+  useEffect(() => {
+    if (prevPhaseRef.current !== state.phase && state.phase !== "celebrate") {
+      setBoardTransition(true);
+      const timer = setTimeout(() => setBoardTransition(false), 300);
+      prevPhaseRef.current = state.phase;
+      return () => clearTimeout(timer);
+    }
+    prevPhaseRef.current = state.phase;
+  }, [state.phase]);
 
   // 4-second idle timer during try phase — show tap hint
   useEffect(() => {
@@ -263,7 +276,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
               phase={phaseOverride ?? (narrationOverride === "try_again" ? "wrong" : narrationOverride ? "try" : (state.phase as "watch" | "try"))}
             />
 
-            <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
+            <div className={`w-full flex justify-center transition-opacity duration-300${boardTransition ? " opacity-0" : " opacity-100"}${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
               <ChessBoard
                 pieces={boardPieces}
                 theme={boardTheme}

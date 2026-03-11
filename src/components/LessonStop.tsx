@@ -24,6 +24,7 @@ interface LessonStopProps {
   onTap: () => void;
   sparkle?: boolean;
   unlocking?: boolean;
+  justUnlocked?: boolean;
   onLockedTap?: () => void;
 }
 
@@ -89,6 +90,7 @@ export default function LessonStop({
   onTap,
   sparkle,
   unlocking,
+  justUnlocked,
   onLockedTap,
 }: LessonStopProps) {
   const [shaking, setShaking] = useState(false);
@@ -115,9 +117,9 @@ export default function LessonStop({
             boxShadow: "0 4px 0 #10B981, 0 6px 16px rgba(16, 185, 129, 0.4)",
           }
         : {
-            background: "#D4D0E0",
-            border: "4px solid #E8E4F0",
-            boxShadow: "0 2px 0 #B8B4C4, 0 4px 8px rgba(0,0,0,0.06)",
+            background: "#C4BED6",
+            border: "4px solid #DDD8E8",
+            boxShadow: "0 2px 0 #A8A2B8, 0 4px 8px rgba(0,0,0,0.08)",
           };
 
   const outerAnimClasses = [
@@ -146,7 +148,7 @@ export default function LessonStop({
 
       {/* The round node */}
       <div
-        className={`w-[60px] h-[60px] rounded-full flex items-center justify-center ${status === "current" ? "animate-gentle-bounce" : ""}`}
+        className={`w-[60px] h-[60px] rounded-full flex items-center justify-center ${status === "current" ? "animate-gentle-bounce" : ""}${justUnlocked ? " animate-unlock-glow" : ""}`}
         style={nodeStyle}
       >
         <LessonIcon icon={lesson.icon} />
@@ -156,7 +158,7 @@ export default function LessonStop({
       <div
         className="mt-1 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-extrabold shadow-sm"
         style={{
-          background: status === "completed" ? "var(--ck-purple)" : status === "current" ? "var(--ck-mint-dark)" : "#C4C0D0",
+          background: status === "completed" ? "var(--ck-purple)" : status === "current" ? "var(--ck-mint-dark)" : "#B4AEC6",
           color: "white",
           border: "2px solid white",
         }}
