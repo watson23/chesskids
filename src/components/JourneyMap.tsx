@@ -288,9 +288,9 @@ export default function JourneyMap({
           const pos = getLessonPosition(currentLesson, LESSONS.length);
           return (
             <div
-              className="absolute pointer-events-none -translate-y-1/2"
+              className="absolute pointer-events-none -translate-y-1/2 journey-pikku"
               style={{
-                left: `calc(${pos.x}% + 36px)`,
+                left: `calc(${pos.x}% + clamp(20px, 8vw, 36px))`,
                 top: `${pos.y}%`,
               }}
             >

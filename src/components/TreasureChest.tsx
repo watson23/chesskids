@@ -77,7 +77,7 @@ export default function TreasureChest({
 
   return (
     <button
-      className={`absolute flex flex-col items-center -translate-x-1/2 -translate-y-1/2 ${
+      className={`absolute flex flex-col items-center -translate-x-1/2 -translate-y-1/2 journey-node ${
         status === "unlocked"
           ? "cursor-pointer animate-chest-shake"
           : status === "locked"
