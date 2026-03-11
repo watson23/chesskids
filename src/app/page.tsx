@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { GearSix, Crown } from "@phosphor-icons/react";
+import NavIcon from "@/components/NavIcon";
 import JourneyMap from "@/components/JourneyMap";
 import ChestOpenModal from "@/components/ChestOpenModal";
 import RewardCollection from "@/components/RewardCollection";
@@ -14,7 +14,7 @@ import ChestPeekModal from "@/components/ChestPeekModal";
 import { CHESTS } from "@/data/chests";
 import { LESSONS } from "@/data/lessons";
 import { useAuth } from "@/hooks/useAuth";
-import { useLongPress } from "@/hooks/useLongPress";
+
 import {
   getLessonProgress,
   updateChildProgress,
@@ -44,9 +44,6 @@ function HomeContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
   const [peekChestIndex, setPeekChestIndex] = useState<number | null>(null);
-
-  const openSettings = useCallback(() => setShowSettings(true), []);
-  const longPressHandlers = useLongPress(openSettings);
 
   // Guard against processing completion params multiple times
   const completionProcessed = useRef(false);
@@ -291,38 +288,46 @@ function HomeContent() {
         onUnlockAnimationDone={handleUnlockAnimationDone}
       />
 
-      {/* Top-left: rewards + settings gear */}
-      <div className="fixed top-4 left-4 z-30 flex items-center gap-2">
-        <button
-          onClick={() => setShowRewards(true)}
-          className="w-9 h-9 rounded-full bg-white/60 backdrop-blur shadow-sm flex items-center justify-center active:scale-95 transition-transform"
-          aria-label="My rewards"
-        >
-          <Crown size={18} weight="fill" style={{ color: "var(--ck-gold)" }} />
-        </button>
-        <button
-          onClick={openSettings}
-          {...longPressHandlers}
-          className="w-9 h-9 rounded-full bg-white/60 backdrop-blur shadow-sm flex items-center justify-center active:scale-95 transition-transform select-none"
-          aria-label="Settings"
-        >
-          <GearSix size={18} weight="bold" className="text-gray-400" />
-        </button>
-      </div>
+      {/* Top navigation bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+8px)] pb-2">
+        {/* Left: character + star counter */}
+        <div className="flex items-center gap-2">
+          <NavIcon
+            icon="icon-character"
+            alt="My character"
+            size="md"
+            onClick={() => setActiveChild(null)}
+          />
+          <button
+            onClick={() => setShowRewards(true)}
+            className="flex items-center"
+          >
+            <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
+          </button>
+        </div>
 
-      {/* Top-center: star counter */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30">
-        <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
+        {/* Right: practice, play, settings */}
+        <div className="flex items-center gap-2">
+          <NavIcon
+            icon="icon-practice"
+            alt="Practice puzzles"
+            size="md"
+            onClick={() => router.push("/practice")}
+          />
+          <NavIcon
+            icon="icon-play"
+            alt="Play against opponents"
+            size="md"
+            onClick={() => router.push("/play")}
+          />
+          <NavIcon
+            icon="icon-settings"
+            alt="Settings"
+            size="md"
+            onClick={() => setShowSettings(true)}
+          />
+        </div>
       </div>
-
-      {/* Top-right: active child avatar (tap to switch) */}
-      <button
-        onClick={() => setActiveChild(null)}
-        className="fixed top-4 right-4 z-30 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-md flex items-center justify-center active:scale-95 transition-transform text-xl"
-        aria-label="Switch child profile"
-      >
-        {activeChild.avatar}
-      </button>
 
       {/* Parent settings panel */}
       <ParentSettings
