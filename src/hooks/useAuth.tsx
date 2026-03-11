@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import {
@@ -56,6 +57,10 @@ export function AuthProvider({
   const [loading, setLoading] = useState(true);
   const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
   const [activeChild, setActiveChildState] = useState<ChildProfile | null>(null);
+  const activeChildRef = useRef<ChildProfile | null>(null);
+
+  // Keep ref in sync so refreshChildren can read latest without stale closure
+  activeChildRef.current = activeChild;
 
   /** Load user document and children from Firestore */
   const loadUserData = useCallback(async (u: User) => {
@@ -121,16 +126,14 @@ export function AuthProvider({
     const kids = await getChildren(user.uid);
     setChildProfiles(kids);
 
-    // If the active child was deleted or doesn't exist, reset selection
-    if (activeChild && !kids.find((k) => k.id === activeChild.id)) {
-      setActiveChildState(kids[0] ?? null);
+    // Read from ref to avoid stale closure over activeChild
+    const current = activeChildRef.current;
+    if (current) {
+      const updated = kids.find((k) => k.id === current.id);
+      // Update with fresh data, or reset if child was deleted
+      setActiveChildState(updated ?? kids[0] ?? null);
     }
-    // If active child still exists, update its data from Firestore
-    const updatedActive = activeChild ? kids.find((k) => k.id === activeChild.id) : null;
-    if (updatedActive) {
-      setActiveChildState(updatedActive);
-    }
-  }, [user, activeChild]);
+  }, [user]);
 
   return (
     <AuthCtx.Provider

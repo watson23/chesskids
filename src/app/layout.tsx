@@ -6,6 +6,7 @@ import { AudioProvider } from "@/hooks/useAudio";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import ViewportHeightFix from "@/components/ViewportHeightFix";
 import HtmlLangSync from "@/components/HtmlLangSync";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 
 const nunitoSans = Nunito_Sans({
@@ -43,11 +44,13 @@ export default function RootLayout({
         className={`${nunitoSans.className} antialiased overflow-hidden`}
         style={{ background: "var(--ck-bg)" }}
       >
-        <AuthProvider>
-          <AudioProvider>
-            {children}
-          </AudioProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <AudioProvider>
+              {children}
+            </AudioProvider>
+          </AuthProvider>
+        </ErrorBoundary>
         <ServiceWorkerRegistrar />
         <ViewportHeightFix />
         <HtmlLangSync />

@@ -1,6 +1,6 @@
 import {
   doc, getDoc, setDoc, updateDoc, collection,
-  getDocs, addDoc, serverTimestamp
+  getDocs, addDoc, serverTimestamp, writeBatch
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import type { UserDocument, ChildProfile, LessonProgress, UserSettings } from "@/types/user";
@@ -42,10 +42,12 @@ export async function updateChildProgress(
   stars: number, newCurrentLesson: number, newTotalStars: number
 ): Promise<void> {
   const db = getDb();
+  const batch = writeBatch(db);
   const childRef = doc(db, "users", uid, "children", childId);
-  await updateDoc(childRef, { currentLesson: newCurrentLesson, totalStars: newTotalStars });
+  batch.update(childRef, { currentLesson: newCurrentLesson, totalStars: newTotalStars });
   const progressRef = doc(db, "users", uid, "children", childId, "progress", lessonId);
-  await setDoc(progressRef, { lessonId, stars, completedAt: serverTimestamp(), attempts: 1 });
+  batch.set(progressRef, { lessonId, stars, completedAt: serverTimestamp(), attempts: 1 });
+  await batch.commit();
 }
 
 export async function getLessonProgress(uid: string, childId: string): Promise<Record<string, LessonProgress>> {

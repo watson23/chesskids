@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, memo } from "react";
 import type {
   Square,
   ChessPiece as ChessPieceType,
@@ -21,6 +21,83 @@ interface ChessBoardProps {
   flipped?: boolean;
   interactive?: boolean;
 }
+
+interface BoardSquareProps {
+  square: Square;
+  piece: ChessPieceType | undefined;
+  bgColor: string;
+  isSelected: boolean;
+  isValidMove: boolean;
+  interactive: boolean;
+  pieceColors: PieceColorSet;
+  onTap: (square: Square) => void;
+}
+
+const BoardSquare = memo(function BoardSquare({
+  square,
+  piece,
+  bgColor,
+  isSelected,
+  isValidMove,
+  interactive,
+  pieceColors,
+  onTap,
+}: BoardSquareProps) {
+  const hasPiece = piece !== undefined;
+
+  return (
+    <div
+      className="relative flex items-center justify-center"
+      style={{ backgroundColor: bgColor }}
+      onClick={() => interactive && onTap(square)}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={`Square ${square}${hasPiece ? `, ${piece.color} ${piece.type}` : ""}`}
+      onKeyDown={(e) => {
+        if (interactive && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onTap(square);
+        }
+      }}
+    >
+      {/* Piece */}
+      {hasPiece && (
+        <div className="w-[92%] h-[92%] flex items-center justify-center pointer-events-none">
+          <ChessPiece
+            type={piece.type}
+            color={piece.color}
+            colorSet={pieceColors}
+            size={100}
+          />
+        </div>
+      )}
+
+      {/* Valid move indicator */}
+      {isValidMove && !hasPiece && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="w-[38%] h-[38%] rounded-full"
+            style={{
+              background: "radial-gradient(circle, #6EE7B7 0%, #34D399 100%)",
+              boxShadow: "0 0 8px rgba(110, 231, 183, 0.6), 0 2px 4px rgba(0,0,0,0.15)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Valid capture indicator (ring around capturable piece) */}
+      {isValidMove && hasPiece && (
+        <div
+          className="absolute inset-[3%] rounded-full pointer-events-none"
+          style={{
+            border: "5px solid #F472B6",
+            boxShadow: "inset 0 0 8px rgba(244, 114, 182, 0.4), 0 0 8px rgba(244, 114, 182, 0.3)",
+          }}
+        />
+      )}
+    </div>
+  );
+});
 
 export default function ChessBoard({
   pieces,
@@ -60,7 +137,6 @@ export default function ChessBoard({
             const isLastMove =
               lastMove !== null &&
               (lastMove.from === square || lastMove.to === square);
-            const hasPiece = piece !== undefined;
 
             let bgColor: string;
             if (isSelected) {
@@ -74,57 +150,17 @@ export default function ChessBoard({
             }
 
             return (
-              <div
+              <BoardSquare
                 key={`${displayRow}-${displayCol}`}
-                className="relative flex items-center justify-center"
-                style={{ backgroundColor: bgColor }}
-                onClick={() => handleSquareTap(square)}
-                role={interactive ? "button" : undefined}
-                tabIndex={interactive ? 0 : undefined}
-                aria-label={`Square ${square}${hasPiece ? `, ${piece.color} ${piece.type}` : ""}`}
-                onKeyDown={(e) => {
-                  if (interactive && (e.key === "Enter" || e.key === " ")) {
-                    e.preventDefault();
-                    handleSquareTap(square);
-                  }
-                }}
-              >
-                {/* Piece */}
-                {hasPiece && (
-                  <div className="w-[92%] h-[92%] flex items-center justify-center pointer-events-none">
-                    <ChessPiece
-                      type={piece.type}
-                      color={piece.color}
-                      colorSet={pieceColors}
-                      size={100}
-                    />
-                  </div>
-                )}
-
-                {/* Valid move indicator */}
-                {isValidMove && !hasPiece && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div
-                      className="w-[38%] h-[38%] rounded-full"
-                      style={{
-                        background: "radial-gradient(circle, #6EE7B7 0%, #34D399 100%)",
-                        boxShadow: "0 0 8px rgba(110, 231, 183, 0.6), 0 2px 4px rgba(0,0,0,0.15)",
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Valid capture indicator (ring around capturable piece) */}
-                {isValidMove && hasPiece && (
-                  <div
-                    className="absolute inset-[3%] rounded-full pointer-events-none"
-                    style={{
-                      border: "5px solid #F472B6",
-                      boxShadow: "inset 0 0 8px rgba(244, 114, 182, 0.4), 0 0 8px rgba(244, 114, 182, 0.3)",
-                    }}
-                  />
-                )}
-              </div>
+                square={square}
+                piece={piece}
+                bgColor={bgColor}
+                isSelected={isSelected}
+                isValidMove={isValidMove}
+                interactive={interactive}
+                pieceColors={pieceColors}
+                onTap={handleSquareTap}
+              />
             );
           });
         })}
