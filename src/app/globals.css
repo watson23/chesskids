@@ -156,6 +156,12 @@ html, body {
 }
 .animate-valid-move { animation: valid-move-pulse 1.5s ease-in-out infinite; }
 
+@keyframes capture-fade {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+.animate-capture-fade { animation: capture-fade 0.35s ease-out forwards; }
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }

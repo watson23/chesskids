@@ -14,7 +14,10 @@ interface ChestOpenModalProps {
   onClose: () => void;
 }
 
-/** Sparkle particles that burst from the chest */
+/** Sparkle particles that burst from the chest — circles, stars, and diamonds */
+type SparkleShape = "circle" | "star" | "diamond";
+const SPARKLE_SHAPES: SparkleShape[] = ["circle", "star", "diamond", "circle", "star", "circle", "diamond", "star", "circle", "star", "diamond", "circle"];
+
 const SPARKLES = Array.from({ length: 12 }, (_, i) => {
   const angle = (i / 12) * Math.PI * 2;
   const distance = 50 + (i % 3) * 20;
@@ -24,6 +27,7 @@ const SPARKLES = Array.from({ length: 12 }, (_, i) => {
     ty: Math.sin(angle) * distance - 20,
     delay: (i % 4) * 0.05,
     size: 5 + (i % 3) * 2,
+    shape: SPARKLE_SHAPES[i],
   };
 });
 
@@ -119,24 +123,64 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
   // Memoize sparkle styles
   const sparkleElements = useMemo(
     () =>
-      SPARKLES.map((s) => (
-        <div
-          key={s.id}
-          className="absolute rounded-full animate-sparkle-fly"
-          style={{
-            "--tx": `${s.tx}px`,
-            "--ty": `${s.ty}px`,
-            width: s.size,
-            height: s.size,
-            background: s.id % 2 === 0 ? "#FCD34D" : "#FDE68A",
-            animationDelay: `${s.delay}s`,
-            left: "50%",
-            top: "50%",
-            marginLeft: -s.size / 2,
-            marginTop: -s.size / 2,
-          } as React.CSSProperties}
-        />
-      )),
+      SPARKLES.map((s) => {
+        const color = s.id % 2 === 0 ? "#FCD34D" : "#FDE68A";
+        const base = {
+          "--tx": `${s.tx}px`,
+          "--ty": `${s.ty}px`,
+          animationDelay: `${s.delay}s`,
+          left: "50%",
+          top: "50%",
+        } as React.CSSProperties;
+
+        if (s.shape === "star") {
+          return (
+            <svg
+              key={s.id}
+              className="absolute animate-sparkle-fly"
+              width={s.size * 2}
+              height={s.size * 2}
+              viewBox="0 0 20 20"
+              style={{ ...base, marginLeft: -s.size, marginTop: -s.size }}
+            >
+              <path d="M10 0 L12.5 7 L20 8 L14 13 L15.5 20 L10 16 L4.5 20 L6 13 L0 8 L7.5 7 Z" fill={color} />
+            </svg>
+          );
+        }
+
+        if (s.shape === "diamond") {
+          return (
+            <div
+              key={s.id}
+              className="absolute animate-sparkle-fly"
+              style={{
+                ...base,
+                width: s.size,
+                height: s.size,
+                background: color,
+                transform: "rotate(45deg)",
+                marginLeft: -s.size / 2,
+                marginTop: -s.size / 2,
+              }}
+            />
+          );
+        }
+
+        return (
+          <div
+            key={s.id}
+            className="absolute rounded-full animate-sparkle-fly"
+            style={{
+              ...base,
+              width: s.size,
+              height: s.size,
+              background: color,
+              marginLeft: -s.size / 2,
+              marginTop: -s.size / 2,
+            }}
+          />
+        );
+      }),
     []
   );
 

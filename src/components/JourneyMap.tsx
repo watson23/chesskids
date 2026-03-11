@@ -142,35 +142,35 @@ export default function JourneyMap({
     const completedIndex = LESSONS.findIndex((l) => l.id === justCompletedLesson);
     if (completedIndex >= 0) scrollToLesson(completedIndex);
 
-    // 500ms: sparkle on completed lesson
+    // 300ms: sparkle on completed lesson
     timers.push(setTimeout(() => {
       setSparkleLesson(justCompletedLesson);
       sfx("confetti");
-    }, 500));
+    }, 300));
 
-    // 1500ms: scroll to newly unlocked lesson
+    // 1000ms: scroll to newly unlocked lesson
     timers.push(setTimeout(() => {
       scrollToLesson(justUnlockedLesson);
-    }, 1500));
+    }, 1000));
 
-    // 2000ms: trigger unlock animation on newly unlocked lesson
+    // 1400ms: trigger unlock animation on newly unlocked lesson
     timers.push(setTimeout(() => {
       setSparkleLesson(null);
       setUnlockingIndex(justUnlockedLesson);
       sfx("chest-open");
-    }, 2000));
+    }, 1400));
 
-    // 3000ms: clear unlock animation, start persistent glow, call done
+    // 2200ms: clear unlock animation, start persistent glow, call done
     timers.push(setTimeout(() => {
       setUnlockingIndex(null);
       setGlowingIndex(justUnlockedLesson);
       onUnlockAnimationDone?.();
-    }, 3000));
+    }, 2200));
 
-    // 6000ms: clear glow (CSS animation is 3s, so total 6s from start)
+    // 5200ms: clear glow (CSS animation is 3s)
     timers.push(setTimeout(() => {
       setGlowingIndex(null);
-    }, 6000));
+    }, 5200));
 
     return () => timers.forEach(clearTimeout);
   }, [justCompletedLesson, justUnlockedLesson, sfx, onUnlockAnimationDone]);

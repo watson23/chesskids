@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, memo } from "react";
+import { useCallback, useEffect, useRef, useState, memo } from "react";
 import type {
   Square,
   ChessPiece as ChessPieceType,
@@ -25,6 +25,7 @@ interface ChessBoardProps {
 interface BoardSquareProps {
   square: Square;
   piece: ChessPieceType | undefined;
+  fadingPiece: ChessPieceType | undefined;
   bgColor: string;
   isSelected: boolean;
   isValidMove: boolean;
@@ -36,6 +37,7 @@ interface BoardSquareProps {
 const BoardSquare = memo(function BoardSquare({
   square,
   piece,
+  fadingPiece,
   bgColor,
   isSelected,
   isValidMove,
@@ -60,6 +62,20 @@ const BoardSquare = memo(function BoardSquare({
         }
       }}
     >
+      {/* Fading captured piece */}
+      {fadingPiece && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-capture-fade">
+          <div className="w-[92%] h-[92%] flex items-center justify-center">
+            <ChessPiece
+              type={fadingPiece.type}
+              color={fadingPiece.color}
+              colorSet={pieceColors}
+              size={100}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Piece */}
       {hasPiece && (
         <div className="w-[92%] h-[92%] flex items-center justify-center pointer-events-none">
@@ -119,6 +135,27 @@ export default function ChessBoard({
     [interactive, onSquareTap]
   );
 
+  // Track captured pieces for fade-out animation
+  const prevPiecesRef = useRef(pieces);
+  const [fadingPieces, setFadingPieces] = useState<Record<string, ChessPieceType>>({});
+
+  useEffect(() => {
+    const prev = prevPiecesRef.current;
+    const fading: Record<string, ChessPieceType> = {};
+    for (const sq of Object.keys(prev)) {
+      // Piece was on this square before but now a DIFFERENT piece is there (capture)
+      if (pieces[sq] && prev[sq] && pieces[sq].color !== prev[sq].color) {
+        fading[sq] = prev[sq];
+      }
+    }
+    prevPiecesRef.current = pieces;
+    if (Object.keys(fading).length > 0) {
+      setFadingPieces(fading);
+      const timer = setTimeout(() => setFadingPieces({}), 350);
+      return () => clearTimeout(timer);
+    }
+  }, [pieces]);
+
   const rows = Array.from({ length: 8 }, (_, i) => i);
   const cols = Array.from({ length: 8 }, (_, i) => i);
 
@@ -154,6 +191,7 @@ export default function ChessBoard({
                 key={`${displayRow}-${displayCol}`}
                 square={square}
                 piece={piece}
+                fadingPiece={fadingPieces[square]}
                 bgColor={bgColor}
                 isSelected={isSelected}
                 isValidMove={isValidMove}
