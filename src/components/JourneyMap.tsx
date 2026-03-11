@@ -65,7 +65,7 @@ const CHEST_POSITIONS: Record<number, { x: number; y: number }> = {
   1: { x: 22, y: 63.5 },  // 15★ — left side, between lessons 5-6
   2: { x: 60.75, y: 52.75 }, // 24★ — right side, between lessons 7-8
   3: { x: 22, y: 47 },    // 33★ — left side, between lessons 9-10
-  4: { x: 65, y: 21.5 },  // 39★ — right side, near lessons 12-13
+  4: { x: 77, y: 23 },    // 39★ — right side, near lessons 12-13
 };
 
 function getChestPosition(positionOnMap: number, _total: number, chestIndex: number) {
