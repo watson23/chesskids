@@ -107,17 +107,14 @@ export default function PlayPage() {
         background: "var(--ck-bg) url(/play-bg.webp) center top / cover no-repeat fixed",
       }}
     >
-      <div className="fixed top-4 left-4 z-30">
-        <NavIcon icon="icon-home" alt="Back to map" onClick={() => router.push("/")} />
-      </div>
-
       {/* Semi-transparent overlay */}
       <div
         className="min-h-dvh flex flex-col"
         style={{ background: "rgba(245, 240, 255, 0.55)" }}
       >
-        {/* Pikku header */}
-        <div className="flex items-center gap-3 px-5 pt-6 pb-2 animate-fade-in-up">
+        {/* Pikku header with home button */}
+        <div className="flex items-center gap-3 px-4 pt-5 pb-2 animate-fade-in-up">
+          <NavIcon icon="icon-home" alt="Back to map" onClick={() => router.push("/")} />
           <Image
             src="/mascot/pikku-winking.webp"
             alt="Pikku"
