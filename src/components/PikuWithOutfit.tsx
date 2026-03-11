@@ -21,41 +21,75 @@ const standingExpressionToImage: Record<StandingExpression, string> = {
   "standing-teaching": "/mascot/piku-standing-teaching.webp",
 };
 
-/**
- * Per-expression offsets for the head slot overlay.
- * Each Piku pose has a slightly different head position/tilt,
- * so we fine-tune where head accessories land.
- * Values: { top%, left%, width scale factor }
- */
-const HEAD_SLOT_DEFAULTS = { top: "-20%", left: "53%", widthScale: 0.6, rotate: 0 };
+type SlotPos = { top: string; left: string; widthScale: number; rotate: number };
+type PartialPos = Partial<SlotPos>;
 
 /**
- * Per-item overrides for head slot positioning.
- * Different items (crown vs wizard hat vs bow) have different shapes/sizes,
- * so each can customize its base position before expression offsets apply.
- * Key = filename without path/extension (e.g. "head-crown" from "/outfits/head-crown.webp")
+ * Head slot positioning per item, with optional per-expression overrides.
+ * Each item defines a `base` position plus expression-specific tweaks.
+ * Resolution: item.expressions[expr] → item.base → DEFAULTS
  */
-const headItemOverrides: Record<string, { top?: string; left?: string; widthScale?: number; rotate?: number }> = {
-  "head-wizard-hat": { top: "-32.5%", left: "47%", widthScale: 0.85, rotate: 4 },
+const HEAD_DEFAULTS: SlotPos = { top: "-20%", left: "53%", widthScale: 0.6, rotate: 0 };
+
+const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<Record<StandingExpression, PartialPos>> }> = {
+  "head-crown": {
+    base: {},
+    expressions: {
+      "standing-winking":      { top: "-17%", left: "49%" },
+      "standing-celebrating":  { top: "-9%", left: "54%", widthScale: 0.52, rotate: 10 },
+      "standing-neutral":      { left: "51%" },
+      "standing-sad":          { top: "-18%", left: "50%" },
+      "standing-holding-pawn": { left: "50%" },
+      "standing-teaching":     { left: "50%" },
+    },
+  },
+  "head-wizard-hat": {
+    base: { top: "-32.5%", left: "47%", widthScale: 0.85, rotate: 4 },
+    expressions: {
+      "standing-winking":      { top: "-30%", left: "44%", rotate: 0 },
+      "standing-celebrating":  { top: "-24%", left: "50%", widthScale: 0.72, rotate: 12 },
+    },
+  },
 };
 
-const headSlotOffsets: Partial<Record<StandingExpression, { top?: string; left?: string; widthScale?: number; rotate?: number }>> = {
-  "standing-winking":      { top: "-17%", left: "49%" },
-  "standing-celebrating":  { top: "-9%", left: "54%", widthScale: 0.52, rotate: 10 },
-  "standing-neutral":      { left: "51%" },
-  "standing-sad":          { top: "-18%", left: "50%" },
-  "standing-holding-pawn": { left: "50%" },
-  "standing-teaching":     { left: "50%" },
-};
+function resolveHeadPos(itemKey: string, expression: StandingExpression): SlotPos {
+  const config = headSlotConfig[itemKey];
+  if (!config) return HEAD_DEFAULTS;
+  const exprOvr = config.expressions?.[expression] ?? {};
+  const base = config.base;
+  return {
+    top: exprOvr.top ?? base.top ?? HEAD_DEFAULTS.top,
+    left: exprOvr.left ?? base.left ?? HEAD_DEFAULTS.left,
+    widthScale: exprOvr.widthScale ?? base.widthScale ?? HEAD_DEFAULTS.widthScale,
+    rotate: exprOvr.rotate ?? base.rotate ?? HEAD_DEFAULTS.rotate,
+  };
+}
 
 /**
- * Per-expression offsets for the body slot overlay.
+ * Body slot positioning (same structure, ready for when body items arrive).
  */
-const BODY_SLOT_DEFAULTS = { top: "40%", left: "50%", widthScale: 0.7 };
+const BODY_DEFAULTS: SlotPos = { top: "40%", left: "50%", widthScale: 0.7, rotate: 0 };
 
-const bodySlotOffsets: Partial<Record<StandingExpression, { top?: string; left?: string; widthScale?: number }>> = {
-  // Add per-expression body offsets as needed
+const bodySlotConfig: Record<string, { base: PartialPos; expressions?: Partial<Record<StandingExpression, PartialPos>> }> = {
+  // Add body items as needed
 };
+
+function resolveBodyPos(itemKey: string, expression: StandingExpression): SlotPos {
+  const config = bodySlotConfig[itemKey];
+  if (!config) return BODY_DEFAULTS;
+  const exprOvr = config.expressions?.[expression] ?? {};
+  const base = config.base;
+  return {
+    top: exprOvr.top ?? base.top ?? BODY_DEFAULTS.top,
+    left: exprOvr.left ?? base.left ?? BODY_DEFAULTS.left,
+    widthScale: exprOvr.widthScale ?? base.widthScale ?? BODY_DEFAULTS.widthScale,
+    rotate: exprOvr.rotate ?? base.rotate ?? BODY_DEFAULTS.rotate,
+  };
+}
+
+function extractItemKey(path?: string): string {
+  return path?.split("/").pop()?.replace(/\.\w+$/, "") ?? "";
+}
 
 interface PikuWithOutfitProps {
   expression?: StandingExpression;
@@ -71,25 +105,8 @@ export default function PikuWithOutfit({
   size = 100,
 }: PikuWithOutfitProps) {
   const src = standingExpressionToImage[expression];
-
-  // Resolve head slot position: defaults → item overrides → expression overrides
-  const headItemKey = headImage?.split("/").pop()?.replace(/\.\w+$/, "") ?? "";
-  const itemOvr = headItemOverrides[headItemKey] ?? {};
-  const exprOvr = headSlotOffsets[expression] ?? {};
-  const head = {
-    top: exprOvr.top ?? itemOvr.top ?? HEAD_SLOT_DEFAULTS.top,
-    left: exprOvr.left ?? itemOvr.left ?? HEAD_SLOT_DEFAULTS.left,
-    widthScale: exprOvr.widthScale ?? itemOvr.widthScale ?? HEAD_SLOT_DEFAULTS.widthScale,
-    rotate: exprOvr.rotate ?? itemOvr.rotate ?? HEAD_SLOT_DEFAULTS.rotate,
-  };
-
-  // Resolve body slot position for this expression
-  const bodyOverrides = bodySlotOffsets[expression] ?? {};
-  const body = {
-    top: bodyOverrides.top ?? BODY_SLOT_DEFAULTS.top,
-    left: bodyOverrides.left ?? BODY_SLOT_DEFAULTS.left,
-    widthScale: bodyOverrides.widthScale ?? BODY_SLOT_DEFAULTS.widthScale,
-  };
+  const head = resolveHeadPos(extractItemKey(headImage), expression);
+  const body = resolveBodyPos(extractItemKey(bodyImage), expression);
 
   return (
     <div
@@ -147,7 +164,7 @@ export default function PikuWithOutfit({
             position: "absolute",
             top: body.top,
             left: body.left,
-            transform: "translateX(-50%)",
+            transform: `translateX(-50%) rotate(${body.rotate}deg)`,
             width: Math.round(size * body.widthScale),
             height: "auto",
             objectFit: "contain",
