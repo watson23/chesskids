@@ -1,13 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import {
-  SpeakerHigh,
-  SpeakerSlash,
-  SignOut,
-  X,
-  UserPlus,
-} from "@phosphor-icons/react";
+import { SignOut, UserPlus } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useAudio } from "@/hooks/useAudio";
 import { useAuth } from "@/hooks/useAuth";
 import AddChildModal from "@/components/AddChildModal";
@@ -75,7 +70,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
             className="p-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all"
             aria-label="Close settings"
           >
-            <X size={24} weight="bold" className="text-gray-500" />
+            <Image src="/icons/icon-close.webp" alt="Close" width={20} height={20} className="object-contain" />
           </button>
         </div>
 
@@ -126,9 +121,9 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
               }`}
             >
               {soundEnabled ? (
-                <SpeakerHigh size={24} weight="bold" />
+                <Image src="/icons/icon-sound-on.webp" alt="Sound on" width={20} height={20} className="object-contain" />
               ) : (
-                <SpeakerSlash size={24} weight="bold" />
+                <Image src="/icons/icon-sound-off.webp" alt="Sound off" width={20} height={20} className="object-contain" />
               )}
               <span className="font-semibold">
                 {soundEnabled ? "Sound On" : "Sound Off"}

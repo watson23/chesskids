@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { X, Lock, CheckCircle } from "@phosphor-icons/react";
+import { Lock, CheckCircle } from "@phosphor-icons/react";
+import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
 import PieceColorPreview from "@/components/PieceColorPreview";
 import { BOARD_THEMES, PIECE_COLOR_SETS } from "@/data/themes";
@@ -116,7 +117,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           className="w-10 h-10 rounded-full flex items-center justify-center card-pillow"
           aria-label="Close"
         >
-          <X size={22} weight="bold" style={{ color: "var(--ck-text-light)" }} />
+          <Image src="/icons/icon-close.webp" alt="Close" width={20} height={20} className="object-contain" />
         </button>
 
         {/* Trophy icon */}
