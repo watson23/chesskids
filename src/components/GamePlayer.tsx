@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { House, ArrowCounterClockwise, Star } from "@phosphor-icons/react";
+import { Star } from "@phosphor-icons/react";
 import Image from "next/image";
+import NavIcon from "@/components/NavIcon";
 import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
@@ -245,13 +246,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar: home button */}
       <div className="flex items-center px-4 pt-3 pb-1">
-        <button
-          onClick={handleExit}
-          className="card-pillow p-2 active:scale-95 transition-transform"
-          aria-label="Go back"
-        >
-          <House size={28} weight="fill" style={{ color: "var(--ck-purple)" }} />
-        </button>
+        <NavIcon icon="icon-home" alt="Back to opponents" onClick={handleExit} />
       </div>
 
       {/* Floating opponent */}
@@ -354,7 +349,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
                 onClick={handleRematch}
                 className="btn-3d btn-3d-purple flex items-center gap-2 px-6 py-2.5 text-white font-bold text-base mt-4"
               >
-                <ArrowCounterClockwise size={22} weight="bold" />
+                <Image src="/icons/icon-retry.webp" alt="" width={22} height={22} className="object-contain" />
                 <span>{t("rematch")}</span>
               </button>
             </div>
