@@ -29,6 +29,16 @@ const standingExpressionToImage: Record<StandingExpression, string> = {
  */
 const HEAD_SLOT_DEFAULTS = { top: "-20%", left: "53%", widthScale: 0.6, rotate: 0 };
 
+/**
+ * Per-item overrides for head slot positioning.
+ * Different items (crown vs wizard hat vs bow) have different shapes/sizes,
+ * so each can customize its base position before expression offsets apply.
+ * Key = filename without path/extension (e.g. "head-crown" from "/outfits/head-crown.webp")
+ */
+const headItemOverrides: Record<string, { top?: string; left?: string; widthScale?: number; rotate?: number }> = {
+  "head-wizard-hat": { top: "-32.5%", left: "47%", widthScale: 0.85, rotate: 4 },
+};
+
 const headSlotOffsets: Partial<Record<StandingExpression, { top?: string; left?: string; widthScale?: number; rotate?: number }>> = {
   "standing-winking":      { top: "-17%", left: "49%" },
   "standing-celebrating":  { top: "-9%", left: "54%", widthScale: 0.52, rotate: 10 },
@@ -62,13 +72,15 @@ export default function PikuWithOutfit({
 }: PikuWithOutfitProps) {
   const src = standingExpressionToImage[expression];
 
-  // Resolve head slot position for this expression
-  const headOverrides = headSlotOffsets[expression] ?? {};
+  // Resolve head slot position: defaults → item overrides → expression overrides
+  const headItemKey = headImage?.split("/").pop()?.replace(/\.\w+$/, "") ?? "";
+  const itemOvr = headItemOverrides[headItemKey] ?? {};
+  const exprOvr = headSlotOffsets[expression] ?? {};
   const head = {
-    top: headOverrides.top ?? HEAD_SLOT_DEFAULTS.top,
-    left: headOverrides.left ?? HEAD_SLOT_DEFAULTS.left,
-    widthScale: headOverrides.widthScale ?? HEAD_SLOT_DEFAULTS.widthScale,
-    rotate: headOverrides.rotate ?? HEAD_SLOT_DEFAULTS.rotate,
+    top: exprOvr.top ?? itemOvr.top ?? HEAD_SLOT_DEFAULTS.top,
+    left: exprOvr.left ?? itemOvr.left ?? HEAD_SLOT_DEFAULTS.left,
+    widthScale: exprOvr.widthScale ?? itemOvr.widthScale ?? HEAD_SLOT_DEFAULTS.widthScale,
+    rotate: exprOvr.rotate ?? itemOvr.rotate ?? HEAD_SLOT_DEFAULTS.rotate,
   };
 
   // Resolve body slot position for this expression
