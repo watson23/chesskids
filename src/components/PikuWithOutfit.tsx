@@ -70,14 +70,21 @@ function resolveHeadPos(itemKey: string, expression: StandingExpression): SlotPo
  */
 const BODY_DEFAULTS: SlotPos = { top: "40%", left: "50%", widthScale: 0.35, rotate: 0 };
 
+const BOW_CONFIG = {
+  base: { top: "37.5%", left: "50%", widthScale: 0.35, rotate: 3 } as PartialPos,
+  expressions: {
+    "standing-celebrating": { top: "41.5%", left: "46%", rotate: 5 },
+    "standing-winking": { top: "41%", left: "46%", rotate: -2 },
+  } as Partial<Record<StandingExpression, PartialPos>>,
+};
+
 const bodySlotConfig: Record<string, { base: PartialPos; expressions?: Partial<Record<StandingExpression, PartialPos>> }> = {
-  "body-pink-bow": {
-    base: { top: "37.5%", left: "50%", widthScale: 0.35, rotate: 3 },
-    expressions: {
-      "standing-celebrating": { top: "41.5%", left: "46%", rotate: 5 },
-      "standing-winking": { top: "41%", left: "46%", rotate: -2 },
-    },
-  },
+  "body-pink-bow": BOW_CONFIG,
+  "body-purple-bow": BOW_CONFIG,
+  "body-blue-bow": BOW_CONFIG,
+  "body-mint-bow": BOW_CONFIG,
+  "body-gold-bow": BOW_CONFIG,
+  "body-peach-bow": BOW_CONFIG,
 };
 
 function resolveBodyPos(itemKey: string, expression: StandingExpression): SlotPos {

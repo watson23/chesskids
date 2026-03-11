@@ -83,6 +83,17 @@ export default function OutfitTestPage() {
         </div>
       </div>
 
+      {/* All Bow Colors */}
+      <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Bow Colors</h2>
+      <div className="flex gap-6 flex-wrap justify-center">
+        {["pink", "purple", "blue", "mint", "gold", "peach"].map((color) => (
+          <div key={color} className="flex flex-col items-center gap-2">
+            <PikuWithOutfit expression="standing-happy" bodyImage={`/outfits/body-${color}-bow.webp`} size={140} />
+            <span className="text-sm font-semibold capitalize">{color}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Size comparison */}
       <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Size comparison</h2>
       <div className="flex gap-4 items-end">
