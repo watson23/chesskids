@@ -9,6 +9,7 @@ import type { LocaleKey } from "@/types/locale";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
+import SpeechBubble from "@/components/SpeechBubble";
 import NarrationArea from "@/components/NarrationArea";
 import NavIcon from "@/components/NavIcon";
 import Piku from "@/components/Piku";
@@ -248,16 +249,18 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
         {state.phase === "celebrate" ? (
-          <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
-            <Confetti active />
-            <Piku expression="celebrating" size={120} />
-            <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-purple-dark)" }}>
-              {t(state.stars === 3 ? "celebrate_3_stars" : state.stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
-            </h2>
-            <StarDisplay stars={state.stars} size={56} />
-            <button onClick={handleContinue} className="btn-3d btn-3d-purple mt-2 flex items-center gap-2">
+          <div className="flex flex-col items-center gap-6 animate-slide-in mt-auto mb-auto py-6">
+            <Confetti active particleCount={60} />
+            <SpeechBubble
+              text={t(state.stars === 3 ? "celebrate_3_stars" : state.stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
+              visible
+              pointer="bottom"
+            />
+            <Piku expression="standing-celebrating" size={160} />
+            <StarDisplay stars={state.stars} size={56} staggerDelay={300} />
+            <button onClick={handleContinue} className="btn-3d btn-3d-purple mt-4 flex items-center gap-3 text-lg px-8 py-3">
               {t("continue")}
-              <Image src="/icons/icon-next.webp" alt="" width={22} height={22} className="object-contain" />
+              <Image src="/icons/icon-next.webp" alt="" width={26} height={26} className="object-contain" />
             </button>
           </div>
         ) : (

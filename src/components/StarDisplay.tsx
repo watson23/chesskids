@@ -6,12 +6,15 @@ interface StarDisplayProps {
   stars: number;
   maxStars?: number;
   size?: number;
+  /** Delay in ms between each star's pop animation (default 200) */
+  staggerDelay?: number;
 }
 
 export default function StarDisplay({
   stars,
   maxStars = 3,
   size = 48,
+  staggerDelay = 200,
 }: StarDisplayProps) {
   return (
     <div className="flex gap-2 items-center justify-center" role="img" aria-label={`${stars} out of ${maxStars} stars`}>
@@ -21,7 +24,7 @@ export default function StarDisplay({
           <span
             key={i}
             className="animate-celebrate-pop"
-            style={{ animationDelay: `${i * 0.2}s`, animationFillMode: "both" }}
+            style={{ animationDelay: `${i * (staggerDelay / 1000)}s`, animationFillMode: "both" }}
           >
             <Image
               src={filled ? "/icons/icon-star-full.webp" : "/icons/icon-star-empty.webp"}
