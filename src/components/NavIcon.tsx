@@ -26,8 +26,8 @@ export default function NavIcon({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center justify-center rounded-full bg-white/70 backdrop-blur shadow-sm active:scale-95 transition-transform ${
-        disabled ? "opacity-40" : ""
+      className={`flex items-center justify-center rounded-full bg-white/70 backdrop-blur shadow-sm cursor-pointer hover:scale-105 hover:bg-white/90 hover:shadow-md active:scale-90 transition-all duration-150 ${
+        disabled ? "opacity-40 cursor-default" : ""
       } ${className}`}
       style={{ width: px, height: px }}
       aria-label={alt}
