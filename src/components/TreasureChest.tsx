@@ -52,7 +52,7 @@ export default function TreasureChest({
         status === "unlocked"
           ? "cursor-pointer animate-chest-shake"
           : status === "locked"
-            ? "opacity-50 cursor-default"
+            ? "opacity-80 cursor-default"
             : "cursor-default"
       } ${shaking ? "animate-chest-shake" : ""}`}
       style={{ left: `${x}%`, top: `${y}%` }}
