@@ -276,7 +276,7 @@ function HomeContent() {
   }
 
   return (
-    <div className="relative min-h-dvh pb-14">
+    <div className="relative min-h-dvh">
       {/* Journey Map */}
       <JourneyMap
         currentLesson={currentLesson}
