@@ -27,7 +27,7 @@ interface JourneyMapProps {
  * Position of the igloo door at the end of the path.
  * Pikku stands here when all lessons are completed.
  */
-const IGLOO_POSITION = { x: 30, y: 12 };
+const IGLOO_POSITION = { x: 25, y: 12 };
 
 /**
  * Hand-tuned lesson positions tracing the winding snowy path
