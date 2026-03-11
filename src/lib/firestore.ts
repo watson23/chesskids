@@ -1,6 +1,6 @@
 import {
   doc, getDoc, setDoc, updateDoc, collection,
-  getDocs, addDoc, serverTimestamp, writeBatch
+  getDocs, addDoc, serverTimestamp, writeBatch, arrayUnion
 } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import { LESSONS } from "@/data/lessons";
@@ -33,6 +33,7 @@ export async function addChild(uid: string, name: string, avatar: string): Promi
   const child: Omit<ChildProfile, "id"> = {
     name, avatar, currentLesson: LESSONS[0]?.id ?? "", totalStars: 0,
     unlockedRewards: [], activeBoardTheme: "classic", activePieceColor: "classic",
+    equippedOutfit: {}, unlockedOutfits: [],
   };
   const docRef = await addDoc(colRef, child);
   return { id: docRef.id, ...child };
@@ -90,11 +91,13 @@ export async function markPuzzleSolved(
   await setDoc(ref, { puzzleId, solved: true, attempts: 1 }, { merge: true });
 }
 
-export async function updateChildRewards(uid: string, childId: string, rewards: string[], theme?: string, pieceColor?: string): Promise<void> {
+export async function updateChildRewards(uid: string, childId: string, rewards: string[], theme?: string, pieceColor?: string, outfitUnlocks?: string[], equippedOutfit?: { head?: string; body?: string }): Promise<void> {
   const db = getDb();
   const ref = doc(db, "users", uid, "children", childId);
   const updates: Record<string, unknown> = { unlockedRewards: rewards };
   if (theme) updates.activeBoardTheme = theme;
   if (pieceColor) updates.activePieceColor = pieceColor;
+  if (outfitUnlocks && outfitUnlocks.length > 0) updates.unlockedOutfits = arrayUnion(...outfitUnlocks);
+  if (equippedOutfit) updates.equippedOutfit = equippedOutfit;
   await updateDoc(ref, updates);
 }
