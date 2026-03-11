@@ -212,12 +212,18 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
   // Opponent speech (shown near the opponent character)
   const opponentText = isAIThinking && !gameResult ? t("game_ai_thinking") : "";
+  const opponentIcon = isAIThinking && !gameResult ? "/speech/speech-opponent-thinking.webp" : undefined;
 
   // Pikku coach speech (shown near Pikku, below the board)
   const pikkuText = gameResult === "win" ? t("you_win")
     : gameResult === "loss" ? t("you_lose")
       : gameResult === "draw" ? t("draw")
         : !isAIThinking ? t("game_your_turn") : "";
+
+  const pikkuIcon = gameResult === "win" ? "/speech/speech-you-won.webp"
+    : gameResult === "loss" ? "/speech/speech-you-lost.webp"
+      : gameResult === "draw" ? "/speech/speech-its-a-draw.webp"
+        : !isAIThinking ? "/speech/speech-your-turn-white.webp" : undefined;
 
   // Count player's remaining pieces to detect when player is struggling
   const playerPieceCount = useMemo(() => {
@@ -269,7 +275,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           </div>
           {!!opponentText && (
             <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2">
-              <SpeechBubble text={opponentText} visible pointer="left" />
+              <SpeechBubble text={opponentText} icon={opponentIcon} visible pointer="left" />
             </div>
           )}
         </div>
@@ -368,7 +374,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
             />
           </div>
           <div className="pt-2">
-            <SpeechBubble text={pikkuText} visible={!!pikkuText} />
+            <SpeechBubble text={pikkuText} icon={pikkuIcon} visible={!!pikkuText} />
           </div>
         </div>
 

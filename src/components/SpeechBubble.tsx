@@ -1,22 +1,38 @@
 "use client";
 
+import Image from "next/image";
+
 interface SpeechBubbleProps {
+  /** Text shown as aria-label for accessibility (screen readers) */
   text: string;
+  /** Icon image path shown inside the bubble (replaces visible text) */
+  icon?: string;
   visible: boolean;
   /** Direction the pointer points — "left" means character is on the left, "bottom" means character is below */
   pointer?: "left" | "bottom";
 }
 
-export default function SpeechBubble({ text, visible, pointer = "left" }: SpeechBubbleProps) {
-  if (!visible || !text) return null;
+export default function SpeechBubble({ text, icon, visible, pointer = "left" }: SpeechBubbleProps) {
+  if (!visible || (!text && !icon)) return null;
 
   return (
     <div className="relative max-w-[260px] animate-slide-in">
       {/* Bubble body */}
-      <div className="card-pillow px-4 py-3">
-        <p className="font-bold text-sm leading-snug" style={{ color: "var(--ck-text)" }}>
-          {text}
-        </p>
+      <div className={`card-pillow flex items-center justify-center ${icon ? "px-3 py-2" : "px-4 py-3"}`}>
+        {icon ? (
+          <Image
+            src={icon}
+            alt={text}
+            width={80}
+            height={80}
+            className="object-contain"
+            style={{ width: 80, height: "auto" }}
+          />
+        ) : (
+          <p className="font-bold text-sm leading-snug" style={{ color: "var(--ck-text)" }}>
+            {text}
+          </p>
+        )}
       </div>
 
       {pointer === "left" && (
