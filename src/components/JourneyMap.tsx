@@ -124,6 +124,18 @@ export default function JourneyMap({
   const [unlockingIndex, setUnlockingIndex] = useState<number | null>(null);
   const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+  const [pikuWalking, setPikuWalking] = useState(false);
+  const [pikuPosition, setPikuPosition] = useState<{ x: number; y: number }>(() => {
+    const allDone = currentLesson >= LESSONS.length;
+    return allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
+  });
+
+  // Keep Piku position in sync when currentLesson changes (not during walk animation)
+  useEffect(() => {
+    if (pikuWalking) return;
+    const allDone = currentLesson >= LESSONS.length;
+    setPikuPosition(allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length));
+  }, [currentLesson, pikuWalking]);
 
   // Auto-scroll to current lesson on mount / lesson change
   useEffect(() => {
@@ -161,29 +173,55 @@ export default function JourneyMap({
       sfx("confetti");
     }, 300));
 
-    // 1000ms: scroll to newly unlocked lesson
+    // 1000ms: start Piku walking to newly unlocked lesson
     timers.push(setTimeout(() => {
-      scrollToLesson(justUnlockedLesson);
+      setPikuWalking(true);
+      const newPos = getLessonPosition(justUnlockedLesson, LESSONS.length);
+      setPikuPosition(newPos);
+
+      // Scroll to follow Piku during walk using rAF interpolation
+      const walkDuration = 1500; // matches CSS transition duration
+      const walkStart = performance.now();
+      const oldPos = getLessonPosition(justUnlockedLesson - 1, LESSONS.length);
+      let rafId: number;
+      function scrollFollow(now: number) {
+        if (!container) return;
+        const elapsed = now - walkStart;
+        const t = Math.min(elapsed / walkDuration, 1);
+        // Ease-in-out interpolation to match CSS transition
+        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const currentY = oldPos.y + (newPos.y - oldPos.y) * ease;
+        const mapHeight = container.scrollHeight;
+        const targetScroll = (currentY / 100) * mapHeight - container.clientHeight / 2;
+        container.scrollTo({ top: Math.max(0, targetScroll) });
+        if (t < 1) {
+          rafId = requestAnimationFrame(scrollFollow);
+        }
+      }
+      rafId = requestAnimationFrame(scrollFollow);
+      // Store rafId cleanup
+      timers.push(setTimeout(() => cancelAnimationFrame(rafId), walkDuration + 100) as unknown as ReturnType<typeof setTimeout>);
     }, 1000));
 
-    // 1400ms: trigger unlock animation on newly unlocked lesson
+    // 2500ms: walking done, trigger unlock animation on newly unlocked lesson
     timers.push(setTimeout(() => {
+      setPikuWalking(false);
       setSparkleLesson(null);
       setUnlockingIndex(justUnlockedLesson);
       sfx("chest-open");
-    }, 1400));
+    }, 2500));
 
-    // 2200ms: clear unlock animation, start persistent glow, call done
+    // 3100ms: clear unlock animation, start persistent glow, call done
     timers.push(setTimeout(() => {
       setUnlockingIndex(null);
       setGlowingIndex(justUnlockedLesson);
       onUnlockAnimationDone?.();
-    }, 2200));
+    }, 3100));
 
-    // 5200ms: clear glow (CSS animation is 3s)
+    // 6100ms: clear glow (CSS animation is 3s)
     timers.push(setTimeout(() => {
       setGlowingIndex(null);
-    }, 5200));
+    }, 6100));
 
     return () => timers.forEach(clearTimeout);
   }, [justCompletedLesson, justUnlockedLesson, sfx, onUnlockAnimationDone]);
@@ -307,15 +345,17 @@ export default function JourneyMap({
         {/* Piku mascot standing next to current lesson, or at the igloo when all done */}
         {!(currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
           const allDone = currentLesson >= LESSONS.length;
-          const pos = allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
           return (
             <div
-              className="absolute pointer-events-none -translate-y-1/2 journey-piku"
+              className={`absolute pointer-events-none -translate-y-1/2 journey-piku${pikuWalking ? " animate-piku-walk-bounce" : ""}`}
               style={{
                 left: allDone
-                  ? `${pos.x}%`
-                  : `calc(${pos.x}% + clamp(20px, 8vw, 36px))`,
-                top: `${pos.y}%`,
+                  ? `${pikuPosition.x}%`
+                  : `calc(${pikuPosition.x}% + clamp(20px, 8vw, 36px))`,
+                top: `${pikuPosition.y}%`,
+                ...(pikuWalking
+                  ? { transition: "left 1.5s ease-in-out, top 1.5s ease-in-out" }
+                  : {}),
               }}
             >
               <Piku expression={allDone ? "standing-celebrating" : "standing-happy"} size={72} />

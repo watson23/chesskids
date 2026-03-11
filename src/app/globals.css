@@ -280,6 +280,15 @@ html, body {
 }
 .animate-wiggle-locked { animation: wiggle-locked 0.5s ease-in-out; }
 
+/* ---- Piku walking bounce on journey map ---- */
+@keyframes piku-walk-bounce {
+  0%, 100% { transform: translateY(0) translateX(-50%); }
+  50% { transform: translateY(-4px) translateX(-50%); }
+}
+.animate-piku-walk-bounce {
+  animation: piku-walk-bounce 0.3s ease-in-out infinite;
+}
+
 /* ---- Journey map responsive scaling ---- */
 /* Nodes and Piku scale down on narrow screens so they don't overlap.
    375px → ~0.65, 500px+ → 1.0 */
