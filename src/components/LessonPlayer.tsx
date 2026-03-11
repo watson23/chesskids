@@ -2,13 +2,14 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { House, ArrowRight } from "@phosphor-icons/react";
+import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
 import NarrationArea from "@/components/NarrationArea";
+import NavIcon from "@/components/NavIcon";
 import Pikku from "@/components/Pikku";
 import TapHint from "@/components/TapHint";
 import { useLessonPlayer } from "@/hooks/useLessonPlayer";
@@ -213,13 +214,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
-        <button
-          onClick={handleGoHome}
-          className="w-10 h-10 rounded-full flex items-center justify-center card-pillow"
-          aria-label="Go home"
-        >
-          <House size={22} weight="fill" style={{ color: "var(--ck-purple)" }} />
-        </button>
+        <NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />
 
         {/* Progress bar */}
         <div className="flex-1 mx-4">
@@ -248,7 +243,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
             <StarDisplay stars={state.stars} size={56} />
             <button onClick={handleContinue} className="btn-3d btn-3d-purple mt-2 flex items-center gap-2">
               {t("continue")}
-              <ArrowRight size={22} weight="bold" />
+              <Image src="/icons/icon-next.webp" alt="" width={22} height={22} className="object-contain" />
             </button>
           </div>
         ) : (
@@ -283,7 +278,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
             {state.phase === "watch" && (
               <button onClick={handleNext} className="btn-3d btn-3d-pink flex items-center gap-2 animate-gentle-bounce">
                 Next
-                <ArrowRight size={22} weight="bold" />
+                <Image src="/icons/icon-next.webp" alt="" width={22} height={22} className="object-contain" />
               </button>
             )}
 
