@@ -37,9 +37,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-      </head>
+      <head />
       <body
         className={`${nunitoSans.className} antialiased overflow-hidden`}
         style={{ background: "var(--ck-bg)" }}

@@ -145,22 +145,30 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     }
   }, [pieceCount, turn, gameResult]);
 
-  // 10-second idle timer during player's turn — show tap hint + sleepy Pikku
+  // Idle timers during player's turn — puzzled at 10s, sleepy at 30s
+  const sleepyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (tapHintTimer.current) clearTimeout(tapHintTimer.current);
+    if (sleepyTimer.current) clearTimeout(sleepyTimer.current);
     setShowTapHint(false);
 
     if (turn === "white" && !isAIThinking && !gameOver.over && !gameResult && !selectedSquare) {
       tapHintTimer.current = setTimeout(() => {
         setShowTapHint(true);
-        setPikkuMood("sleepy");
+        setPikkuMood("puzzled");
       }, 10000);
+      sleepyTimer.current = setTimeout(() => {
+        setPikkuMood("sleepy");
+      }, 30000);
     } else {
-      // Clear sleepy mood when player acts
-      if (pikkuMood === "sleepy") setPikkuMood(null);
+      // Clear idle moods when player acts
+      if (pikkuMood === "sleepy" || pikkuMood === "puzzled") setPikkuMood(null);
     }
 
-    return () => { if (tapHintTimer.current) clearTimeout(tapHintTimer.current); };
+    return () => {
+      if (tapHintTimer.current) clearTimeout(tapHintTimer.current);
+      if (sleepyTimer.current) clearTimeout(sleepyTimer.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, isAIThinking, gameOver.over, gameResult, selectedSquare]);
 
@@ -176,6 +184,9 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     }
     if (tapHintTimer.current) {
       clearTimeout(tapHintTimer.current);
+    }
+    if (sleepyTimer.current) {
+      clearTimeout(sleepyTimer.current);
     }
     reset();
   }, [sfx, reset]);
@@ -239,28 +250,28 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
       {/* Floating opponent */}
       <div className="flex flex-col items-center px-4 pb-1">
-        {/* Opponent speech bubble — above the character */}
-        {!!opponentText && (
-          <div className="flex items-end justify-center mb-1">
-            <SpeechBubble text={opponentText} visible pointer="bottom" />
+        {/* Character image with speech bubble anchored to its right */}
+        <div className="relative">
+          <div
+            className={`transition-transform duration-500 ${
+              isAIThinking ? "animate-opponent-think" : ""
+            }`}
+          >
+            <Image
+              src={opponent.image}
+              alt={t(opponent.nameKey)}
+              width={100}
+              height={100}
+              className="drop-shadow-lg"
+              style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" }}
+              priority
+            />
           </div>
-        )}
-
-        {/* Character image — large and floating on the background */}
-        <div
-          className={`relative transition-transform duration-500 ${
-            isAIThinking ? "animate-opponent-think" : ""
-          }`}
-        >
-          <Image
-            src={opponent.image}
-            alt={t(opponent.nameKey)}
-            width={100}
-            height={100}
-            className="drop-shadow-lg"
-            style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" }}
-            priority
-          />
+          {!!opponentText && (
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2">
+              <SpeechBubble text={opponentText} visible pointer="left" />
+            </div>
+          )}
         </div>
 
         {/* Name badge + status */}
@@ -345,17 +356,20 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         </div>
 
         {/* Pikku coach below the board */}
-        <div className="flex items-center gap-2 w-full max-w-[360px]">
-          <div className="flex-shrink-0">
+        <div className="flex items-start gap-2 w-full max-w-[360px]">
+          <div className="flex-shrink-0 w-[72px] h-[86px] relative overflow-hidden">
             <Image
               src={`/mascot/pikku-${pikkuExpression}.webp`}
               alt="Pikku"
               width={72}
-              height={86}
-              className="drop-shadow-md"
+              height={108}
+              className="drop-shadow-md absolute bottom-0 left-0"
+              style={{ width: 72, height: "auto" }}
             />
           </div>
-          <SpeechBubble text={pikkuText} visible={!!pikkuText} />
+          <div className="pt-2">
+            <SpeechBubble text={pikkuText} visible={!!pikkuText} />
+          </div>
         </div>
 
         {!gameResult && turn === "white" && !isAIThinking && (
