@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Star } from "@phosphor-icons/react";
+import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
 import PieceColorPreview from "@/components/PieceColorPreview";
 import { BOARD_THEMES, PIECE_COLOR_SETS } from "@/data/themes";
@@ -101,7 +101,7 @@ export default function ChestPeekModal({ chest, totalStars, onClose }: ChestPeek
               color: "white",
             }}
           >
-            <Star size={16} weight="fill" />
+            <Image src="/icons/icon-star-full.webp" alt="Star" width={16} height={16} className="object-contain" style={{ width: 16, height: "auto" }} />
             <span className="text-sm font-extrabold">
               {starsNeeded > 0 ? `${starsNeeded} more needed` : "Ready!"}
             </span>

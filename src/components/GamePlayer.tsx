@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { Star } from "@phosphor-icons/react";
 import Image from "next/image";
 import NavIcon from "@/components/NavIcon";
 import type { AIDifficulty } from "@/types/chess";
@@ -299,7 +298,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           {!isAIThinking && turn === "white" && !gameOver.over && !gameResult && (
             <div className="flex gap-0.5 ml-1">
               {Array.from({ length: difficulty }, (_, i) => (
-                <Star key={i} size={14} weight="fill" color={opponent.accentColor} />
+                <Image key={i} src="/icons/icon-star-full.webp" alt="Difficulty star" width={14} height={14} className="object-contain" style={{ width: 14, height: "auto" }} />
               ))}
             </div>
           )}

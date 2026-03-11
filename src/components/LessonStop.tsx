@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useState, useCallback } from "react";
-import { Star } from "@phosphor-icons/react";
+import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
 import {
   PawnSVG,
@@ -168,11 +168,14 @@ export default function LessonStop({
       {status === "completed" && (
         <div className="flex gap-0.5 mt-0.5">
           {Array.from({ length: 3 }, (_, i) => (
-            <Star
+            <Image
               key={i}
-              size={14}
-              weight={i < stars ? "fill" : "regular"}
-              color={i < stars ? "#FCD34D" : "#D4D0E0"}
+              src={i < stars ? "/icons/icon-star-full.webp" : "/icons/icon-star-empty.webp"}
+              alt={i < stars ? "Star earned" : "Star empty"}
+              width={14}
+              height={14}
+              className="object-contain"
+              style={{ width: 14, height: "auto" }}
             />
           ))}
         </div>

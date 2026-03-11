@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Lock, CheckCircle } from "@phosphor-icons/react";
 import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
 import PieceColorPreview from "@/components/PieceColorPreview";
@@ -178,7 +177,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   {/* Active checkmark */}
                   {isActive && (
                     <div className="absolute -top-1.5 -right-1.5">
-                      <CheckCircle size={24} weight="fill" color="var(--ck-mint-dark)" />
+                      <Image src="/icons/icon-check-circle.webp" alt="Active" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
                     </div>
                   )}
 
@@ -186,7 +185,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   {!unlocked && (
                     <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/10">
                       <div className="flex flex-col items-center">
-                        <Lock size={20} weight="bold" color="var(--ck-text-light)" />
+                        <Image src="/icons/icon-lock.webp" alt="Locked" width={20} height={20} className="object-contain" style={{ width: 20, height: "auto" }} />
                         {chest && (
                           <span className="text-[10px] font-bold mt-0.5" style={{ color: "var(--ck-text-light)" }}>
                             {chest.starsRequired}&#11088;
@@ -240,7 +239,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   {/* Active checkmark */}
                   {isActive && (
                     <div className="absolute -top-1.5 -right-1.5">
-                      <CheckCircle size={24} weight="fill" color="var(--ck-mint-dark)" />
+                      <Image src="/icons/icon-check-circle.webp" alt="Active" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
                     </div>
                   )}
 
@@ -248,7 +247,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   {!unlocked && (
                     <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/10">
                       <div className="flex flex-col items-center">
-                        <Lock size={20} weight="bold" color="var(--ck-text-light)" />
+                        <Image src="/icons/icon-lock.webp" alt="Locked" width={20} height={20} className="object-contain" style={{ width: 20, height: "auto" }} />
                         {chest && (
                           <span className="text-[10px] font-bold mt-0.5" style={{ color: "var(--ck-text-light)" }}>
                             {chest.starsRequired}&#11088;

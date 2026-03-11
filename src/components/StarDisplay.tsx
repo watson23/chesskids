@@ -1,6 +1,6 @@
 "use client";
 
-import { Star } from "@phosphor-icons/react";
+import Image from "next/image";
 
 interface StarDisplayProps {
   stars: number;
@@ -23,10 +23,13 @@ export default function StarDisplay({
             className="animate-celebrate-pop"
             style={{ animationDelay: `${i * 0.2}s`, animationFillMode: "both" }}
           >
-            <Star
-              size={size}
-              weight={filled ? "fill" : "regular"}
-              className={filled ? "text-yellow-400" : "text-gray-300"}
+            <Image
+              src={filled ? "/icons/icon-star-full.webp" : "/icons/icon-star-empty.webp"}
+              alt={filled ? "Star earned" : "Star empty"}
+              width={size}
+              height={size}
+              className="object-contain"
+              style={{ width: size, height: "auto" }}
             />
           </span>
         );

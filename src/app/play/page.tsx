@@ -3,7 +3,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Star, Lock, CaretRight } from "@phosphor-icons/react";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
 
@@ -168,7 +167,7 @@ export default function PlayPage() {
                   />
                   {isLocked && (
                     <div className="absolute inset-0 flex items-center justify-center rounded-2xl" style={{ background: "rgba(0,0,0,0.25)" }}>
-                      <Lock size={28} weight="fill" color="white" />
+                      <Image src="/icons/icon-lock.webp" alt="Locked" width={28} height={28} className="object-contain" style={{ width: 28, height: "auto" }} />
                     </div>
                   )}
                 </div>
@@ -189,11 +188,14 @@ export default function PlayPage() {
                   </span>
                   <div className="flex gap-0.5 mt-1">
                     {Array.from({ length: opponent.stars }, (_, i) => (
-                      <Star
+                      <Image
                         key={i}
-                        size={16}
-                        weight="fill"
-                        color={isLocked ? "#CBD5E1" : opponent.accentColor}
+                        src="/icons/icon-star-full.webp"
+                        alt="Difficulty star"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                        style={{ width: 16, height: "auto", opacity: isLocked ? 0.4 : 1 }}
                       />
                     ))}
                   </div>
@@ -202,13 +204,13 @@ export default function PlayPage() {
                 {/* Play arrow or lock */}
                 <div className="flex-shrink-0">
                   {isLocked ? (
-                    <Lock size={24} weight="bold" color="var(--ck-text-light)" />
+                    <Image src="/icons/icon-lock.webp" alt="Locked" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
                   ) : (
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center"
                       style={{ background: opponent.accentColor }}
                     >
-                      <CaretRight size={22} weight="bold" color="white" />
+                      <Image src="/icons/icon-caret-right.webp" alt="Play" width={22} height={22} className="object-contain" style={{ width: 22, height: "auto" }} />
                     </div>
                   )}
                 </div>

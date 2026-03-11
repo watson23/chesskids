@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { CheckCircle } from "@phosphor-icons/react";
+import Image from "next/image";
 import Confetti from "@/components/Confetti";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
 import PieceColorPreview from "@/components/PieceColorPreview";
@@ -210,7 +210,7 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
             {/* Equipped checkmark */}
             {phase >= 4 && (
               <div className="animate-celebrate-pop flex items-center gap-1.5">
-                <CheckCircle size={28} weight="fill" color="var(--ck-mint-dark)" />
+                <Image src="/icons/icon-check-circle.webp" alt="Equipped" width={28} height={28} className="object-contain" style={{ width: 28, height: "auto" }} />
               </div>
             )}
           </div>

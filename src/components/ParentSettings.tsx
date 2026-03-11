@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SignOut, UserPlus } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useAudio } from "@/hooks/useAudio";
 import { useAuth } from "@/hooks/useAuth";
@@ -163,7 +162,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
                 onClick={() => setShowAddChild(true)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:bg-gray-50 active:scale-95 transition-all"
               >
-                <UserPlus size={24} weight="bold" />
+                <Image src="/icons/icon-add-player.webp" alt="" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
                 <span className="font-semibold">Add player</span>
               </button>
             </div>
@@ -176,7 +175,7 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
             onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 active:scale-95 transition-all"
           >
-            <SignOut size={22} weight="bold" />
+            <Image src="/icons/icon-sign-out.webp" alt="" width={22} height={22} className="object-contain" style={{ width: 22, height: "auto" }} />
             Sign out
           </button>
         </div>
