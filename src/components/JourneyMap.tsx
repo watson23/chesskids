@@ -68,11 +68,16 @@ function getLessonPosition(index: number, _total: number) {
  * Keyed by chest index.
  */
 const CHEST_POSITIONS: Record<number, { x: number; y: number }> = {
-  0: { x: 72.5, y: 80.75 }, // 6★  — right side, on the chessboard circle
-  1: { x: 22, y: 63.5 },  // 15★ — left side, between lessons 5-6
-  2: { x: 60.75, y: 52.75 }, // 24★ — right side, between lessons 7-8
-  3: { x: 22, y: 47 },    // 33★ — left side, between lessons 9-10
-  4: { x: 77, y: 23 },    // 39★ — right side, near lessons 12-13
+  0: { x: 72.5, y: 90 },    //  4★ — right side, between L1-L2
+  1: { x: 20, y: 84 },      //  8★ — left side, between L2-L3
+  2: { x: 60.75, y: 78 },   // 12★ — right side, between L3-L4
+  3: { x: 25, y: 72 },      // 16★ — left side, between L4-L5
+  4: { x: 75, y: 66 },      // 18★ — right side, between L5-L6
+  5: { x: 22, y: 60 },      // 22★ — left side, between L6-L7
+  6: { x: 68, y: 54 },      // 26★ — right side, between L7-L8
+  7: { x: 38, y: 42 },      // 30★ — left side, between L9-L10
+  8: { x: 75, y: 36 },      // 34★ — right side, between L10-L11
+  9: { x: 26, y: 24 },      // 38★ — left side, between L12-L13
 };
 
 function getChestPosition(positionOnMap: number, _total: number, chestIndex: number) {
