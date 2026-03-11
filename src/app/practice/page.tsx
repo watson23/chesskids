@@ -133,7 +133,7 @@ export default function PracticePage() {
         {/* Pikku header */}
         <div className="flex items-center gap-3 px-5 pt-6 pb-2 animate-fade-in-up">
           <Image
-            src="/mascot/pikku-happy.webp"
+            src="/mascot/pikku-determined.webp"
             alt="Pikku"
             width={72}
             height={86}

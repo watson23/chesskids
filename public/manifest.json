@@ -1,6 +1,6 @@
 {
-  "name": "Chess Penguin",
-  "short_name": "Chess Penguin",
+  "name": "My First Chess Moves",
+  "short_name": "First Chess Moves",
   "description": "Chess for kids — no reading needed!",
   "start_url": "/",
   "display": "standalone",

@@ -68,7 +68,7 @@ export default function CTASection({ t, onPlayFree, onGoogleSignIn }: CTASection
           className="text-xs mt-8 text-center"
           style={{ color: "var(--ck-text-light)" }}
         >
-          Chess Penguin — {t("landing_footer")} ❤️
+          My First Chess Moves — {t("landing_footer")} ❤️
         </p>
       </div>
     </section>

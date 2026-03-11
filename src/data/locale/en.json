@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome to Chess Penguin!",
+  "welcome": "Welcome to My First Chess Moves!",
   "piece_pawn": "This is the pawn!",
   "piece_knight": "This is the knight! It jumps in an L shape.",
   "piece_bishop": "This is the bishop! It moves diagonally.",
@@ -124,7 +124,7 @@
   "game_ai_thinking": "Hmm, let me think...",
   "game_your_turn": "Your turn! Pick a piece.",
   "landing_hero_speech": "Hi! I'm Pikku! Let's learn chess!",
-  "landing_hero_title": "Chess Penguin",
+  "landing_hero_title": "My First Chess Moves",
   "landing_hero_subtitle": "Chess for kids ages 4–6 — no reading needed!",
   "landing_cta_play": "Start Playing Free",
   "landing_cta_google": "Sign in with Google",

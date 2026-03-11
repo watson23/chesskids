@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { House, ArrowCounterClockwise, Star } from "@phosphor-icons/react";
 import Image from "next/image";
 import type { AIDifficulty } from "@/types/chess";
@@ -34,8 +34,10 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const [gameResult, setGameResult] = useState<"win" | "loss" | "draw" | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
+  const [pikkuMood, setPikkuMood] = useState<string | null>(null);
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevPieceCountRef = useRef<number>(32);
 
   const handleMove = useCallback(() => {
     sfx("piece-place");
@@ -75,7 +77,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         say("you_win");
         // Unlock bear opponent when the player beats the owl (level 3)
         if (difficulty >= 3) {
-          localStorage.setItem("chesspenguin_owl_beaten", "true");
+          localStorage.setItem("mfcm_owl_beaten", "true");
         }
       } else {
         setGameResult("loss");
@@ -115,16 +117,51 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, gameOver.over]);
 
-  // 10-second idle timer during player's turn — show tap hint
+  // Track captures and game events → set temporary Pikku mood
+  const pieceCount = useMemo(() => Object.keys(pieces).length, [pieces]);
+  const moveCount = useMemo(() => {
+    // Move count from FEN fullmove number (last field)
+    const parts = fen.split(" ");
+    return parseInt(parts[5] || "1", 10);
+  }, [fen]);
+
+  useEffect(() => {
+    if (gameResult) return; // game-end expressions take priority
+
+    const prevCount = prevPieceCountRef.current;
+    prevPieceCountRef.current = pieceCount;
+
+    if (pieceCount < prevCount) {
+      // A capture happened!
+      if (turn === "black") {
+        // White just captured — player captured a piece
+        setPikkuMood("cheering");
+      } else {
+        // Black just captured — opponent captured player's piece
+        setPikkuMood("surprised");
+      }
+      const timer = setTimeout(() => setPikkuMood(null), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [pieceCount, turn, gameResult]);
+
+  // 10-second idle timer during player's turn — show tap hint + sleepy Pikku
   useEffect(() => {
     if (tapHintTimer.current) clearTimeout(tapHintTimer.current);
     setShowTapHint(false);
 
     if (turn === "white" && !isAIThinking && !gameOver.over && !gameResult && !selectedSquare) {
-      tapHintTimer.current = setTimeout(() => setShowTapHint(true), 10000);
+      tapHintTimer.current = setTimeout(() => {
+        setShowTapHint(true);
+        setPikkuMood("sleepy");
+      }, 10000);
+    } else {
+      // Clear sleepy mood when player acts
+      if (pikkuMood === "sleepy") setPikkuMood(null);
     }
 
     return () => { if (tapHintTimer.current) clearTimeout(tapHintTimer.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, isAIThinking, gameOver.over, gameResult, selectedSquare]);
 
   const handleRematch = useCallback(() => {
@@ -132,6 +169,8 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     setGameResult(null);
     setIsAIThinking(false);
     setShowTapHint(false);
+    setPikkuMood(null);
+    prevPieceCountRef.current = 32;
     if (aiTimeoutRef.current) {
       clearTimeout(aiTimeoutRef.current);
     }
@@ -160,17 +199,30 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
   const opponent = OPPONENTS[difficulty] || OPPONENTS[1];
 
-  // Pikku speech text based on game state
+  // Opponent speech (shown near the opponent character)
+  const opponentText = isAIThinking && !gameResult ? t("game_ai_thinking") : "";
+
+  // Pikku coach speech (shown near Pikku, below the board)
   const pikkuText = gameResult === "win" ? t("you_win")
     : gameResult === "loss" ? t("you_lose")
       : gameResult === "draw" ? t("draw")
-        : isAIThinking ? t("game_ai_thinking")
-          : t("game_your_turn");
+        : !isAIThinking ? t("game_your_turn") : "";
 
+  // Count player's remaining pieces to detect when player is struggling
+  const playerPieceCount = useMemo(() => {
+    return Object.values(pieces).filter(p => p.color === "white").length;
+  }, [pieces]);
+
+  // Pikku expression: game result > temporary mood > contextual default
   const pikkuExpression = gameResult === "win" ? "celebrating"
     : gameResult === "loss" ? "sad"
-      : gameResult === "draw" ? "surprised"
-        : isAIThinking ? "thinking" : "happy";
+      : gameResult === "draw" ? "proud"
+        : pikkuMood ? pikkuMood
+          : isAIThinking ? "puzzled"
+            : playerPieceCount <= 8 ? "determined"
+              : moveCount <= 1 ? "happy"
+                : moveCount % 7 === 0 ? "winking"
+                  : moveCount % 5 === 0 ? "proud" : "happy";
 
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
@@ -187,6 +239,13 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
       {/* Floating opponent */}
       <div className="flex flex-col items-center px-4 pb-1">
+        {/* Opponent speech bubble — above the character */}
+        {!!opponentText && (
+          <div className="flex items-end justify-center mb-1">
+            <SpeechBubble text={opponentText} visible pointer="bottom" />
+          </div>
+        )}
+
         {/* Character image — large and floating on the background */}
         <div
           className={`relative transition-transform duration-500 ${

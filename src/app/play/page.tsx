@@ -75,7 +75,7 @@ export default function PlayPage() {
   const [wiggleId, setWiggleId] = useState<number | null>(null);
 
   useEffect(() => {
-    const beaten = localStorage.getItem("chesspenguin_owl_beaten") === "true";
+    const beaten = localStorage.getItem("mfcm_owl_beaten") === "true";
     setOwlBeaten(beaten);
   }, []);
 

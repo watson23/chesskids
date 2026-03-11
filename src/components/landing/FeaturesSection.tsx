@@ -79,7 +79,7 @@ export default function FeaturesSection({ t }: FeaturesSectionProps) {
         <div className="animate-fade-in-up-d3 mt-4">
           <Image
             src="/landing/app-preview.webp"
-            alt="Chess Penguin app preview"
+            alt="My First Chess Moves app preview"
             width={280}
             height={560}
             className="drop-shadow-xl"
