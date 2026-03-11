@@ -35,7 +35,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const [gameResult, setGameResult] = useState<"win" | "loss" | "draw" | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
-  const [pikkuMood, setPikkuMood] = useState<string | null>(null);
+  const [pikuMood, setPikuMood] = useState<string | null>(null);
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPieceCountRef = useRef<number>(32);
@@ -118,7 +118,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, gameOver.over]);
 
-  // Track captures and game events → set temporary Pikku mood
+  // Track captures and game events → set temporary Piku mood
   const pieceCount = useMemo(() => Object.keys(pieces).length, [pieces]);
   const moveCount = useMemo(() => {
     // Move count from FEN fullmove number (last field)
@@ -136,12 +136,12 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
       // A capture happened!
       if (turn === "black") {
         // White just captured — player captured a piece
-        setPikkuMood("cheering");
+        setPikuMood("cheering");
       } else {
         // Black just captured — opponent captured player's piece
-        setPikkuMood("surprised");
+        setPikuMood("surprised");
       }
-      const timer = setTimeout(() => setPikkuMood(null), 2500);
+      const timer = setTimeout(() => setPikuMood(null), 2500);
       return () => clearTimeout(timer);
     }
   }, [pieceCount, turn, gameResult]);
@@ -156,14 +156,14 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     if (turn === "white" && !isAIThinking && !gameOver.over && !gameResult && !selectedSquare) {
       tapHintTimer.current = setTimeout(() => {
         setShowTapHint(true);
-        setPikkuMood("puzzled");
+        setPikuMood("puzzled");
       }, 10000);
       sleepyTimer.current = setTimeout(() => {
-        setPikkuMood("sleepy");
+        setPikuMood("sleepy");
       }, 30000);
     } else {
       // Clear idle moods when player acts
-      if (pikkuMood === "sleepy" || pikkuMood === "puzzled") setPikkuMood(null);
+      if (pikuMood === "sleepy" || pikuMood === "puzzled") setPikuMood(null);
     }
 
     return () => {
@@ -178,7 +178,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     setGameResult(null);
     setIsAIThinking(false);
     setShowTapHint(false);
-    setPikkuMood(null);
+    setPikuMood(null);
     prevPieceCountRef.current = 32;
     if (aiTimeoutRef.current) {
       clearTimeout(aiTimeoutRef.current);
@@ -215,13 +215,13 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const opponentText = isAIThinking && !gameResult ? t("game_ai_thinking") : "";
   const opponentIcon = isAIThinking && !gameResult ? "/speech/speech-opponent-thinking.webp" : undefined;
 
-  // Pikku coach speech (shown near Pikku, below the board)
-  const pikkuText = gameResult === "win" ? t("you_win")
+  // Piku coach speech (shown near Piku, below the board)
+  const pikuText = gameResult === "win" ? t("you_win")
     : gameResult === "loss" ? t("you_lose")
       : gameResult === "draw" ? t("draw")
         : !isAIThinking ? t("game_your_turn") : "";
 
-  const pikkuIcon = gameResult === "win" ? "/speech/speech-you-won.webp"
+  const pikuIcon = gameResult === "win" ? "/speech/speech-you-won.webp"
     : gameResult === "loss" ? "/speech/speech-you-lost.webp"
       : gameResult === "draw" ? "/speech/speech-its-a-draw.webp"
         : !isAIThinking ? "/speech/speech-your-turn-white.webp" : undefined;
@@ -231,11 +231,11 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     return Object.values(pieces).filter(p => p.color === "white").length;
   }, [pieces]);
 
-  // Pikku expression: game result > temporary mood > contextual default
-  const pikkuExpression = gameResult === "win" ? "celebrating"
+  // Piku expression: game result > temporary mood > contextual default
+  const pikuExpression = gameResult === "win" ? "celebrating"
     : gameResult === "loss" ? "sad"
       : gameResult === "draw" ? "proud"
-        : pikkuMood ? pikkuMood
+        : pikuMood ? pikuMood
           : isAIThinking ? "puzzled"
             : playerPieceCount <= 8 ? "determined"
               : moveCount <= 1 ? "happy"
@@ -356,12 +356,12 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           )}
         </div>
 
-        {/* Pikku coach below the board */}
+        {/* Piku coach below the board */}
         <div className="flex items-start gap-2 w-full max-w-[360px]">
           <div className="flex-shrink-0 w-[72px] h-[86px] relative overflow-hidden">
             <Image
-              src={`/mascot/pikku-${pikkuExpression}.webp`}
-              alt="Pikku"
+              src={`/mascot/piku-${pikuExpression}.webp`}
+              alt="Piku"
               width={72}
               height={108}
               className="drop-shadow-md absolute bottom-0 left-0"
@@ -369,7 +369,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
             />
           </div>
           <div className="pt-2">
-            <SpeechBubble text={pikkuText} icon={pikkuIcon} visible={!!pikkuText} />
+            <SpeechBubble text={pikuText} icon={pikuIcon} visible={!!pikuText} />
           </div>
         </div>
 

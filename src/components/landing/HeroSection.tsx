@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 
 interface HeroSectionProps {
@@ -56,9 +56,9 @@ export default function HeroSection({ t, onPlayFree, onGoogleSignIn }: HeroSecti
 
       {/* Content */}
       <div className="flex flex-col items-center gap-4 animate-fade-in-up">
-        {/* Pikku waving */}
+        {/* Piku waving */}
         <div className="animate-float">
-          <Pikku expression="wave" size={180} />
+          <Piku expression="wave" size={180} />
         </div>
 
         {/* Speech bubble */}

@@ -1,6 +1,6 @@
 "use client";
 
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 
 interface CTASectionProps {
@@ -25,9 +25,9 @@ export default function CTASection({ t, onPlayFree, onGoogleSignIn }: CTASection
       <div className="absolute inset-0 z-0 bg-white/30" />
 
       <div className="relative max-w-md mx-auto flex flex-col items-center gap-6 animate-fade-in-up">
-        {/* Pikku holding pawn */}
+        {/* Piku holding pawn */}
         <div className="animate-float">
-          <Pikku expression="holding-pawn" size={150} />
+          <Piku expression="holding-pawn" size={150} />
         </div>
 
         <SpeechBubble text={t("landing_cta_speech")} visible />

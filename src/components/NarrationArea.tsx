@@ -1,6 +1,6 @@
 "use client";
 
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 import { useAudio } from "@/hooks/useAudio";
 
@@ -37,7 +37,7 @@ export default function NarrationArea({ narrationKey, phase }: NarrationAreaProp
   return (
     <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: 120 }}>
       <div className="flex-shrink-0">
-        <Pikku expression={expression} size={110} />
+        <Piku expression={expression} size={110} />
       </div>
       <SpeechBubble text={text} visible={!!text} />
     </div>

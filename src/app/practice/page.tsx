@@ -108,7 +108,7 @@ export default function PracticePage() {
 
   // Speak the instruction when page loads
   useEffect(() => {
-    say("practice_pikku_speech");
+    say("practice_piku_speech");
   }, [say]);
 
   const handleCategoryTap = useCallback(
@@ -131,17 +131,17 @@ export default function PracticePage() {
         className="min-h-dvh flex flex-col"
         style={{ background: "rgba(245, 240, 255, 0.6)" }}
       >
-        {/* Pikku header with home button */}
+        {/* Piku header with home button */}
         <div className="flex items-center gap-3 px-4 pt-5 pb-2 animate-fade-in-up">
           <NavIcon icon="icon-home" alt="Back to map" onClick={() => router.push("/")} />
           <Image
-            src="/mascot/pikku-determined.webp"
-            alt="Pikku"
+            src="/mascot/piku-determined.webp"
+            alt="Piku"
             width={72}
             height={86}
             className="flex-shrink-0 drop-shadow-md"
           />
-          <SpeechBubble text={t("practice_pikku_speech")} visible />
+          <SpeechBubble text={t("practice_piku_speech")} visible />
         </div>
 
         {/* Category grid */}

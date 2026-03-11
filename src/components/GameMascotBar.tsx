@@ -1,6 +1,6 @@
 "use client";
 
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 import { useLocale } from "@/hooks/useLocale";
 
@@ -25,7 +25,7 @@ export default function GameMascotBar({ expression, narrationKey }: GameMascotBa
       style={{ minHeight: 80 }}
     >
       <div className="flex-shrink-0">
-        <Pikku expression={expression} size={80} />
+        <Piku expression={expression} size={80} />
       </div>
       <SpeechBubble text={text} visible={!!text} />
     </div>

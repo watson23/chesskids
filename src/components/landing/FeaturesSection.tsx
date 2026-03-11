@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 
 interface FeaturesSectionProps {
@@ -41,9 +41,9 @@ export default function FeaturesSection({ t }: FeaturesSectionProps) {
           {t("landing_features_title")}
         </h2>
 
-        {/* Pikku teaching */}
+        {/* Piku teaching */}
         <div className="flex items-end gap-3 animate-fade-in-up">
-          <Pikku expression="teaching" size={60} />
+          <Piku expression="teaching" size={60} />
           <SpeechBubble text={t("landing_features_speech")} visible />
         </div>
 

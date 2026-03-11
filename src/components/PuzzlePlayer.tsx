@@ -9,7 +9,7 @@ import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
 import NarrationArea from "@/components/NarrationArea";
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import TapHint from "@/components/TapHint";
 import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
@@ -244,7 +244,7 @@ export default function PuzzlePlayer({
         {phase === "celebrate" ? (
           <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             <Confetti active />
-            <Pikku expression="celebrating" size={120} />
+            <Piku expression="celebrating" size={120} />
             <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-text)" }}>
               {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
             </h2>

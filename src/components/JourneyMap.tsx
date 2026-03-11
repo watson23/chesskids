@@ -6,7 +6,7 @@ import { CHESTS } from "@/data/chests";
 import LessonStop from "@/components/LessonStop";
 import TreasureChest from "@/components/TreasureChest";
 import JourneyMapOnboarding from "@/components/JourneyMapOnboarding";
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import { useAudio } from "@/hooks/useAudio";
 import type { LessonProgress } from "@/types/user";
 
@@ -283,18 +283,18 @@ export default function JourneyMap({
           );
         })}
 
-        {/* Pikku mascot standing next to current lesson (hidden when onboarding overlay has its own Pikku) */}
+        {/* Piku mascot standing next to current lesson (hidden when onboarding overlay has its own Piku) */}
         {!(currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
           const pos = getLessonPosition(currentLesson, LESSONS.length);
           return (
             <div
-              className="absolute pointer-events-none -translate-y-1/2 journey-pikku"
+              className="absolute pointer-events-none -translate-y-1/2 journey-piku"
               style={{
                 left: `calc(${pos.x}% + clamp(20px, 8vw, 36px))`,
                 top: `${pos.y}%`,
               }}
             >
-              <Pikku expression="happy" size={72} />
+              <Piku expression="happy" size={72} />
             </div>
           );
         })()}

@@ -1,6 +1,6 @@
 "use client";
 
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 
 interface TrustSectionProps {
   t: (key: string) => string;
@@ -62,9 +62,9 @@ export default function TrustSection({ t }: TrustSectionProps) {
           ))}
         </div>
 
-        {/* Pikku celebrating in corner */}
+        {/* Piku celebrating in corner */}
         <div className="animate-gentle-bounce">
-          <Pikku expression="celebrating" size={50} />
+          <Piku expression="celebrating" size={50} />
         </div>
       </div>
     </section>

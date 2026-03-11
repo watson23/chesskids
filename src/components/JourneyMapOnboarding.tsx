@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Pikku from "@/components/Pikku";
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 import TapHint from "@/components/TapHint";
 import { useLocale } from "@/hooks/useLocale";
@@ -40,7 +40,7 @@ export default function JourneyMapOnboarding({
       aria-label="Start your adventure"
     >
       <div className="flex items-end gap-2">
-        <Pikku expression="happy" size={100} />
+        <Piku expression="happy" size={100} />
         <SpeechBubble text={t("onboarding_start")} visible />
       </div>
       <TapHint visible />
