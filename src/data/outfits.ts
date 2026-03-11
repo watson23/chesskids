@@ -97,3 +97,25 @@ export function getOutfitItem(id: string): OutfitItem | undefined {
 export function getOutfitsBySlot(slot: OutfitSlot): OutfitItem[] {
   return ALL_OUTFITS.filter((item) => item.slot === slot);
 }
+
+/**
+ * Outfits that have real images and working PikuWithOutfit positioning.
+ * This is the list shown in the outfit picker UI.
+ */
+export const AVAILABLE_OUTFITS: OutfitItem[] = [
+  // Head
+  { id: "crown", slot: "head", nameKey: "outfit_crown", image: "/outfits/head-crown.webp" },
+  { id: "wizard-hat", slot: "head", nameKey: "outfit_wizard_hat", image: "/outfits/head-wizard-hat.webp" },
+  // Body
+  { id: "pink-bow", slot: "body", nameKey: "outfit_pink_bow", image: "/outfits/body-pink-bow.webp" },
+  { id: "purple-bow", slot: "body", nameKey: "outfit_purple_bow", image: "/outfits/body-purple-bow.webp" },
+  { id: "blue-bow", slot: "body", nameKey: "outfit_blue_bow", image: "/outfits/body-blue-bow.webp" },
+  { id: "mint-bow", slot: "body", nameKey: "outfit_mint_bow", image: "/outfits/body-mint-bow.webp" },
+  { id: "gold-bow", slot: "body", nameKey: "outfit_gold_bow", image: "/outfits/body-gold-bow.webp" },
+  { id: "peach-bow", slot: "body", nameKey: "outfit_peach_bow", image: "/outfits/body-peach-bow.webp" },
+  { id: "medal-snowflake", slot: "body", nameKey: "outfit_medal_snowflake", image: "/outfits/body-medal-snowflake.webp" },
+];
+
+export function getAvailableBySlot(slot: OutfitSlot): OutfitItem[] {
+  return AVAILABLE_OUTFITS.filter((item) => item.slot === slot);
+}

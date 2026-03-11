@@ -98,6 +98,10 @@ export default function OutfitTestPage() {
           <PikuWithOutfit expression="standing-celebrating" bodyImage="/outfits/body-medal-snowflake.webp" size={200} />
           <span className="text-sm font-semibold">Celebrating</span>
         </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-winking" bodyImage="/outfits/body-medal-snowflake.webp" size={200} />
+          <span className="text-sm font-semibold">Winking</span>
+        </div>
       </div>
 
       {/* All Bow Colors */}

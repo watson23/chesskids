@@ -6,7 +6,7 @@ import { CHESTS } from "@/data/chests";
 import LessonStop from "@/components/LessonStop";
 import TreasureChest from "@/components/TreasureChest";
 import JourneyMapOnboarding from "@/components/JourneyMapOnboarding";
-import Piku from "@/components/Piku";
+import PikuWithOutfit from "@/components/PikuWithOutfit";
 import { useAudio } from "@/hooks/useAudio";
 import type { LessonProgress } from "@/types/user";
 
@@ -22,6 +22,7 @@ interface JourneyMapProps {
   justUnlockedLesson?: number | null;
   onUnlockAnimationDone?: () => void;
   childName?: string;
+  equippedOutfit?: { head?: string; body?: string };
 }
 
 /**
@@ -117,6 +118,7 @@ export default function JourneyMap({
   justUnlockedLesson,
   onUnlockAnimationDone,
   childName,
+  equippedOutfit,
 }: JourneyMapProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { sfx } = useAudio();
@@ -372,7 +374,12 @@ export default function JourneyMap({
                   : {}),
               }}
             >
-              <Piku expression={allDone ? "standing-celebrating" : "standing-happy"} size={72} />
+              <PikuWithOutfit
+                expression={allDone ? "standing-celebrating" : "standing-happy"}
+                headImage={equippedOutfit?.head}
+                bodyImage={equippedOutfit?.body}
+                size={72}
+              />
             </div>
           );
         })()}

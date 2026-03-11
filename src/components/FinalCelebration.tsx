@@ -5,16 +5,17 @@ import Image from "next/image";
 import Confetti from "@/components/Confetti";
 import SpeechBubble from "@/components/SpeechBubble";
 import StarDisplay from "@/components/StarDisplay";
-import Piku from "@/components/Piku";
+import PikuWithOutfit from "@/components/PikuWithOutfit";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
 
 interface FinalCelebrationProps {
   stars: number;
   onContinue: () => void;
+  equippedOutfit?: { head?: string; body?: string };
 }
 
-export default function FinalCelebration({ stars, onContinue }: FinalCelebrationProps) {
+export default function FinalCelebration({ stars, onContinue, equippedOutfit }: FinalCelebrationProps) {
   const [phase, setPhase] = useState(1);
   const { sfx } = useAudio();
   const { t } = useLocale();
@@ -51,7 +52,7 @@ export default function FinalCelebration({ stars, onContinue }: FinalCelebration
       />
 
       {/* Large celebrating Piku */}
-      <Piku expression="standing-celebrating" size={200} />
+      <PikuWithOutfit expression="standing-celebrating" headImage={equippedOutfit?.head} bodyImage={equippedOutfit?.body} size={200} />
 
       {/* Stars */}
       <StarDisplay stars={stars} size={56} staggerDelay={300} />
@@ -74,7 +75,7 @@ export default function FinalCelebration({ stars, onContinue }: FinalCelebration
       {/* More coming message — phase 3 */}
       {phase >= 3 && (
         <div className="animate-slide-in flex flex-col items-center gap-2">
-          <Piku expression="standing-winking" size={80} />
+          <PikuWithOutfit expression="standing-winking" headImage={equippedOutfit?.head} bodyImage={equippedOutfit?.body} size={80} />
           <p
             className="text-sm font-semibold"
             style={{ color: "var(--ck-text-light)" }}

@@ -302,6 +302,7 @@ function HomeContent() {
         justUnlockedLesson={justUnlockedLesson}
         onUnlockAnimationDone={handleUnlockAnimationDone}
         childName={activeChild?.name}
+        equippedOutfit={activeChild?.equippedOutfit}
       />
 
       {/* Top navigation bar */}

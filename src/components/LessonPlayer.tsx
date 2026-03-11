@@ -20,6 +20,7 @@ import { useLessonPlayer } from "@/hooks/useLessonPlayer";
 import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -30,6 +31,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const { say, sfx } = useAudio();
   const { boardTheme, pieceColors } = useActiveTheme();
   const { t } = useLocale();
+  const { activeChild } = useAuth();
   const {
     state,
     currentStep,
@@ -254,7 +256,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
       <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
         {state.phase === "celebrate" ? (
           isLastLesson ? (
-            <FinalCelebration stars={state.stars} onContinue={handleContinue} />
+            <FinalCelebration stars={state.stars} onContinue={handleContinue} equippedOutfit={activeChild?.equippedOutfit} />
           ) : (
             <div className="flex flex-col items-center gap-6 animate-slide-in mt-auto mb-auto py-6">
               <Confetti active particleCount={60} />

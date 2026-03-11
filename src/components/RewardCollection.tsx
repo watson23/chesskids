@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
 import PieceColorPreview from "@/components/PieceColorPreview";
@@ -9,7 +9,12 @@ import { CHESTS } from "@/data/chests";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "@/hooks/useAudio";
 import { updateChildRewards } from "@/lib/firestore";
+import PikuWithOutfit from "@/components/PikuWithOutfit";
+import { getAvailableBySlot } from "@/data/outfits";
+import { updateEquippedOutfit } from "@/lib/firestore";
+import { useLocale } from "@/hooks/useLocale";
 import type { BoardTheme, PieceColorSet } from "@/types/chess";
+import type { LocaleKey } from "@/types/locale";
 
 interface RewardCollectionProps {
   open: boolean;
@@ -54,6 +59,45 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
   const unlockedRewards = activeChild?.unlockedRewards ?? [];
   const activeThemeId = activeChild?.activeBoardTheme ?? "classic";
   const activePieceId = activeChild?.activePieceColor ?? "classic";
+
+  const { t } = useLocale();
+  const equippedOutfit = activeChild?.equippedOutfit ?? {};
+  const [previewOutfit, setPreviewOutfit] = useState<{ head?: string; body?: string }>(equippedOutfit);
+
+  // Sync preview when activeChild changes
+  useEffect(() => {
+    setPreviewOutfit(activeChild?.equippedOutfit ?? {});
+  }, [activeChild?.equippedOutfit]);
+
+  const headOutfits = getAvailableBySlot("head");
+  const bodyOutfits = getAvailableBySlot("body");
+
+  const toggleOutfit = useCallback(
+    async (slot: "head" | "body", image: string | undefined) => {
+      if (!user || !activeChild || saving) return;
+      sfx("button-tap");
+
+      const next = { ...previewOutfit };
+      if (image && next[slot] === image) {
+        delete next[slot];
+      } else if (image) {
+        next[slot] = image;
+      } else {
+        delete next[slot];
+      }
+      setPreviewOutfit(next);
+
+      setSaving(true);
+      try {
+        await updateEquippedOutfit(user.uid, activeChild.id, next);
+        await refreshChildren();
+      } catch (err) {
+        console.error("Failed to update outfit:", err);
+      }
+      setSaving(false);
+    },
+    [user, activeChild, previewOutfit, sfx, saving, refreshChildren]
+  );
 
   const selectTheme = useCallback(
     async (theme: BoardTheme) => {
@@ -119,27 +163,116 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           <Image src="/icons/icon-close.webp" alt="Close" width={20} height={20} className="object-contain" />
         </button>
 
-        {/* Trophy icon */}
-        <div className="flex items-center gap-2">
-          <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-            <path
-              d="M7 4h10v2a5 5 0 01-10 0V4z"
-              fill="var(--ck-gold)"
-              stroke="var(--ck-gold-dark)"
-              strokeWidth="1.5"
-            />
-            <path d="M4 4h3v3a3 3 0 01-3-3z" fill="var(--ck-gold)" stroke="var(--ck-gold-dark)" strokeWidth="1.5" />
-            <path d="M17 4h3a3 3 0 01-3 3V4z" fill="var(--ck-gold)" stroke="var(--ck-gold-dark)" strokeWidth="1.5" />
-            <rect x="10" y="13" width="4" height="4" rx="1" fill="var(--ck-gold)" />
-            <rect x="8" y="17" width="8" height="3" rx="1.5" fill="var(--ck-gold-dark)" />
-          </svg>
-        </div>
+        <div className="w-10" /> {/* Spacer for centering (was trophy icon) */}
 
         <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
       {/* Scrollable content */}
       <div className="overflow-y-auto px-4 pb-8" style={{ height: "calc(100dvh - 60px)" }}>
+        {/* Outfits section */}
+        <div className="mb-8">
+          {/* Piku preview — pt-10 reserves space for head accessories like crown/hat */}
+          <div className="flex justify-center mb-4 pt-10 overflow-visible">
+            <PikuWithOutfit
+              expression="standing-happy"
+              headImage={previewOutfit.head}
+              bodyImage={previewOutfit.body}
+              size={160}
+            />
+          </div>
+
+          {/* Head outfits */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-extrabold" style={{ color: "var(--ck-text)" }}>
+                {t("wardrobe_head")}
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {/* None button */}
+              <button
+                onClick={() => toggleOutfit("head", undefined)}
+                className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
+                style={{
+                  border: !previewOutfit.head ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
+                  background: !previewOutfit.head ? "rgba(252, 211, 77, 0.15)" : "white",
+                }}
+              >
+                <span className="text-lg">✕</span>
+              </button>
+              {headOutfits.map((item) => {
+                const isEquipped = previewOutfit.head === item.image;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => toggleOutfit("head", item.image)}
+                    className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center relative overflow-hidden"
+                    style={{
+                      border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
+                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "white",
+                    }}
+                  >
+                    <Image
+                      src={item.image}
+                      alt={t(item.nameKey as LocaleKey)}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                      style={{ width: 40, height: "auto" }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Body outfits */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-extrabold" style={{ color: "var(--ck-text)" }}>
+                {t("wardrobe_body")}
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {/* None button */}
+              <button
+                onClick={() => toggleOutfit("body", undefined)}
+                className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
+                style={{
+                  border: !previewOutfit.body ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
+                  background: !previewOutfit.body ? "rgba(252, 211, 77, 0.15)" : "white",
+                }}
+              >
+                <span className="text-lg">✕</span>
+              </button>
+              {bodyOutfits.map((item) => {
+                const isEquipped = previewOutfit.body === item.image;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => toggleOutfit("body", item.image)}
+                    className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center relative overflow-hidden"
+                    style={{
+                      border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
+                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "white",
+                    }}
+                  >
+                    <Image
+                      src={item.image}
+                      alt={t(item.nameKey as LocaleKey)}
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                      style={{ width: 40, height: "auto" }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         {/* Boards section */}
         <div className="mb-6">
           {/* Visual section header — mini board icon */}

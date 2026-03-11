@@ -101,3 +101,13 @@ export async function updateChildRewards(uid: string, childId: string, rewards: 
   if (equippedOutfit) updates.equippedOutfit = equippedOutfit;
   await updateDoc(ref, updates);
 }
+
+export async function updateEquippedOutfit(
+  uid: string,
+  childId: string,
+  equippedOutfit: { head?: string; body?: string }
+): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, "users", uid, "children", childId);
+  await updateDoc(ref, { equippedOutfit });
+}
