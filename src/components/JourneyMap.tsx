@@ -21,6 +21,7 @@ interface JourneyMapProps {
   justCompletedLesson?: string | null;
   justUnlockedLesson?: number | null;
   onUnlockAnimationDone?: () => void;
+  childName?: string;
 }
 
 /**
@@ -110,6 +111,7 @@ export default function JourneyMap({
   justCompletedLesson,
   justUnlockedLesson,
   onUnlockAnimationDone,
+  childName,
 }: JourneyMapProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { sfx } = useAudio();
@@ -323,6 +325,7 @@ export default function JourneyMap({
             <JourneyMapOnboarding
               x={pos.x}
               y={pos.y}
+              childName={childName ?? ""}
               onDismiss={() => setOnboardingDismissed(true)}
             />
           );

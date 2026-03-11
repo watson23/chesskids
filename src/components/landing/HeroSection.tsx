@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import { useAudio } from "@/hooks/useAudio";
 import type { TranslateFn } from "@/types/locale";
 
 interface HeroSectionProps {
@@ -12,8 +13,36 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ t, onPlayFree, onGoogleSignIn }: HeroSectionProps) {
+  const { language, setLanguage } = useAudio();
+
   return (
     <section className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden px-6">
+      {/* Language toggle — top-right corner */}
+      <div className="absolute top-4 right-4 z-20 flex gap-1.5">
+        <button
+          onClick={() => setLanguage("en")}
+          className={`px-3 py-1.5 rounded-full text-sm font-bold transition-all active:scale-95 ${
+            language === "en"
+              ? "bg-white/90 shadow-md ring-2 ring-amber-400"
+              : "bg-white/40 hover:bg-white/60"
+          }`}
+          aria-label="English"
+        >
+          🇬🇧
+        </button>
+        <button
+          onClick={() => setLanguage("fi")}
+          className={`px-3 py-1.5 rounded-full text-sm font-bold transition-all active:scale-95 ${
+            language === "fi"
+              ? "bg-white/90 shadow-md ring-2 ring-amber-400"
+              : "bg-white/40 hover:bg-white/60"
+          }`}
+          aria-label="Suomi"
+        >
+          🇫🇮
+        </button>
+      </div>
+
       {/* Warm gradient background */}
       <div
         className="absolute inset-0 -z-10"

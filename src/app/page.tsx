@@ -287,6 +287,7 @@ function HomeContent() {
         justCompletedLesson={justCompletedLesson}
         justUnlockedLesson={justUnlockedLesson}
         onUnlockAnimationDone={handleUnlockAnimationDone}
+        childName={activeChild?.name}
       />
 
       {/* Top navigation bar */}
