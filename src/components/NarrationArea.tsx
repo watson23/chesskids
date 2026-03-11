@@ -2,12 +2,7 @@
 
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
-import { useAudio } from "@/hooks/useAudio";
-
-import en from "@/data/locale/en.json";
-import fi from "@/data/locale/fi.json";
-
-const locales: Record<string, Record<string, string>> = { en, fi };
+import { useLocale } from "@/hooks/useLocale";
 
 type LessonPhase = "watch" | "try" | "celebrate" | "wrong";
 
@@ -30,8 +25,8 @@ function getExpression(phase: LessonPhase) {
 }
 
 export default function NarrationArea({ narrationKey, phase }: NarrationAreaProps) {
-  const { language } = useAudio();
-  const text = locales[language]?.[narrationKey] || locales.en[narrationKey] || "";
+  const { t } = useLocale();
+  const text = t(narrationKey);
   const expression = getExpression(phase);
 
   return (

@@ -10,14 +10,25 @@ const PIECE_VALUES: Record<string, number> = {
   k: 0,
 };
 
+const CENTER = ["d4", "d5", "e4", "e5"];
+const EXTENDED_CENTER = [
+  "c3", "c4", "c5", "c6",
+  "d3", "d6", "e3", "e6",
+  "f3", "f4", "f5", "f6",
+];
+
 /**
  * Returns an AI-selected move for the given position and difficulty level.
  *
  * - Level 1: random legal move
  * - Level 2: prefers captures, otherwise random
  * - Level 3: basic evaluation (captures by value, center control, checks, checkmate)
+ * - Level 4: 2-ply minimax — evaluate our move + opponent's best reply
  *
  * Returns null if no legal moves are available (checkmate or stalemate).
+ *
+ * Performance: reuses a single Chess instance via move()/undo() instead of
+ * allocating new instances per candidate move.
  */
 export function getAIMove(
   fen: string,
@@ -45,7 +56,7 @@ export function getAIMove(
   }
 
   if (level === 3) {
-    // Level 3: basic evaluation
+    // Level 3: basic evaluation — single Chess instance with move/undo
     let bestScore = -Infinity;
     let bestMoves: typeof moves = [];
 
@@ -56,19 +67,20 @@ export function getAIMove(
         score += PIECE_VALUES[move.captured] * 10;
       }
 
-      const centerSquares = ["d4", "d5", "e4", "e5"];
-      if (centerSquares.includes(move.to)) {
+      if (CENTER.includes(move.to)) {
         score += 1;
       }
 
-      const testChess = new Chess(fen);
-      testChess.move(move);
+      // Apply move, evaluate, then undo
+      chess.move(move);
 
-      if (testChess.isCheckmate()) {
+      if (chess.isCheckmate()) {
         score += 1000;
-      } else if (testChess.isCheck()) {
+      } else if (chess.isCheck()) {
         score += 3;
       }
+
+      chess.undo();
 
       score += Math.random() * 0.5;
 
@@ -84,16 +96,17 @@ export function getAIMove(
     return { from: chosen.from as Square, to: chosen.to as Square };
   }
 
-  // Level 4: 2-ply minimax — evaluate our move + opponent's best reply
+  // Level 4: 2-ply minimax — reuse chess instance with nested move/undo
   let bestScore = -Infinity;
   let bestMoves: typeof moves = [];
 
   for (const move of moves) {
-    const afterMove = new Chess(fen);
-    afterMove.move(move);
+    // Ply 1: our move
+    chess.move(move);
 
     // If we checkmate immediately, pick it
-    if (afterMove.isCheckmate()) {
+    if (chess.isCheckmate()) {
+      chess.undo();
       return { from: move.from as Square, to: move.to as Square };
     }
 
@@ -105,17 +118,15 @@ export function getAIMove(
     }
 
     // Center control bonus
-    const center = ["d4", "d5", "e4", "e5"];
-    const extendedCenter = ["c3", "c4", "c5", "c6", "d3", "d6", "e3", "e6", "f3", "f4", "f5", "f6"];
-    if (center.includes(move.to)) moveScore += 2;
-    else if (extendedCenter.includes(move.to)) moveScore += 0.5;
+    if (CENTER.includes(move.to)) moveScore += 2;
+    else if (EXTENDED_CENTER.includes(move.to)) moveScore += 0.5;
 
     // Check bonus
-    if (afterMove.isCheck()) moveScore += 3;
+    if (chess.isCheck()) moveScore += 3;
 
-    // Look at opponent's best reply (minimax ply 2)
-    const opponentMoves = afterMove.moves({ verbose: true });
-    let worstOpponentScore = 0; // best opponent reply from their perspective
+    // Ply 2: evaluate opponent's best reply
+    const opponentMoves = chess.moves({ verbose: true });
+    let worstOpponentScore = 0;
 
     for (const opMove of opponentMoves) {
       let opScore = 0;
@@ -124,19 +135,22 @@ export function getAIMove(
         opScore += PIECE_VALUES[opMove.captured] * 10;
       }
 
-      const afterOp = new Chess(afterMove.fen());
-      afterOp.move(opMove);
+      chess.move(opMove);
 
-      if (afterOp.isCheckmate()) {
+      if (chess.isCheckmate()) {
         opScore += 1000;
-      } else if (afterOp.isCheck()) {
+      } else if (chess.isCheck()) {
         opScore += 2;
       }
+
+      chess.undo(); // undo opponent move
 
       if (opScore > worstOpponentScore) {
         worstOpponentScore = opScore;
       }
     }
+
+    chess.undo(); // undo our move
 
     // Net evaluation: our gain minus opponent's best response
     moveScore -= worstOpponentScore;

@@ -24,6 +24,7 @@ interface AudioContextValue {
   say: (key: string) => Promise<void>;
   sfx: (effect: SoundEffect) => void;
   stop: () => void;
+  t: (key: string) => string;
 }
 
 const AudioCtx = createContext<AudioContextValue>({
@@ -34,6 +35,7 @@ const AudioCtx = createContext<AudioContextValue>({
   say: async () => {},
   sfx: () => {},
   stop: () => {},
+  t: (key: string) => key,
 });
 
 export function AudioProvider({ children }: { children: ReactNode }) {
@@ -74,6 +76,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     stopSpeaking();
   }, []);
 
+  const t = useCallback(
+    (key: string): string => {
+      return locales[language]?.[key] || locales.en[key] || key;
+    },
+    [language]
+  );
+
   return (
     <AudioCtx.Provider
       value={{
@@ -84,6 +93,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         say,
         sfx,
         stop,
+        t,
       }}
     >
       {children}
