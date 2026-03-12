@@ -50,8 +50,9 @@ const LESSON_POSITIONS: { x: number; y: number }[] = [
   { x: 58, y: 45 },  // 9  En Passant       — 0.5 bubble left
   { x: 72, y: 39 },  // 10 Promotion        — 0.5 more right
   { x: 57, y: 33 },  // 11 Check & Checkmate — 1 bubble right
-  { x: 42, y: 27 },  // 12 Forks            — 1 bubble right
-  { x: 44, y: 21 },  // 13 Pins             — 1.5 bubbles right
+  { x: 42, y: 27 },  // 12 Stalemate (was Forks)
+  { x: 44, y: 21 },  // 13 Forks (was Pins)
+  { x: 30, y: 15 },  // 14 Pins (new — needs hand-tuning later)
 ];
 
 function getLessonPosition(index: number, _total: number) {

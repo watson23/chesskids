@@ -673,7 +673,67 @@ const checkCheckmateLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 12. Forks ----------
+// ---------- 12. Stalemate ----------
+const stalemateLesson: Lesson = {
+  id: "stalemate",
+  icon: "special",
+  steps: [
+    {
+      narrationKey: "stalemate_intro",
+      boardSetup: pos(
+        ["h1", "king", "white"],
+        ["f2", "queen", "white"],
+        ["h8", "king", "black"]
+      ),
+    },
+    {
+      narrationKey: "stalemate_trapped",
+      boardSetup: pos(
+        ["h1", "king", "white"],
+        ["g6", "queen", "white"],
+        ["h8", "king", "black"]
+      ),
+      animation: {
+        piece: "h8" as Square,
+        path: ["h8"] as Square[],
+        highlights: ["g8", "g7", "h7"] as Square[],
+      },
+    },
+  ],
+  puzzles: [
+    {
+      narrationKey: "stalemate_puzzle_avoid",
+      boardSetup: pos(
+        ["g1", "king", "white"],
+        ["f7", "queen", "white"],
+        ["h8", "king", "black"]
+      ),
+      correctMoves: [
+        { from: "f7" as Square, to: "f6" as Square },
+        { from: "f7" as Square, to: "e7" as Square },
+        { from: "f7" as Square, to: "g7" as Square },
+      ],
+      wrongMoveNarrationKey: "stalemate_oops",
+      successNarrationKey: "great_move",
+    },
+    {
+      narrationKey: "stalemate_puzzle_checkmate",
+      boardSetup: pos(
+        ["f1", "king", "white"],
+        ["e6", "queen", "white"],
+        ["h8", "king", "black"]
+      ),
+      correctMoves: [
+        { from: "e6" as Square, to: "g8" as Square },
+      ],
+      wrongMoveNarrationKey: "stalemate_oops",
+      successNarrationKey: "great_move",
+    },
+  ],
+  starsForChest: 2,
+};
+
+// ---------- 13. Forks ----------
 const forksLesson: Lesson = {
   id: "forks",
   icon: "tactics",
@@ -742,7 +802,7 @@ const forksLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 13. Pins ----------
+// ---------- 14. Pins ----------
 const pinsLesson: Lesson = {
   id: "pins",
   icon: "tactics",
@@ -822,8 +882,9 @@ export const LESSONS: Lesson[] = [
   enPassantLesson,
   promotionLesson,
   checkCheckmateLesson,
-  forksLesson,
-  pinsLesson,
+  stalemateLesson,   // 12 — Stalemate
+  forksLesson,       // 13 — Forks
+  pinsLesson,        // 14 — Pins
 ];
 
 export function getLessonById(id: string): Lesson | undefined {
