@@ -243,7 +243,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                     }}
                   >
                     <Image
-                      src={item.image}
+                      src={item.iconImage ?? item.image}
                       alt={t(item.nameKey as LocaleKey)}
                       width={34}
                       height={34}

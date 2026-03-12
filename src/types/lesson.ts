@@ -50,6 +50,8 @@ export interface OutfitItem {
   slot: OutfitSlot;
   nameKey: string;
   image: string;
+  /** Optional centered icon for the outfit selector (when main image is positioned for character) */
+  iconImage?: string;
 }
 
 export interface Reward {
