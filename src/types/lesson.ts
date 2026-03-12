@@ -65,7 +65,8 @@ export interface Reward {
 
 export interface ChestDefinition {
   index: number;
-  starsRequired: number;
+  /** Lesson ID that must be completed to unlock this chest */
+  afterLesson: string;
   rewards: Reward[];
   positionOnMap: number;
 }

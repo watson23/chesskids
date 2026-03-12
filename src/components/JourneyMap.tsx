@@ -15,6 +15,7 @@ interface JourneyMapProps {
   lessonProgress: Record<string, LessonProgress>;
   totalStars: number;
   openedChests: number[];
+  completedLessons: string[];
   onLessonTap: (lessonId: string) => void;
   onChestTap: (chestIndex: number) => void;
   onLockedChestTap?: (chestIndex: number) => void;
@@ -107,6 +108,7 @@ export default function JourneyMap({
   lessonProgress,
   totalStars,
   openedChests,
+  completedLessons,
   onLessonTap,
   onChestTap,
   onLockedChestTap,
@@ -317,7 +319,7 @@ export default function JourneyMap({
           let chestStatus: "locked" | "unlocked" | "opened";
           if (openedChests.includes(chest.index)) {
             chestStatus = "opened";
-          } else if (totalStars >= chest.starsRequired) {
+          } else if (completedLessons.includes(chest.afterLesson)) {
             chestStatus = "unlocked";
           } else {
             chestStatus = "locked";
@@ -330,7 +332,6 @@ export default function JourneyMap({
               status={chestStatus}
               x={x}
               y={y}
-              totalStars={totalStars}
               onTap={() => onChestTap(chest.index)}
               onLockedTap={() => {
                 handleLockedTap();

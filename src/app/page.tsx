@@ -10,7 +10,6 @@ import ChildSelector from "@/components/ChildSelector";
 import AddChildModal from "@/components/AddChildModal";
 import ParentSettings from "@/components/ParentSettings";
 import StarCounter from "@/components/StarCounter";
-import ChestPeekModal from "@/components/ChestPeekModal";
 import { CHESTS } from "@/data/chests";
 import { LESSONS } from "@/data/lessons";
 import { resolveCurrentLessonIndex, getLessonIdAtIndex } from "@/lib/lesson-utils";
@@ -44,7 +43,6 @@ function HomeContent() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
-  const [peekChestIndex, setPeekChestIndex] = useState<number | null>(null);
 
   // Guard against processing completion params multiple times
   const completionProcessed = useRef(false);
@@ -254,16 +252,6 @@ function HomeContent() {
     setJustUnlockedLesson(null);
   }, []);
 
-  const handleLockedChestTap = useCallback((chestIndex: number) => {
-    // Show peek modal after short delay (let shake play first)
-    setTimeout(() => setPeekChestIndex(chestIndex), 500);
-  }, []);
-
-  const peekChest =
-    peekChestIndex !== null
-      ? CHESTS.find((c) => c.index === peekChestIndex) ?? null
-      : null;
-
   const openedChest =
     openChestIndex !== null
       ? CHESTS.find((c) => c.index === openChestIndex) ?? null
@@ -296,9 +284,9 @@ function HomeContent() {
         lessonProgress={lessonProgress}
         totalStars={totalStars}
         openedChests={openedChests}
+        completedLessons={Object.keys(lessonProgress)}
         onLessonTap={handleLessonTap}
         onChestTap={handleChestTap}
-        onLockedChestTap={handleLockedChestTap}
         justCompletedLesson={justCompletedLesson}
         justUnlockedLesson={justUnlockedLesson}
         onUnlockAnimationDone={handleUnlockAnimationDone}
@@ -351,15 +339,6 @@ function HomeContent() {
       {/* Chest open modal */}
       {openedChest && (
         <ChestOpenModal chest={openedChest} onClose={handleChestClose} />
-      )}
-
-      {/* Chest peek modal (locked chest preview) */}
-      {peekChest && (
-        <ChestPeekModal
-          chest={peekChest}
-          totalStars={totalStars}
-          onClose={() => setPeekChestIndex(null)}
-        />
       )}
 
       {/* Reward collection overlay */}

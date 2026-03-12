@@ -3,7 +3,7 @@ import type { ChestDefinition } from "@/types/lesson";
 export const CHESTS: ChestDefinition[] = [
   {
     index: 0,
-    starsRequired: 6,
+    afterLesson: "pawn",
     rewards: [
       { id: "outfit-pink-bow", type: "outfit", chestIndex: 0, outfitId: "pink-bow" },
       { id: "outfit-blue-bow", type: "outfit", chestIndex: 0, outfitId: "blue-bow" },
@@ -12,7 +12,7 @@ export const CHESTS: ChestDefinition[] = [
   },
   {
     index: 1,
-    starsRequired: 15,
+    afterLesson: "bishop",
     rewards: [
       { id: "outfit-mint-bow", type: "outfit", chestIndex: 1, outfitId: "mint-bow" },
       { id: "outfit-peach-bow", type: "outfit", chestIndex: 1, outfitId: "peach-bow" },
@@ -21,7 +21,7 @@ export const CHESTS: ChestDefinition[] = [
   },
   {
     index: 2,
-    starsRequired: 24,
+    afterLesson: "queen",
     rewards: [
       { id: "outfit-purple-bow", type: "outfit", chestIndex: 2, outfitId: "purple-bow" },
       { id: "outfit-gold-bow", type: "outfit", chestIndex: 2, outfitId: "gold-bow" },
@@ -30,7 +30,7 @@ export const CHESTS: ChestDefinition[] = [
   },
   {
     index: 3,
-    starsRequired: 33,
+    afterLesson: "en-passant",
     rewards: [
       { id: "outfit-wizard-hat", type: "outfit", chestIndex: 3, outfitId: "wizard-hat" },
     ],
@@ -38,7 +38,7 @@ export const CHESTS: ChestDefinition[] = [
   },
   {
     index: 4,
-    starsRequired: 42,
+    afterLesson: "stalemate",
     rewards: [
       { id: "outfit-medal-snowflake", type: "outfit", chestIndex: 4, outfitId: "medal-snowflake" },
     ],
