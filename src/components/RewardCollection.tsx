@@ -142,7 +142,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
       {/* Scrollable middle: boards + pieces (compact, no labels) */}
       <div className="relative z-10 flex-1 overflow-y-auto px-4 min-h-0">
-        {/* Boards section */}
+        {/* Boards section — no background bubbles, gold ring = selected */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width={18} height={18} viewBox="0 0 16 16" fill="none">
@@ -162,16 +162,12 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                 <button
                   key={theme.id}
                   onClick={() => selectTheme(theme)}
-                  className="relative flex items-center justify-center p-1.5 rounded-xl transition-all"
-                  style={{
-                    background: isActive ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                    border: isActive ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                  }}
+                  className={`relative rounded-xl overflow-hidden transition-all ${isActive ? "ring-3 ring-amber-400 scale-105" : "opacity-80"}`}
                 >
                   <MiniBoardPreview theme={theme} size="sm" />
 
                   {isActive && (
-                    <div className="absolute -top-1.5 -right-1.5">
+                    <div className="absolute -top-1 -right-1">
                       <Image src="/icons/icon-check-circle.webp" alt="Active" width={20} height={20} className="object-contain" style={{ width: 20, height: "auto" }} />
                     </div>
                   )}
@@ -181,7 +177,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           </div>
         </div>
 
-        {/* Pieces section — horizontal scroll, compact */}
+        {/* Pieces section — wrapping grid, no background bubbles */}
         <div className="mb-2">
           <div className="flex items-center gap-2 mb-2">
             <svg width={18} height={18} viewBox="0 0 24 24" fill="var(--ck-purple)">
@@ -191,7 +187,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
             <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>Pieces</span>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <div className="flex flex-wrap gap-2">
             {PIECE_COLOR_SETS.map((colorSet) => {
               const isActive = colorSet.id === activePieceId;
 
@@ -199,16 +195,12 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                 <button
                   key={colorSet.id}
                   onClick={() => selectPieceColor(colorSet)}
-                  className="relative shrink-0 flex items-center justify-center p-2 rounded-xl transition-all"
-                  style={{
-                    background: isActive ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                    border: isActive ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                  }}
+                  className={`relative flex items-center justify-center p-1.5 rounded-xl transition-all ${isActive ? "ring-3 ring-amber-400 scale-105" : "opacity-80"}`}
                 >
                   <PieceColorPreview colorSet={colorSet} size={30} />
 
                   {isActive && (
-                    <div className="absolute -top-1.5 -right-1.5">
+                    <div className="absolute -top-1 -right-1">
                       <Image src="/icons/icon-check-circle.webp" alt="Active" width={18} height={18} className="object-contain" style={{ width: 18, height: "auto" }} />
                     </div>
                   )}
