@@ -20,7 +20,7 @@ export default function NavIcon({
   disabled = false,
 }: NavIconProps) {
   const px = size === "md" ? 52 : 44;
-  const imgPx = size === "md" ? 36 : 28;
+  const imgPx = size === "md" ? 40 : 28;
 
   return (
     <button
