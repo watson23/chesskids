@@ -5,7 +5,7 @@ import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
 import PieceColorPreview from "@/components/PieceColorPreview";
 import { BOARD_THEMES, PIECE_COLOR_SETS } from "@/data/themes";
-import { CHESTS } from "@/data/chests";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "@/hooks/useAudio";
 import { updateChildRewards } from "@/lib/firestore";
@@ -21,35 +21,6 @@ interface RewardCollectionProps {
   onClose: () => void;
 }
 
-/** Find which chest contains a specific theme or piece color */
-function getChestForReward(
-  type: "board-theme" | "piece-color",
-  id: string
-): { starsRequired: number } | null {
-  for (const chest of CHESTS) {
-    for (const reward of chest.rewards) {
-      if (type === "board-theme" && reward.themeId === id) return chest;
-      if (type === "piece-color" && reward.pieceColorId === id) return chest;
-    }
-  }
-  return null;
-}
-
-/** Check if a reward ID matching this theme/pieces exists in unlocked rewards */
-function isRewardUnlocked(
-  type: "board-theme" | "piece-color",
-  id: string,
-  unlockedRewards: string[]
-): boolean {
-  if (id === "classic") return true; // classic always unlocked
-  for (const chest of CHESTS) {
-    for (const reward of chest.rewards) {
-      if (type === "board-theme" && reward.themeId === id && unlockedRewards.includes(reward.id)) return true;
-      if (type === "piece-color" && reward.pieceColorId === id && unlockedRewards.includes(reward.id)) return true;
-    }
-  }
-  return false;
-}
 
 export default function RewardCollection({ open, onClose }: RewardCollectionProps) {
   const { user, activeChild, refreshChildren } = useAuth();
@@ -103,8 +74,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
     async (theme: BoardTheme) => {
       if (!user || !activeChild || saving) return;
       if (theme.id === activeThemeId) return;
-      if (!isRewardUnlocked("board-theme", theme.id, unlockedRewards)) return;
-
       sfx("button-tap");
       setSaving(true);
       try {
@@ -128,8 +97,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
     async (colorSet: PieceColorSet) => {
       if (!user || !activeChild || saving) return;
       if (colorSet.id === activePieceId) return;
-      if (!isRewardUnlocked("piece-color", colorSet.id, unlockedRewards)) return;
-
       sfx("button-tap");
       setSaving(true);
       try {
@@ -288,21 +255,16 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
           <div className="grid grid-cols-3 gap-3">
             {BOARD_THEMES.map((theme) => {
-              const unlocked = isRewardUnlocked("board-theme", theme.id, unlockedRewards);
               const isActive = theme.id === activeThemeId;
-              const chest = getChestForReward("board-theme", theme.id);
 
               return (
                 <button
                   key={theme.id}
-                  onClick={() => unlocked && selectTheme(theme)}
-                  disabled={!unlocked}
+                  onClick={() => selectTheme(theme)}
                   className="relative flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all"
                   style={{
                     background: isActive ? "rgba(252, 211, 77, 0.15)" : "white",
                     border: isActive ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                    opacity: unlocked ? 1 : 0.5,
-                    filter: unlocked ? "none" : "grayscale(0.8)",
                   }}
                 >
                   <MiniBoardPreview theme={theme} size="sm" />
@@ -311,20 +273,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   {isActive && (
                     <div className="absolute -top-1.5 -right-1.5">
                       <Image src="/icons/icon-check-circle.webp" alt="Active" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
-                    </div>
-                  )}
-
-                  {/* Lock overlay for locked items */}
-                  {!unlocked && (
-                    <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/10">
-                      <div className="flex flex-col items-center">
-                        <Image src="/icons/icon-lock.webp" alt="Locked" width={20} height={20} className="object-contain" style={{ width: 20, height: "auto" }} />
-                        {chest && (
-                          <span className="text-[10px] font-bold mt-0.5" style={{ color: "var(--ck-text-light)" }}>
-                            {chest.starsRequired}&#11088;
-                          </span>
-                        )}
-                      </div>
                     </div>
                   )}
 
@@ -350,21 +298,16 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
           <div className="grid grid-cols-2 gap-3">
             {PIECE_COLOR_SETS.map((colorSet) => {
-              const unlocked = isRewardUnlocked("piece-color", colorSet.id, unlockedRewards);
               const isActive = colorSet.id === activePieceId;
-              const chest = getChestForReward("piece-color", colorSet.id);
 
               return (
                 <button
                   key={colorSet.id}
-                  onClick={() => unlocked && selectPieceColor(colorSet)}
-                  disabled={!unlocked}
+                  onClick={() => selectPieceColor(colorSet)}
                   className="relative flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all"
                   style={{
                     background: isActive ? "rgba(252, 211, 77, 0.15)" : "white",
                     border: isActive ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                    opacity: unlocked ? 1 : 0.5,
-                    filter: unlocked ? "none" : "grayscale(0.8)",
                   }}
                 >
                   <PieceColorPreview colorSet={colorSet} size={36} />
@@ -373,20 +316,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   {isActive && (
                     <div className="absolute -top-1.5 -right-1.5">
                       <Image src="/icons/icon-check-circle.webp" alt="Active" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
-                    </div>
-                  )}
-
-                  {/* Lock overlay */}
-                  {!unlocked && (
-                    <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/10">
-                      <div className="flex flex-col items-center">
-                        <Image src="/icons/icon-lock.webp" alt="Locked" width={20} height={20} className="object-contain" style={{ width: 20, height: "auto" }} />
-                        {chest && (
-                          <span className="text-[10px] font-bold mt-0.5" style={{ color: "var(--ck-text-light)" }}>
-                            {chest.starsRequired}&#11088;
-                          </span>
-                        )}
-                      </div>
                     </div>
                   )}
 
