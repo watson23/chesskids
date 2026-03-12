@@ -6,6 +6,7 @@ import NavIcon from "@/components/NavIcon";
 import type { PuzzleDefinition } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
 import type { LocaleKey } from "@/types/locale";
+import type { PuzzleProgress } from "@/types/user";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
@@ -23,15 +24,36 @@ interface PuzzlePlayerProps {
   onComplete: () => void;
   uid?: string;
   childId?: string;
+  /** Solved status per puzzle ID — enables teal star nav + jump-to-puzzle */
+  puzzleProgress?: Record<string, PuzzleProgress>;
+  /** Called after a puzzle is solved so parent can refresh progress */
+  onPuzzleSolved?: () => void;
 }
 
 type Phase = "solving" | "success" | "celebrate";
+
+/** Teal star for the puzzle nav bar */
+function TealStar({ filled, active, size = 24 }: { filled: boolean; active: boolean; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"
+        fill={filled ? "#2DD4BF" : "none"}
+        stroke={active ? "#14B8A6" : filled ? "#14B8A6" : "#99F6E4"}
+        strokeWidth={active ? "2.5" : "1.5"}
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function PuzzlePlayer({
   puzzles,
   onComplete,
   uid,
   childId,
+  puzzleProgress,
+  onPuzzleSolved,
 }: PuzzlePlayerProps) {
   const { say, sfx } = useAudio();
   const { boardTheme, pieceColors } = useActiveTheme();
@@ -41,6 +63,8 @@ export default function PuzzlePlayer({
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [phase, setPhase] = useState<Phase>("solving");
   const [stars, setStars] = useState(0);
+  // Track puzzles solved in this session (for immediate star fill before Firestore roundtrip)
+  const [solvedInSession, setSolvedInSession] = useState<Set<string>>(new Set());
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [validMoves, setValidMoves] = useState<Square[]>([]);
@@ -60,6 +84,8 @@ export default function PuzzlePlayer({
     () => puzzles[puzzleIndex] ?? null,
     [puzzles, puzzleIndex]
   );
+
+  const hasTealStars = puzzleProgress !== undefined;
 
   // 4-second idle timer during solving phase — show tap hint
   useEffect(() => {
@@ -90,6 +116,22 @@ export default function PuzzlePlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, puzzleIndex]);
 
+  /** Jump to a specific puzzle by index */
+  const jumpToPuzzle = useCallback(
+    (index: number) => {
+      if (index === puzzleIndex || phase === "success") return;
+      sfx("button-tap");
+      setPuzzleIndex(index);
+      setPhase("solving");
+      setSelectedSquare(null);
+      setValidMoves([]);
+      setLastMove(null);
+      setWrongAttempts(0);
+      setNarrationOverride(null);
+    },
+    [puzzleIndex, phase, sfx]
+  );
+
   const handleSquareTap = useCallback(
     (square: Square) => {
       if (phase !== "solving" || !currentPuzzle) return;
@@ -104,13 +146,7 @@ export default function PuzzlePlayer({
         if (isValidSource && piece) {
           setSelectedSquare(square);
           sfx("piece-pickup");
-          // Don't show destination hints for checkmate puzzles — let the child find the answer
-          if (currentPuzzle.category !== "checkmate") {
-            const destinations = correctMoves
-              .filter((m) => m.from === square)
-              .map((m) => m.to);
-            setValidMoves(destinations);
-          }
+          // No destination hints in practice — puzzles test learned skills
         }
         return;
       }
@@ -152,19 +188,28 @@ export default function PuzzlePlayer({
 
         // Save puzzle progress to Firestore
         if (uid && childId) markPuzzleSolved(uid, childId, currentPuzzle.id);
+        // Track in session for immediate star fill
+        setSolvedInSession((prev) => new Set(prev).add(currentPuzzle.id));
+        // Notify parent to refresh progress
+        onPuzzleSolved?.();
 
-        // Show success briefly, then advance
+        // Show success briefly, then advance to next unsolved (or stay)
         setPhase("success");
         setTimeout(() => {
-          const nextIndex = puzzleIndex + 1;
-          if (nextIndex < puzzles.length) {
-            setPuzzleIndex(nextIndex);
+          if (hasTealStars) {
+            // Stay on current puzzle (star fills in), user can tap another
             setPhase("solving");
           } else {
-            // All puzzles done
-            const earnedStars = calculateStars(wrongAttempts);
-            setStars(earnedStars);
-            setPhase("celebrate");
+            const nextIndex = puzzleIndex + 1;
+            if (nextIndex < puzzles.length) {
+              setPuzzleIndex(nextIndex);
+              setPhase("solving");
+            } else {
+              // All puzzles done (lesson mode)
+              const earnedStars = calculateStars(wrongAttempts);
+              setStars(earnedStars);
+              setPhase("celebrate");
+            }
           }
         }, 2500);
       } else {
@@ -190,6 +235,11 @@ export default function PuzzlePlayer({
       puzzleIndex,
       puzzles.length,
       wrongAttempts,
+      onComplete,
+      onPuzzleSolved,
+      hasTealStars,
+      uid,
+      childId,
     ]
   );
 
@@ -203,44 +253,64 @@ export default function PuzzlePlayer({
     onComplete();
   }, [sfx, onComplete]);
 
-  // Progress dots
   const totalPuzzles = puzzles.length;
+
+  /** Check if a puzzle is solved (from Firestore progress OR solved in this session) */
+  const isPuzzleSolved = useCallback(
+    (puzzle: PuzzleDefinition) => {
+      return (puzzleProgress?.[puzzle.id]?.solved ?? false) || solvedInSession.has(puzzle.id);
+    },
+    [puzzleProgress, solvedInSession]
+  );
 
   return (
     <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
-        <NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />
+        <NavIcon icon="icon-back" alt="Back" onClick={handleGoHome} />
 
-        {/* Progress dots */}
-        <div className="flex gap-1.5 items-center">
-          {Array.from({ length: totalPuzzles }, (_, i) => {
-            const isCompleted = i < puzzleIndex;
-            const isCurrent =
-              i === puzzleIndex && phase !== "celebrate";
-            return (
-              <div
-                key={i}
-                className={`rounded-full transition-all duration-300 ${
-                  isCompleted
-                    ? "bg-green-400 w-2.5 h-2.5"
-                    : isCurrent
-                      ? "bg-amber-400 w-3 h-3 animate-pulse"
-                      : "bg-gray-300 w-2 h-2"
-                }`}
-              />
-            );
-          })}
-        </div>
+        {/* Teal star navigation (practice mode) or progress dots (lesson mode) */}
+        {hasTealStars ? (
+          <div className="flex gap-1 items-center">
+            {puzzles.map((puzzle, i) => {
+              const isCurrent = i === puzzleIndex && phase !== "celebrate";
+              const isSolved = isPuzzleSolved(puzzle);
+              return (
+                <button
+                  key={puzzle.id}
+                  onClick={() => jumpToPuzzle(i)}
+                  className={`transition-transform ${isCurrent ? "scale-125" : "hover:scale-110"}`}
+                  aria-label={`Puzzle ${i + 1}${isSolved ? ", solved" : ""}${isCurrent ? ", current" : ""}`}
+                >
+                  <TealStar filled={isSolved} active={isCurrent} size={isCurrent ? 28 : 22} />
+                </button>
+              );
+            })}
+          </div>
+        ) : totalPuzzles > 1 ? (
+          <div className="flex gap-1.5 items-center">
+            {Array.from({ length: totalPuzzles }, (_, i) => {
+              const isCompleted = i < puzzleIndex;
+              const isCurrent =
+                i === puzzleIndex && phase !== "celebrate";
+              return (
+                <div
+                  key={i}
+                  className={`rounded-full transition-all duration-300 ${
+                    isCompleted
+                      ? "bg-green-400 w-2.5 h-2.5"
+                      : isCurrent
+                        ? "bg-amber-400 w-3 h-3 animate-pulse"
+                        : "bg-gray-300 w-2 h-2"
+                  }`}
+                />
+              );
+            })}
+          </div>
+        ) : null}
 
-        {/* Puzzle count */}
-        <div
-          className="w-10 text-xs text-right font-semibold"
-          style={{ color: "var(--ck-text-light)" }}
-          aria-label={`Puzzle ${Math.min(puzzleIndex + 1, totalPuzzles)} of ${totalPuzzles}`}
-        >
-          {Math.min(puzzleIndex + 1, totalPuzzles)}/{totalPuzzles}
-        </div>
+        {/* Spacer to balance back button */}
+        <div className="w-10" />
       </div>
 
       {/* Main content */}

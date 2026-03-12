@@ -1,10 +1,12 @@
 "use client";
 
-import { use, useCallback } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
 import PuzzlePlayer from "@/components/PuzzlePlayer";
 import { useAuth } from "@/hooks/useAuth";
+import { getPuzzleProgress } from "@/lib/firestore";
+import type { PuzzleProgress } from "@/types/user";
 
 const VALID_CATEGORIES: PuzzleCategory[] = [
   "pawn",
@@ -27,10 +29,24 @@ export default function PracticeCategoryPage({
   const { category } = use(params);
   const router = useRouter();
   const { user, activeChild } = useAuth();
+  const [puzzleProgress, setPuzzleProgress] = useState<Record<string, PuzzleProgress>>({});
+
+  // Fetch puzzle progress
+  useEffect(() => {
+    if (!user || !activeChild) return;
+    getPuzzleProgress(user.uid, activeChild.id).then(setPuzzleProgress);
+  }, [user, activeChild]);
 
   const handleComplete = useCallback(() => {
     router.push("/practice");
   }, [router]);
+
+  // Re-fetch progress when a puzzle is solved (called from PuzzlePlayer)
+  const handlePuzzleSolved = useCallback(() => {
+    if (user && activeChild) {
+      getPuzzleProgress(user.uid, activeChild.id).then(setPuzzleProgress);
+    }
+  }, [user, activeChild]);
 
   // Validate category
   if (!VALID_CATEGORIES.includes(category as PuzzleCategory)) {
@@ -67,5 +83,14 @@ export default function PracticeCategoryPage({
     );
   }
 
-  return <PuzzlePlayer puzzles={puzzles} onComplete={handleComplete} uid={user?.uid} childId={activeChild?.id} />;
+  return (
+    <PuzzlePlayer
+      puzzles={puzzles}
+      onComplete={handleComplete}
+      uid={user?.uid}
+      childId={activeChild?.id}
+      puzzleProgress={puzzleProgress}
+      onPuzzleSolved={handlePuzzleSolved}
+    />
+  );
 }

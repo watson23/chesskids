@@ -113,10 +113,11 @@ const knightPuzzles: PuzzleDefinition[] = [
     category: "knight",
     difficulty: 2,
     narrationKey: "puzzle_knight_capture",
+    // Pawn on h5 is a visual distractor but NOT capturable by knight from e4
     boardSetup: board(
       ["e4", w("knight")],
       ["f6", b("bishop")],
-      ["d2", b("pawn")]
+      ["h5", b("pawn")]
     ),
     correctMoves: [{ from: "e4" as Square, to: "f6" as Square }],
     wrongMoveNarrationKey: "try_again",
@@ -214,10 +215,11 @@ const bishopPuzzles: PuzzleDefinition[] = [
     category: "bishop",
     difficulty: 2,
     narrationKey: "puzzle_bishop_capture",
+    // Pawn on b3 is a visual distractor but NOT on bishop's diagonal from d3
     boardSetup: board(
       ["d3", w("bishop")],
       ["f5", b("knight")],
-      ["b1", b("pawn")]
+      ["b3", b("pawn")]
     ),
     correctMoves: [{ from: "d3" as Square, to: "f5" as Square }],
     wrongMoveNarrationKey: "try_again",
@@ -293,10 +295,11 @@ const rookPuzzles: PuzzleDefinition[] = [
     category: "rook",
     difficulty: 2,
     narrationKey: "puzzle_rook_capture",
+    // Pawn on g5 is a visual distractor but NOT on rook's file or rank from d1
     boardSetup: board(
       ["d1", w("rook")],
       ["d7", b("bishop")],
-      ["g1", b("pawn")]
+      ["g5", b("pawn")]
     ),
     correctMoves: [{ from: "d1" as Square, to: "d7" as Square }],
     wrongMoveNarrationKey: "try_again",
@@ -347,11 +350,11 @@ const queenPuzzles: PuzzleDefinition[] = [
     category: "queen",
     difficulty: 3,
     narrationKey: "puzzle_queen_best_move",
-    // Queen should capture the unprotected knight
+    // Queen should capture the knight (3pts) over pawn (1pt). Pawn on d4 is on queen's diagonal.
     boardSetup: board(
       ["a1", w("queen")],
       ["a8", b("knight")],
-      ["h1", b("pawn")]
+      ["d4", b("pawn")]
     ),
     correctMoves: [{ from: "a1" as Square, to: "a8" as Square }],
     wrongMoveNarrationKey: "try_again",
@@ -506,14 +509,14 @@ const checkmatePuzzles: PuzzleDefinition[] = [
     category: "checkmate",
     difficulty: 3,
     narrationKey: "puzzle_checkmate",
-    // Ladder mate: Black king on a8. White rooks on b1 and a file is open. Rook to a1 mates.
+    // Ladder mate: Rb3 covers b-file, Rd1→a1# mates. King a8 can't go to b8/b7 (Rb3) or a7 (Ra1).
     boardSetup: board(
-      ["e1", w("king")],
-      ["b7", w("rook")],
-      ["h1", w("rook")],
+      ["f3", w("king")],
+      ["b3", w("rook")],
+      ["d1", w("rook")],
       ["a8", b("king")]
     ),
-    correctMoves: [{ from: "h1" as Square, to: "a1" as Square }],
+    correctMoves: [{ from: "d1" as Square, to: "a1" as Square }],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "well_done",
   },
@@ -595,14 +598,15 @@ const tacticsPuzzles: PuzzleDefinition[] = [
     category: "tactics",
     difficulty: 3,
     narrationKey: "puzzle_tactic_fork",
-    // Queen fork: move queen to a4 to fork king on e8 and rook on a8
+    // Queen fork: Qc2→e4 checks king on e8 (e-file) and attacks rook a8 (diagonal e4-d5-c6-b7-a8).
+    // Rook on a8 cannot capture queen on e4 (no shared file/rank/diagonal).
     boardSetup: board(
-      ["e1", w("king")],
-      ["d1", w("queen")],
+      ["g1", w("king")],
+      ["c2", w("queen")],
       ["e8", b("king")],
       ["a8", b("rook")]
     ),
-    correctMoves: [{ from: "d1" as Square, to: "a4" as Square }],
+    correctMoves: [{ from: "c2" as Square, to: "e4" as Square }],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "well_done",
   },

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
+import { getPuzzlesByCategory, PUZZLES, type PuzzleCategory } from "@/data/puzzles";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
 import { useAuth } from "@/hooks/useAuth";
@@ -155,6 +155,28 @@ export default function PracticePage() {
           />
           <SpeechBubble text={t("practice_piku_speech")} visible />
         </div>
+
+        {/* Total teal star counter */}
+        {(() => {
+          const totalSolved = PUZZLES.filter(p => puzzleProgress[p.id]?.solved).length;
+          const totalCount = PUZZLES.length;
+          return (
+            <div className="flex items-center justify-center gap-2 px-4 pb-2 animate-fade-in-up">
+              <svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"
+                  fill="#2DD4BF"
+                  stroke="#14B8A6"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="text-sm font-extrabold" style={{ color: "#14B8A6" }}>
+                {totalSolved} / {totalCount}
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Category grid */}
         <div className="flex-1 px-4 py-4 flex justify-center">
