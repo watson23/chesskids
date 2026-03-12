@@ -120,14 +120,14 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
   return (
     <div
-      className="fixed inset-0 z-50 animate-slide-in flex flex-col"
+      className="fixed inset-0 z-50 animate-slide-in"
       style={{ background: "var(--ck-bg) url(/bg-reward-view.webp) center / cover no-repeat" }}
     >
       {/* Semi-transparent overlay for readability */}
       <div className="fixed inset-0 z-0" style={{ background: "rgba(245, 240, 255, 0.5)" }} />
 
       {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 py-3 shrink-0">
+      <div className="relative z-10 flex items-center justify-between px-4 py-3">
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full flex items-center justify-center card-pillow"
@@ -140,9 +140,9 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
         <div className="w-10" />
       </div>
 
-      {/* Scrollable middle: boards + pieces (compact, no labels) */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-4 min-h-0">
-        {/* Boards section — no background bubbles, gold ring = selected */}
+      {/* Single scrollable content area */}
+      <div className="relative z-10 overflow-y-auto px-4 pb-6" style={{ height: "calc(100dvh - 60px)" }}>
+        {/* Boards section — no background, gold ring = selected */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width={18} height={18} viewBox="0 0 16 16" fill="none">
@@ -162,7 +162,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                 <button
                   key={theme.id}
                   onClick={() => selectTheme(theme)}
-                  className={`relative rounded-xl overflow-hidden transition-all ${isActive ? "ring-3 ring-amber-400 scale-105" : "opacity-80"}`}
+                  className={`relative rounded-xl overflow-hidden transition-all ${isActive ? "ring-3 ring-amber-400" : "opacity-75"}`}
                 >
                   <MiniBoardPreview theme={theme} size="sm" />
 
@@ -177,8 +177,8 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           </div>
         </div>
 
-        {/* Pieces section — wrapping grid, no background bubbles */}
-        <div className="mb-2">
+        {/* Pieces section — wrapping grid, frosted background for contrast */}
+        <div className="mb-5">
           <div className="flex items-center gap-2 mb-2">
             <svg width={18} height={18} viewBox="0 0 24 24" fill="var(--ck-purple)">
               <path d="M12 2a4 4 0 00-4 4c0 1.2.6 2.3 1.4 3C7 10.5 5 13 5 16h14c0-3-2-5.5-4.4-7A4.5 4.5 0 0016 6a4 4 0 00-4-4z" opacity="0.7" />
@@ -195,9 +195,9 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                 <button
                   key={colorSet.id}
                   onClick={() => selectPieceColor(colorSet)}
-                  className={`relative flex items-center justify-center p-1.5 rounded-xl transition-all ${isActive ? "ring-3 ring-amber-400 scale-105" : "opacity-80"}`}
+                  className={`relative flex items-center justify-center p-2 rounded-xl transition-all ${isActive ? "ring-3 ring-amber-400 bg-white/40" : "opacity-75 bg-white/20"}`}
                 >
-                  <PieceColorPreview colorSet={colorSet} size={30} />
+                  <PieceColorPreview colorSet={colorSet} size={32} />
 
                   {isActive && (
                     <div className="absolute -top-1 -right-1">
@@ -209,57 +209,55 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
             })}
           </div>
         </div>
-      </div>
 
-      {/* Fixed bottom: outfits + Pikku with chest */}
-      <div className="relative z-10 shrink-0 px-4 pb-3 pt-2">
-        {/* Outfit selectors */}
-        <div className="mb-2">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>
-              {t("wardrobe_head")}
-            </span>
+        {/* Outfits — closest to Pikku */}
+        <div className="mb-3">
+          {/* Head outfits */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>
+                {t("wardrobe_head")}
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              <button
+                onClick={() => toggleOutfit("head", undefined)}
+                className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{
+                  border: !previewOutfit.head ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
+                  background: !previewOutfit.head ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
+                }}
+              >
+                <span className="text-base">✕</span>
+              </button>
+              {headOutfits.map((item) => {
+                const isEquipped = previewOutfit.head === item.image;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => toggleOutfit("head", item.image)}
+                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden"
+                    style={{
+                      border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
+                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
+                    }}
+                  >
+                    <Image
+                      src={item.image}
+                      alt={t(item.nameKey as LocaleKey)}
+                      width={34}
+                      height={34}
+                      className="object-contain"
+                      style={{ width: 34, height: "auto" }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <button
-              onClick={() => toggleOutfit("head", undefined)}
-              className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{
-                border: !previewOutfit.head ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                background: !previewOutfit.head ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-              }}
-            >
-              <span className="text-base">✕</span>
-            </button>
-            {headOutfits.map((item) => {
-              const isEquipped = previewOutfit.head === item.image;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => toggleOutfit("head", item.image)}
-                  className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden"
-                  style={{
-                    border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                    background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                  }}
-                >
-                  <Image
-                    src={item.image}
-                    alt={t(item.nameKey as LocaleKey)}
-                    width={34}
-                    height={34}
-                    className="object-contain"
-                    style={{ width: 34, height: "auto" }}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
-        <div className="flex items-end gap-3">
-          {/* Body outfit selector */}
-          <div className="flex-1 min-w-0">
+          {/* Body outfits */}
+          <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>
                 {t("wardrobe_body")}
@@ -301,25 +299,25 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
               })}
             </div>
           </div>
+        </div>
 
-          {/* Pikku + chest */}
-          <div className="flex items-end gap-1 shrink-0">
-            <Image
-              src="/icons/icon-chest-rewards.webp"
-              alt=""
-              width={56}
-              height={56}
-              className="object-contain drop-shadow-lg"
-              style={{ width: 56, height: "auto" }}
+        {/* Pikku + chest decoration */}
+        <div className="flex justify-center items-end gap-3 pt-2 pb-4">
+          <Image
+            src="/icons/icon-chest-rewards.webp"
+            alt=""
+            width={80}
+            height={80}
+            className="object-contain drop-shadow-lg"
+            style={{ width: 80, height: "auto" }}
+          />
+          <div className="overflow-visible" style={{ marginTop: -20 }}>
+            <PikuWithOutfit
+              expression="standing-happy"
+              headImage={previewOutfit.head}
+              bodyImage={previewOutfit.body}
+              size={130}
             />
-            <div className="overflow-visible" style={{ marginTop: -30 }}>
-              <PikuWithOutfit
-                expression="standing-happy"
-                headImage={previewOutfit.head}
-                bodyImage={previewOutfit.body}
-                size={100}
-              />
-            </div>
           </div>
         </div>
       </div>
