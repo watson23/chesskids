@@ -154,7 +154,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
             <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>Boards</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap gap-2">
             {BOARD_THEMES.map((theme) => {
               const isActive = theme.id === activeThemeId;
 
@@ -162,7 +162,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                 <button
                   key={theme.id}
                   onClick={() => selectTheme(theme)}
-                  className={`relative rounded-xl overflow-hidden transition-all ${isActive ? "ring-3 ring-amber-400" : "opacity-75"}`}
+                  className={`relative shrink-0 rounded-xl overflow-hidden transition-all ${isActive ? "ring-3 ring-amber-400" : "opacity-75"}`}
                 >
                   <MiniBoardPreview theme={theme} size="sm" />
 
