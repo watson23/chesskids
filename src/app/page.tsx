@@ -219,12 +219,13 @@ function HomeContent() {
           ...(activeChild.unlockedRewards ?? []),
           ...newRewardIds.filter((id) => !(activeChild.unlockedRewards ?? []).includes(id)),
         ];
-        // Extract theme/pieceColor from the chest rewards
-        const themeReward = chest.rewards.find((r) => r.type === "board-theme");
-        const pieceReward = chest.rewards.find((r) => r.type === "piece-color");
+        // Extract outfit IDs from chest rewards
+        const outfitIds = chest.rewards
+          .filter((r) => r.type === "outfit" && r.outfitId)
+          .map((r) => r.outfitId!);
         updateChildRewards(
           user.uid, activeChild.id, allRewards,
-          themeReward?.themeId, pieceReward?.pieceColorId
+          undefined, undefined, outfitIds
         ).then(() => refreshChildren()).catch((err) =>
           console.error("Failed to save rewards:", err)
         );
