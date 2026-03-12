@@ -308,20 +308,15 @@ function HomeContent() {
 
       {/* Top navigation bar */}
       <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+8px)] pb-2">
-        {/* Left: character + star counter */}
+        {/* Left: rewards chest + star counter */}
         <div className="flex items-center gap-2">
           <NavIcon
-            icon="icon-character"
-            alt="My character"
+            icon="icon-chest-rewards"
+            alt="My rewards"
             size="md"
-            onClick={() => setActiveChild(null)}
-          />
-          <button
             onClick={() => setShowRewards(true)}
-            className="flex items-center"
-          >
-            <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
-          </button>
+          />
+          <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
         </div>
 
         {/* Right: practice, play, settings */}
