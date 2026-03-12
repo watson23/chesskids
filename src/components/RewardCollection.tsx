@@ -119,9 +119,15 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 animate-slide-in" style={{ background: "var(--ck-bg)" }}>
+    <div
+      className="fixed inset-0 z-50 animate-slide-in"
+      style={{ background: "var(--ck-bg) url(/bg-reward-view.webp) center / cover no-repeat" }}
+    >
+      {/* Semi-transparent overlay for readability */}
+      <div className="fixed inset-0 z-0" style={{ background: "rgba(245, 240, 255, 0.5)" }} />
+
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="relative z-10 flex items-center justify-between px-4 py-3">
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full flex items-center justify-center card-pillow"
@@ -130,25 +136,14 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           <Image src="/icons/icon-close.webp" alt="Close" width={20} height={20} className="object-contain" />
         </button>
 
-        <div className="w-10" /> {/* Spacer for centering (was trophy icon) */}
-
-        <div className="w-10" /> {/* Spacer for centering */}
+        <div className="w-10" />
+        <div className="w-10" />
       </div>
 
       {/* Scrollable content */}
-      <div className="overflow-y-auto px-4 pb-8" style={{ height: "calc(100dvh - 60px)" }}>
-        {/* Outfits section */}
-        <div className="mb-8">
-          {/* Piku preview — pt-10 reserves space for head accessories like crown/hat */}
-          <div className="flex justify-center mb-4 pt-10 overflow-visible">
-            <PikuWithOutfit
-              expression="standing-happy"
-              headImage={previewOutfit.head}
-              bodyImage={previewOutfit.body}
-              size={160}
-            />
-          </div>
-
+      <div className="relative z-10 overflow-y-auto px-4 pb-8" style={{ height: "calc(100dvh - 60px)" }}>
+        {/* Outfits section — selection options on top */}
+        <div className="mb-6">
           {/* Head outfits */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -157,13 +152,12 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
               </span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {/* None button */}
               <button
                 onClick={() => toggleOutfit("head", undefined)}
                 className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
                 style={{
                   border: !previewOutfit.head ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                  background: !previewOutfit.head ? "rgba(252, 211, 77, 0.15)" : "white",
+                  background: !previewOutfit.head ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
                 }}
               >
                 <span className="text-lg">✕</span>
@@ -177,7 +171,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                     className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center relative overflow-hidden"
                     style={{
                       border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "white",
+                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
                     }}
                   >
                     <Image
@@ -202,13 +196,12 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
               </span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {/* None button */}
               <button
                 onClick={() => toggleOutfit("body", undefined)}
                 className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
                 style={{
                   border: !previewOutfit.body ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                  background: !previewOutfit.body ? "rgba(252, 211, 77, 0.15)" : "white",
+                  background: !previewOutfit.body ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
                 }}
               >
                 <span className="text-lg">✕</span>
@@ -222,7 +215,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                     className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center relative overflow-hidden"
                     style={{
                       border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "white",
+                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
                     }}
                   >
                     <Image
@@ -242,7 +235,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
         {/* Boards section */}
         <div className="mb-6">
-          {/* Visual section header — mini board icon */}
           <div className="flex items-center gap-2 mb-3">
             <svg width={20} height={20} viewBox="0 0 16 16" fill="none">
               <rect x="0" y="0" width="7" height="7" rx="1" fill="var(--ck-purple)" opacity="0.9" />
@@ -263,13 +255,12 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   onClick={() => selectTheme(theme)}
                   className="relative flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all"
                   style={{
-                    background: isActive ? "rgba(252, 211, 77, 0.15)" : "white",
+                    background: isActive ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
                     border: isActive ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
                   }}
                 >
                   <MiniBoardPreview theme={theme} size="sm" />
 
-                  {/* Active checkmark */}
                   {isActive && (
                     <div className="absolute -top-1.5 -right-1.5">
                       <Image src="/icons/icon-check-circle.webp" alt="Active" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
@@ -286,8 +277,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
         </div>
 
         {/* Pieces section */}
-        <div>
-          {/* Visual section header — piece icon */}
+        <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <svg width={20} height={20} viewBox="0 0 24 24" fill="var(--ck-purple)">
               <path d="M12 2a4 4 0 00-4 4c0 1.2.6 2.3 1.4 3C7 10.5 5 13 5 16h14c0-3-2-5.5-4.4-7A4.5 4.5 0 0016 6a4 4 0 00-4-4z" opacity="0.7" />
@@ -306,13 +296,12 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                   onClick={() => selectPieceColor(colorSet)}
                   className="relative flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all"
                   style={{
-                    background: isActive ? "rgba(252, 211, 77, 0.15)" : "white",
+                    background: isActive ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
                     border: isActive ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
                   }}
                 >
                   <PieceColorPreview colorSet={colorSet} size={36} />
 
-                  {/* Active checkmark */}
                   {isActive && (
                     <div className="absolute -top-1.5 -right-1.5">
                       <Image src="/icons/icon-check-circle.webp" alt="Active" width={24} height={24} className="object-contain" style={{ width: 24, height: "auto" }} />
@@ -325,6 +314,28 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* Pikku + chest decoration at the bottom */}
+        <div className="flex flex-col items-center gap-2 pt-4 pb-4">
+          <div className="flex items-end gap-4">
+            <Image
+              src="/icons/icon-chest-rewards.webp"
+              alt=""
+              width={120}
+              height={120}
+              className="object-contain drop-shadow-lg"
+              style={{ width: 120, height: "auto" }}
+            />
+            <div className="overflow-visible pt-10">
+              <PikuWithOutfit
+                expression="standing-happy"
+                headImage={previewOutfit.head}
+                bodyImage={previewOutfit.body}
+                size={140}
+              />
+            </div>
           </div>
         </div>
       </div>
