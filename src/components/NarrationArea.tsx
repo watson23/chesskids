@@ -17,7 +17,7 @@ interface NarrationAreaProps {
 function getExpression(phase: LessonPhase) {
   switch (phase) {
     case "watch":
-      return "teaching" as const;
+      return "standing-teaching" as const;
     case "try":
       return "thinking" as const;
     case "celebrate":

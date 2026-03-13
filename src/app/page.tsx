@@ -182,27 +182,7 @@ function HomeContent() {
     if (chestParam !== null) {
       const chestIndex = parseInt(chestParam, 10);
       if (!isNaN(chestIndex)) {
-        // Mark chest as opened + save rewards (reuse existing handleChestClose logic)
-        setOpenedChests((prev) =>
-          prev.includes(chestIndex) ? prev : [...prev, chestIndex]
-        );
-        const chest = CHESTS.find((c) => c.index === chestIndex);
-        if (chest && user && activeChild) {
-          const newRewardIds = chest.rewards.map((r) => r.id);
-          const allRewards = [
-            ...(activeChild.unlockedRewards ?? []),
-            ...newRewardIds.filter((id) => !(activeChild.unlockedRewards ?? []).includes(id)),
-          ];
-          const outfitIds = chest.rewards
-            .filter((r) => r.type === "outfit" && r.outfitId)
-            .map((r) => r.outfitId!);
-          updateChildRewards(
-            user.uid, activeChild.id, allRewards,
-            undefined, undefined, outfitIds
-          ).then(() => refreshChildren()).catch((err) =>
-            console.error("Failed to save chest rewards:", err)
-          );
-        }
+        saveChestRewards(chestIndex);
       }
     }
 
@@ -232,21 +212,20 @@ function HomeContent() {
     []
   );
 
-  const handleChestClose = useCallback(() => {
-    if (openChestIndex !== null && user && activeChild) {
+  /** Save chest rewards to Firestore and mark chest as opened */
+  const saveChestRewards = useCallback(
+    (chestIndex: number) => {
+      if (!user || !activeChild) return;
       setOpenedChests((prev) =>
-        prev.includes(openChestIndex) ? prev : [...prev, openChestIndex]
+        prev.includes(chestIndex) ? prev : [...prev, chestIndex]
       );
-
-      // Save rewards to Firestore
-      const chest = CHESTS.find((c) => c.index === openChestIndex);
+      const chest = CHESTS.find((c) => c.index === chestIndex);
       if (chest) {
         const newRewardIds = chest.rewards.map((r) => r.id);
         const allRewards = [
           ...(activeChild.unlockedRewards ?? []),
           ...newRewardIds.filter((id) => !(activeChild.unlockedRewards ?? []).includes(id)),
         ];
-        // Extract outfit IDs from chest rewards
         const outfitIds = chest.rewards
           .filter((r) => r.type === "outfit" && r.outfitId)
           .map((r) => r.outfitId!);
@@ -254,12 +233,19 @@ function HomeContent() {
           user.uid, activeChild.id, allRewards,
           undefined, undefined, outfitIds
         ).then(() => refreshChildren()).catch((err) =>
-          console.error("Failed to save rewards:", err)
+          console.error("Failed to save chest rewards:", err)
         );
       }
+    },
+    [user, activeChild, refreshChildren]
+  );
+
+  const handleChestClose = useCallback(() => {
+    if (openChestIndex !== null) {
+      saveChestRewards(openChestIndex);
     }
     setOpenChestIndex(null);
-  }, [openChestIndex, user, activeChild, refreshChildren]);
+  }, [openChestIndex, saveChestRewards]);
 
   const handleAddChild = useCallback(
     async (name: string, avatar: string) => {
