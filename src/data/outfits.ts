@@ -92,7 +92,8 @@ export const ALL_OUTFITS: OutfitItem[] = [
 ];
 
 export function getOutfitItem(id: string): OutfitItem | undefined {
-  return ALL_OUTFITS.find((item) => item.id === id);
+  // Prefer AVAILABLE_OUTFITS (has correct slots/images) over ALL_OUTFITS
+  return AVAILABLE_OUTFITS.find((item) => item.id === id) ?? ALL_OUTFITS.find((item) => item.id === id);
 }
 
 export function getOutfitsBySlot(slot: OutfitSlot): OutfitItem[] {

@@ -95,10 +95,9 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
     }
   }, [phase, pikkyRevealed, isLastReward, onClose, sfx]);
 
-  // Build last outfit's head/body images for PikuWithOutfit
-  const lastOutfit = outfitRewards[outfitRewards.length - 1]?.outfit;
-  const pikuHead = lastOutfit?.slot === "head" ? lastOutfit.image : undefined;
-  const pikuBody = lastOutfit?.slot === "body" ? lastOutfit.image : undefined;
+  // Collect all head/body images from chest rewards for PikuWithOutfit
+  const pikuHead = outfitRewards.find((r) => r.outfit.slot === "head")?.outfit.image;
+  const pikuBody = outfitRewards.find((r) => r.outfit.slot === "body")?.outfit.image;
 
   // Memoize sparkle elements
   const sparkleElements = useMemo(
