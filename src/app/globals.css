@@ -187,6 +187,12 @@ html, body {
 }
 .animate-chest-bounce-in { animation: chest-bounce-in 0.6s ease-out; }
 
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-8px); opacity: 1; }
+}
+.animate-bounce-gentle { animation: bounce-gentle 1.5s ease-in-out infinite; }
+
 @keyframes lid-open {
   0% { transform: rotateX(0deg); }
   70% { transform: rotateX(-120deg); }

@@ -6,6 +6,7 @@ import Confetti from "@/components/Confetti";
 import PikuWithOutfit from "@/components/PikuWithOutfit";
 import { getOutfitItem } from "@/data/outfits";
 import { useAudio } from "@/hooks/useAudio";
+import { useLocale } from "@/hooks/useLocale";
 import type { ChestDefinition } from "@/types/lesson";
 
 interface ChestOpenModalProps {
@@ -37,6 +38,7 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
   const [showConfetti, setShowConfetti] = useState(false);
   const [pikkyRevealed, setPikkyRevealed] = useState(false);
   const { sfx } = useAudio();
+  const { t } = useLocale();
 
   const outfitRewards = chest.rewards
     .filter((r) => r.type === "outfit" && r.outfitId)
@@ -249,13 +251,13 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
               />
             </div>
 
-            {/* Tap indicator — gentle pulsing ring (no text) */}
-            <div
-              className="mt-6 w-12 h-12 rounded-full animate-pulse"
-              style={{
-                background: "radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 60%, transparent 70%)",
-              }}
-            />
+            {/* Tap indicator — bouncing hand icon + text */}
+            <div className="mt-8 flex flex-col items-center animate-bounce-gentle">
+              <span className="text-3xl" role="img" aria-label="tap">👆</span>
+              <span className="text-white text-sm font-bold mt-1 drop-shadow-md">
+                {t("tap_hint")}
+              </span>
+            </div>
           </div>
         )}
 
@@ -269,12 +271,18 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
               size={200}
             />
 
-            {/* Close button */}
+            {/* Close button — illustrated checkmark */}
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="mt-6 btn-3d btn-3d-gold animate-celebrate-pop"
+              className="mt-6 animate-celebrate-pop"
             >
-              <span className="text-lg">&#10003;</span>
+              <Image
+                src="/icons/icon-check-circle.webp"
+                alt="Done"
+                width={56}
+                height={56}
+                style={{ width: 56, height: "auto", filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.3))" }}
+              />
             </button>
           </div>
         )}
