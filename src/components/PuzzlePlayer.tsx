@@ -178,6 +178,17 @@ export default function PuzzlePlayer({
             newPieces[square] = piece;
           }
 
+          // En passant: pawn captures diagonally to empty square → remove captured pawn
+          if (piece.type === "pawn") {
+            const fromFile = selectedSquare[0];
+            const toFile = square[0];
+            if (fromFile !== toFile && !boardPieces[square]) {
+              // Diagonal move to empty square = en passant
+              const capturedSquare = `${toFile}${selectedSquare[1]}` as Square;
+              delete newPieces[capturedSquare];
+            }
+          }
+
           setBoardPieces(newPieces);
         }
         setLastMove({ from: selectedSquare, to: square });
@@ -197,7 +208,18 @@ export default function PuzzlePlayer({
         setPhase("success");
         setTimeout(() => {
           if (hasTealStars) {
-            // Stay on current puzzle (star fills in), user can tap another
+            // Auto-advance to next unsolved puzzle
+            // Use fresh solvedInSession since we just added current puzzle above
+            const newSolved = new Set(solvedInSession);
+            newSolved.add(currentPuzzle.id);
+            const nextUnsolved = puzzles.findIndex((p, i) =>
+              i > puzzleIndex &&
+              !(puzzleProgress?.[p.id]?.solved ?? false) &&
+              !newSolved.has(p.id)
+            );
+            if (nextUnsolved !== -1) {
+              setPuzzleIndex(nextUnsolved);
+            }
             setPhase("solving");
           } else {
             const nextIndex = puzzleIndex + 1;
@@ -240,6 +262,8 @@ export default function PuzzlePlayer({
       hasTealStars,
       uid,
       childId,
+      solvedInSession,
+      puzzleProgress,
     ]
   );
 

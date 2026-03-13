@@ -185,6 +185,17 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
             }
           }
 
+          // En passant: pawn captures diagonally to empty square → remove captured pawn
+          if (piece.type === "pawn") {
+            const fromFile = selectedSquare[0];
+            const toFile = square[0];
+            if (fromFile !== toFile && !boardPieces[square]) {
+              // Diagonal move to empty square = en passant
+              const capturedSquare = `${toFile}${selectedSquare[1]}` as Square;
+              delete newPieces[capturedSquare];
+            }
+          }
+
           setBoardPieces(newPieces);
         }
         setLastMove({ from: selectedSquare, to: square });

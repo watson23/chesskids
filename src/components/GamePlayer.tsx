@@ -244,9 +244,9 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
-      {/* Top bar: home button */}
+      {/* Top bar: back to opponents */}
       <div className="flex items-center px-4 pt-3 pb-1">
-        <NavIcon icon="icon-home" alt="Back to opponents" onClick={handleExit} />
+        <NavIcon icon="icon-back" alt="Back to opponents" size="md" onClick={handleExit} />
       </div>
 
       {/* Floating opponent */}

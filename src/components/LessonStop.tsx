@@ -166,22 +166,20 @@ export default function LessonStop({
         {index + 1}
       </div>
 
-      {/* Stars for completed lessons */}
-      {status === "completed" && (
-        <div className="flex gap-0.5 mt-0.5">
-          {Array.from({ length: 3 }, (_, i) => (
-            <Image
-              key={i}
-              src={i < stars ? "/icons/icon-star-full.webp" : "/icons/icon-star-empty.webp"}
-              alt={i < stars ? "Star earned" : "Star empty"}
-              width={14}
-              height={14}
-              className="object-contain"
-              style={{ width: 14, height: "auto" }}
-            />
-          ))}
-        </div>
-      )}
+      {/* Stars — always reserve space to prevent layout shift */}
+      <div className={`flex gap-0.5 mt-0.5 ${status === "completed" ? "" : "invisible"}`}>
+        {Array.from({ length: 3 }, (_, i) => (
+          <Image
+            key={i}
+            src={i < stars ? "/icons/icon-star-full.webp" : "/icons/icon-star-empty.webp"}
+            alt={i < stars ? "Star earned" : "Star empty"}
+            width={14}
+            height={14}
+            className="object-contain"
+            style={{ width: 14, height: "auto" }}
+          />
+        ))}
+      </div>
     </button>
   );
 }
