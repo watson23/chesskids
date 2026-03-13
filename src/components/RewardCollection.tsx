@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "@/hooks/useAudio";
 import { updateChildRewards } from "@/lib/firestore";
 import PikuWithOutfit from "@/components/PikuWithOutfit";
-import { getAvailableBySlot } from "@/data/outfits";
+import { getAvailableBySlot, isChestReward } from "@/data/outfits";
 import { updateEquippedOutfit } from "@/lib/firestore";
 import { useLocale } from "@/hooks/useLocale";
 import type { BoardTheme } from "@/types/chess";
@@ -38,8 +38,16 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
     setPreviewOutfit(activeChild?.equippedOutfit ?? {});
   }, [activeChild?.equippedOutfit]);
 
-  const headOutfits = getAvailableBySlot("head");
-  const bodyOutfits = getAvailableBySlot("body");
+  // Only show outfits unlocked from chests (or free items not gated by any chest)
+  const unlockedOutfitIds = new Set(
+    unlockedRewards.filter((r) => r.startsWith("outfit-")).map((r) => r.replace("outfit-", ""))
+  );
+  const headOutfits = getAvailableBySlot("head").filter(
+    (item) => unlockedOutfitIds.has(item.id) || !isChestReward(item.id)
+  );
+  const bodyOutfits = getAvailableBySlot("body").filter(
+    (item) => unlockedOutfitIds.has(item.id) || !isChestReward(item.id)
+  );
 
   const toggleOutfit = useCallback(
     async (slot: "head" | "body", image: string | undefined) => {
@@ -116,8 +124,28 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
         <div className="w-10" />
       </div>
 
-      {/* Single scrollable content area */}
-      <div className="relative z-10 overflow-y-auto px-4 pb-6" style={{ height: "calc(100dvh - 60px)" }}>
+      {/* Pikku + chest anchored at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center items-end pb-2 pointer-events-none">
+        <Image
+          src="/icons/icon-chest-rewards.webp"
+          alt=""
+          width={70}
+          height={70}
+          className="object-contain drop-shadow-lg"
+          style={{ width: 70, height: "auto" }}
+        />
+        <div className="overflow-visible" style={{ marginTop: -20, marginLeft: -8 }}>
+          <PikuWithOutfit
+            expression="standing-happy"
+            headImage={previewOutfit.head}
+            bodyImage={previewOutfit.body}
+            size={120}
+          />
+        </div>
+      </div>
+
+      {/* Scrollable content area — extra bottom padding for Pikku */}
+      <div className="relative z-10 overflow-y-auto px-4 pb-40" style={{ height: "calc(100dvh - 60px)" }}>
         {/* Boards section — no background, gold ring = selected */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -244,25 +272,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           </div>
         </div>
 
-        {/* Pikku + chest decoration */}
-        <div className="flex justify-center items-end gap-3 pt-2 pb-4">
-          <Image
-            src="/icons/icon-chest-rewards.webp"
-            alt=""
-            width={80}
-            height={80}
-            className="object-contain drop-shadow-lg"
-            style={{ width: 80, height: "auto" }}
-          />
-          <div className="overflow-visible" style={{ marginTop: -20 }}>
-            <PikuWithOutfit
-              expression="standing-happy"
-              headImage={previewOutfit.head}
-              bodyImage={previewOutfit.body}
-              size={130}
-            />
-          </div>
-        </div>
       </div>
     </div>
   );

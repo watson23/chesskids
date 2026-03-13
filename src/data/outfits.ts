@@ -121,3 +121,15 @@ export const AVAILABLE_OUTFITS: OutfitItem[] = [
 export function getAvailableBySlot(slot: OutfitSlot): OutfitItem[] {
   return AVAILABLE_OUTFITS.filter((item) => item.slot === slot);
 }
+
+/** Check if an outfit is a chest reward (i.e. needs to be unlocked) */
+export function isChestReward(outfitId: string): boolean {
+  // Import would create circular dep, so just check the naming convention
+  // Chest rewards use "outfit-{id}" format in unlockedRewards
+  // All chest-gated outfits are defined in chests.ts — we hardcode the set here
+  const CHEST_OUTFIT_IDS = new Set([
+    "pink-bow", "blue-bow", "mint-bow", "peach-bow",
+    "purple-bow", "gold-bow", "wizard-hat", "medal-snowflake",
+  ]);
+  return CHEST_OUTFIT_IDS.has(outfitId);
+}
