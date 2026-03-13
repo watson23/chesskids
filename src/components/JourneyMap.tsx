@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { LESSONS } from "@/data/lessons";
-import { CHESTS } from "@/data/chests";
+import { CHESTS, getChestForLesson } from "@/data/chests";
 import LessonStop from "@/components/LessonStop";
 import TreasureChest from "@/components/TreasureChest";
 import JourneyMapOnboarding from "@/components/JourneyMapOnboarding";
@@ -119,7 +119,7 @@ export default function JourneyMap({
   equippedOutfit,
 }: JourneyMapProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { sfx } = useAudio();
+  const { sfx, say } = useAudio();
   const [sparkleLesson, setSparkleLesson] = useState<string | null>(null);
   const [unlockingIndex, setUnlockingIndex] = useState<number | null>(null);
   const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
@@ -211,20 +211,47 @@ export default function JourneyMap({
       sfx("chest-open");
     }, 2500));
 
-    // 3100ms: clear unlock animation, start persistent glow, call done
+    // 3100ms: clear unlock animation, start persistent glow
     timers.push(setTimeout(() => {
       setUnlockingIndex(null);
       setGlowingIndex(justUnlockedLesson);
-      onUnlockAnimationDone?.();
     }, 3100));
 
-    // 6100ms: clear glow (CSS animation is 3s)
-    timers.push(setTimeout(() => {
-      setGlowingIndex(null);
-    }, 6100));
+    // Check if this lesson completion unlocked a chest
+    const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
+    const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
+
+    if (hasNewChest) {
+      // 4000ms: scroll to the newly unlocked chest + Piku voice callout
+      timers.push(setTimeout(() => {
+        setGlowingIndex(null);
+        const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
+        if (container) {
+          const mapHeight = container.scrollHeight;
+          const targetScroll = (chestPos.y / 100) * mapHeight - container.clientHeight / 2;
+          container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+        }
+        say("chest_appeared");
+      }, 4000));
+
+      // 7000ms: done — chest stays glowing on map via existing unlocked styling
+      timers.push(setTimeout(() => {
+        onUnlockAnimationDone?.();
+      }, 7000));
+    } else {
+      // No chest — finish normally
+      timers.push(setTimeout(() => {
+        onUnlockAnimationDone?.();
+      }, 3100));
+
+      // 6100ms: clear glow
+      timers.push(setTimeout(() => {
+        setGlowingIndex(null);
+      }, 6100));
+    }
 
     return () => timers.forEach(clearTimeout);
-  }, [justCompletedLesson, justUnlockedLesson, sfx, onUnlockAnimationDone]);
+  }, [justCompletedLesson, justUnlockedLesson, sfx, say, openedChests, onUnlockAnimationDone]);
 
   const handleLockedTap = useCallback(() => {
     sfx("wrong-move");

@@ -177,15 +177,6 @@ function HomeContent() {
 
     processCompletion(completedLessonId, stars, existing);
 
-    // Process chest opened during lesson celebration
-    const chestParam = searchParams.get("chest");
-    if (chestParam !== null) {
-      const chestIndex = parseInt(chestParam, 10);
-      if (!isNaN(chestIndex)) {
-        saveChestRewards(chestIndex);
-      }
-    }
-
     // Clear URL params
     router.replace("/", { scroll: false });
   }, [

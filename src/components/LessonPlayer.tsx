@@ -16,8 +16,6 @@ import Piku from "@/components/Piku";
 import FinalCelebration from "@/components/FinalCelebration";
 import TapHint from "@/components/TapHint";
 import { LESSONS } from "@/data/lessons";
-import { getChestForLesson } from "@/data/chests";
-import ChestOpenModal from "@/components/ChestOpenModal";
 import { useLessonPlayer } from "@/hooks/useLessonPlayer";
 import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
@@ -54,12 +52,9 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
   const [phaseOverride, setPhaseOverride] = useState<"watch" | "try" | "celebrate" | null>(null);
   const [boardTransition, setBoardTransition] = useState(false);
-  const [chestDismissed, setChestDismissed] = useState(false);
   const [watchTapFeedback, setWatchTapFeedback] = useState(false);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPhaseRef = useRef(state.phase);
-
-  const unlockedChest = getChestForLesson(lesson.id);
 
   // Brief board fade on phase change (watch → try) + transition sound
   useEffect(() => {
@@ -255,15 +250,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const handleGoHome = useCallback(() => { sfx("button-tap"); router.push("/"); }, [sfx, router]);
   const handleContinue = useCallback(() => {
     sfx("button-tap");
-    const params = new URLSearchParams({
-      completed: lesson.id,
-      stars: String(state.stars),
-    });
-    if (chestDismissed && unlockedChest) {
-      params.set("chest", String(unlockedChest.index));
-    }
-    router.push(`/?${params.toString()}`);
-  }, [sfx, router, lesson.id, state.stars, chestDismissed, unlockedChest]);
+    router.push(`/?completed=${encodeURIComponent(lesson.id)}&stars=${state.stars}`);
+  }, [sfx, router, lesson.id, state.stars]);
 
   const isLastLesson = LESSONS[LESSONS.length - 1]?.id === lesson.id;
 
@@ -311,21 +299,9 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
               />
               <Piku expression="standing-celebrating" size={160} />
               <StarDisplay stars={state.stars} size={56} staggerDelay={300} />
-
-              {/* Chest modal — shown before the continue button if this lesson unlocks a chest */}
-              {unlockedChest && !chestDismissed && (
-                <ChestOpenModal
-                  chest={unlockedChest}
-                  onClose={() => setChestDismissed(true)}
-                />
-              )}
-
-              {/* Continue button only shows after chest is dismissed (or if no chest) */}
-              {(!unlockedChest || chestDismissed) && (
-                <button onClick={handleContinue} className="mt-4 animate-bounce-gentle p-2 active:scale-90 transition-transform">
-                  <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
-                </button>
-              )}
+              <button onClick={handleContinue} className="mt-4 animate-bounce-gentle p-2 active:scale-90 transition-transform">
+                <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
+              </button>
             </div>
           )
         ) : (
