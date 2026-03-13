@@ -86,12 +86,8 @@ export default function FinalCelebration({ stars, onContinue, equippedOutfit }: 
       )}
 
       {/* Continue button */}
-      <button
-        onClick={onContinue}
-        className="btn-3d btn-3d-purple mt-4 flex items-center gap-3 text-lg px-8 py-3"
-      >
-        {t("continue")}
-        <Image src="/icons/icon-next.webp" alt="" width={26} height={26} className="object-contain" />
+      <button onClick={onContinue} className="mt-4 animate-bounce-gentle p-2 active:scale-90 transition-transform">
+        <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
       </button>
     </div>
   );

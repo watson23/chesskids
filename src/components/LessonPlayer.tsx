@@ -267,9 +267,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
               />
               <Piku expression="standing-celebrating" size={160} />
               <StarDisplay stars={state.stars} size={56} staggerDelay={300} />
-              <button onClick={handleContinue} className="btn-3d btn-3d-purple mt-4 flex items-center gap-3 text-lg px-8 py-3">
-                {t("continue")}
-                <Image src="/icons/icon-next.webp" alt="" width={26} height={26} className="object-contain" />
+              <button onClick={handleContinue} className="mt-4 animate-bounce-gentle p-2 active:scale-90 transition-transform">
+                <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
               </button>
             </div>
           )
@@ -303,9 +302,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
             </div>
 
             {state.phase === "watch" && (
-              <button onClick={handleNext} className="btn-3d btn-3d-pink flex items-center gap-2 animate-gentle-bounce">
-                {t("next")}
-                <Image src="/icons/icon-next.webp" alt="" width={22} height={22} className="object-contain" />
+              <button onClick={handleNext} className="animate-bounce-gentle p-2 active:scale-90 transition-transform">
+                <Image src="/icons/icon-next.webp" alt={t("next")} width={64} height={64} className="object-contain drop-shadow-lg" />
               </button>
             )}
 

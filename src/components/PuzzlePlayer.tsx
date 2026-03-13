@@ -323,12 +323,8 @@ export default function PuzzlePlayer({
               {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
             </h2>
             <StarDisplay stars={stars} size={56} />
-            <button
-              onClick={handleContinue}
-              className="btn-3d btn-3d-purple mt-2 px-8 py-3 text-white font-bold text-lg flex items-center gap-2"
-            >
-              {t("continue")}
-              <Image src="/icons/icon-next.webp" alt="" width={24} height={24} className="object-contain" />
+            <button onClick={handleContinue} className="mt-2 animate-bounce-gentle p-2 active:scale-90 transition-transform">
+              <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
             </button>
           </div>
         ) : (
