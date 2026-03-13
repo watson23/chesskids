@@ -18,6 +18,7 @@ interface ChessBoardProps {
   validMoves: Square[];
   lastMove: { from: Square; to: Square } | null;
   onSquareTap: (square: Square) => void;
+  onWatchTap?: () => void;
   flipped?: boolean;
   interactive?: boolean;
 }
@@ -123,6 +124,7 @@ export default function ChessBoard({
   validMoves,
   lastMove,
   onSquareTap,
+  onWatchTap,
   flipped = false,
   interactive = true,
 }: ChessBoardProps) {
@@ -130,9 +132,11 @@ export default function ChessBoard({
     (square: Square) => {
       if (interactive) {
         onSquareTap(square);
+      } else if (onWatchTap) {
+        onWatchTap();
       }
     },
-    [interactive, onSquareTap]
+    [interactive, onSquareTap, onWatchTap]
   );
 
   // Track captured pieces for fade-out animation

@@ -211,5 +211,13 @@
   "wardrobe_locked": "Locked",
   "celebrate_all_complete": "You completed all the lessons! You're a chess champion!",
   "celebrate_champion_reward": "You earned the Champion Crown and Cape!",
-  "celebrate_more_coming": "More adventures coming soon!"
+  "celebrate_more_coming": "More adventures coming soon!",
+  "chest_appeared": "Look! A treasure chest! Tap it to open!",
+  "chest_reward_outfit": "A new outfit for you!",
+  "stuck_nudge": "Good game! Want to play again?",
+  "keep_playing": "Keep playing",
+  "watch_first": "Watch first! It's Piku's turn to show you.",
+  "game_over_win": "You won! Amazing!",
+  "game_over_loss": "Good game! Want to try again?",
+  "game_over_draw": "It's a draw! Well played!"
 }

@@ -12,6 +12,7 @@ import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useAudio } from "@/hooks/useAudio";
 import { getAIMove } from "@/lib/chess-ai";
+import { isBareKing } from "@/lib/stuck-detection";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
 import type { LocaleKey } from "@/types/locale";
@@ -35,6 +36,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const [gameResult, setGameResult] = useState<"win" | "loss" | "draw" | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
+  const [showStuckNudge, setShowStuckNudge] = useState(false);
   const [pikuMood, setPikuMood] = useState<string | null>(null);
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,18 +77,18 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
       if (turn === "black") {
         setGameResult("win");
         sfx("confetti");
-        say("you_win");
+        say("game_over_win");
         // Unlock bear opponent when the player beats the owl (level 3)
         if (difficulty >= 3) {
           localStorage.setItem("mfcm_owl_beaten", "true");
         }
       } else {
         setGameResult("loss");
-        say("you_lose");
+        say("game_over_loss");
       }
     } else {
       setGameResult("draw");
-      say("draw");
+      say("game_over_draw");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameOver.over]);
@@ -117,6 +119,17 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn, gameOver.over]);
+
+  // Detect bare king (player lost all pieces except king) — offer friendly rematch
+  useEffect(() => {
+    if (turn === "white" && !gameOver.over && !gameResult && !showStuckNudge && isBareKing(fen, "white")) {
+      const timer = setTimeout(() => {
+        setShowStuckNudge(true);
+        say("stuck_nudge");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [fen, turn, gameOver.over, gameResult, showStuckNudge, say]);
 
   // Track captures and game events → set temporary Piku mood
   const pieceCount = useMemo(() => Object.keys(pieces).length, [pieces]);
@@ -178,6 +191,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     setGameResult(null);
     setIsAIThinking(false);
     setShowTapHint(false);
+    setShowStuckNudge(false);
     setPikuMood(null);
     prevPieceCountRef.current = 32;
     if (aiTimeoutRef.current) {
@@ -216,9 +230,9 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const opponentIcon = isAIThinking && !gameResult ? "/speech/speech-opponent-thinking.webp" : undefined;
 
   // Piku coach speech (shown near Piku, below the board)
-  const pikuText = gameResult === "win" ? t("you_win")
-    : gameResult === "loss" ? t("you_lose")
-      : gameResult === "draw" ? t("draw")
+  const pikuText = gameResult === "win" ? t("game_over_win")
+    : gameResult === "loss" ? t("game_over_loss")
+      : gameResult === "draw" ? t("game_over_draw")
         : !isAIThinking ? t("game_your_turn") : "";
 
   const pikuIcon = gameResult === "win" ? "/speech/speech-you-won.webp"
@@ -320,38 +334,84 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
             interactive={!gameResult && turn === "white" && !isAIThinking}
           />
 
+          {/* Stuck nudge — bare king detected */}
+          {showStuckNudge && !gameResult && (
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
+              style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(2px)" }}
+            >
+              <Image
+                src={opponent.image}
+                alt={t(opponent.nameKey)}
+                width={120}
+                height={120}
+                className="object-contain drop-shadow-lg"
+              />
+              <SpeechBubble text={t("stuck_nudge")} visible pointer="bottom" />
+              <div className="flex gap-4 mt-4">
+                <button onClick={handleRematch} className="btn-3d btn-3d-purple flex items-center gap-2 px-6 py-2.5">
+                  <Image src="/icons/icon-retry.webp" alt="" width={22} height={22} className="object-contain" />
+                  <span className="text-white font-bold">{t("rematch")}</span>
+                </button>
+                <button onClick={handleExit} className="btn-3d btn-3d-gray flex items-center gap-2 px-4 py-2.5">
+                  <Image src="/icons/icon-back.webp" alt="" width={22} height={22} className="object-contain" />
+                </button>
+              </div>
+              <button
+                onClick={() => setShowStuckNudge(false)}
+                className="mt-2 text-sm text-gray-400 underline"
+              >
+                {t("keep_playing")}
+              </button>
+            </div>
+          )}
+
           {/* Game over overlay on top of the board */}
           {gameResult && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
-              style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(2px)" }}
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
+              style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(3px)" }}
             >
               {gameResult === "win" && <Confetti active />}
 
-              <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl animate-celebrate-pop shadow-lg ${
-                  gameResult === "win"
-                    ? "bg-green-100"
-                    : gameResult === "loss"
-                      ? "bg-red-100"
-                      : "bg-amber-100"
-                }`}
-              >
-                {gameResult === "win" ? (
-                  <span role="img" aria-label="Trophy">&#127942;</span>
-                ) : gameResult === "loss" ? (
-                  <span role="img" aria-label="Thinking face">&#129300;</span>
-                ) : (
-                  <span role="img" aria-label="Handshake">&#129309;</span>
-                )}
-              </div>
+              {/* Opponent character */}
+              <Image
+                src={opponent.image}
+                alt={t(opponent.nameKey)}
+                width={140}
+                height={140}
+                className="object-contain drop-shadow-lg mb-2"
+              />
 
-              <button
-                onClick={handleRematch}
-                className="btn-3d btn-3d-purple flex items-center gap-2 px-6 py-2.5 text-white font-bold text-base mt-4"
-              >
-                <Image src="/icons/icon-retry.webp" alt="" width={22} height={22} className="object-contain" />
-                <span>{t("rematch")}</span>
-              </button>
+              {/* Speech bubble with result message */}
+              <SpeechBubble
+                text={t(
+                  gameResult === "win"
+                    ? "game_over_win"
+                    : gameResult === "loss"
+                      ? "game_over_loss"
+                      : "game_over_draw"
+                )}
+                visible
+                pointer="bottom"
+              />
+
+              {/* Action buttons — big and obvious */}
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={handleRematch}
+                  className="btn-3d btn-3d-purple flex items-center gap-2 px-8 py-3 text-white font-bold text-lg"
+                >
+                  <Image src="/icons/icon-retry.webp" alt="" width={28} height={28} className="object-contain" />
+                  <span>{t("rematch")}</span>
+                </button>
+                <button
+                  onClick={handleExit}
+                  className="btn-3d btn-3d-gray p-3"
+                >
+                  <Image src="/icons/icon-back.webp" alt="" width={28} height={28} className="object-contain" />
+                </button>
+              </div>
             </div>
           )}
         </div>

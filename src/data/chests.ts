@@ -1,5 +1,10 @@
 import type { ChestDefinition } from "@/types/lesson";
 
+/** Returns the chest that unlocks after completing the given lesson, or null */
+export function getChestForLesson(lessonId: string): ChestDefinition | null {
+  return CHESTS.find((c) => c.afterLesson === lessonId) ?? null;
+}
+
 export const CHESTS: ChestDefinition[] = [
   {
     index: 0,

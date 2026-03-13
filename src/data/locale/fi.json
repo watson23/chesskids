@@ -211,5 +211,13 @@
   "wardrobe_locked": "Lukittu",
   "celebrate_all_complete": "Suoritit kaikki oppitunnit! Olet shakin mestari!",
   "celebrate_champion_reward": "Ansaitsit Mestarikruunun ja Mestariviitan!",
-  "celebrate_more_coming": "Lisää seikkailuja tulossa pian!"
+  "celebrate_more_coming": "Lisää seikkailuja tulossa pian!",
+  "chest_appeared": "Katso! Aarrearkku! Napauta avataksesi!",
+  "chest_reward_outfit": "Uusi asu sinulle!",
+  "stuck_nudge": "Hyvä peli! Pelataan uudestaan?",
+  "keep_playing": "Jatka pelaamista",
+  "watch_first": "Katso ensin! Pikun vuoro näyttää.",
+  "game_over_win": "Sinä voitit! Mahtavaa!",
+  "game_over_loss": "Hyvä peli! Haluatko yrittää uudestaan?",
+  "game_over_draw": "Tasapeli! Hyvin pelattu!"
 }

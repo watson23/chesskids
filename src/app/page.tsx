@@ -177,6 +177,35 @@ function HomeContent() {
 
     processCompletion(completedLessonId, stars, existing);
 
+    // Process chest opened during lesson celebration
+    const chestParam = searchParams.get("chest");
+    if (chestParam !== null) {
+      const chestIndex = parseInt(chestParam, 10);
+      if (!isNaN(chestIndex)) {
+        // Mark chest as opened + save rewards (reuse existing handleChestClose logic)
+        setOpenedChests((prev) =>
+          prev.includes(chestIndex) ? prev : [...prev, chestIndex]
+        );
+        const chest = CHESTS.find((c) => c.index === chestIndex);
+        if (chest && user && activeChild) {
+          const newRewardIds = chest.rewards.map((r) => r.id);
+          const allRewards = [
+            ...(activeChild.unlockedRewards ?? []),
+            ...newRewardIds.filter((id) => !(activeChild.unlockedRewards ?? []).includes(id)),
+          ];
+          const outfitIds = chest.rewards
+            .filter((r) => r.type === "outfit" && r.outfitId)
+            .map((r) => r.outfitId!);
+          updateChildRewards(
+            user.uid, activeChild.id, allRewards,
+            undefined, undefined, outfitIds
+          ).then(() => refreshChildren()).catch((err) =>
+            console.error("Failed to save chest rewards:", err)
+          );
+        }
+      }
+    }
+
     // Clear URL params
     router.replace("/", { scroll: false });
   }, [
