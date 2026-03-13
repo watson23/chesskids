@@ -303,7 +303,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
             {state.phase === "watch" && (
               <button onClick={handleNext} className="animate-bounce-gentle p-2 active:scale-90 transition-transform">
-                <Image src="/icons/icon-next.webp" alt={t("next")} width={64} height={64} className="object-contain drop-shadow-lg" />
+                <Image src="/icons/icon-next.webp" alt={t("next")} width={80} height={80} className="object-contain drop-shadow-lg" />
               </button>
             )}
 
