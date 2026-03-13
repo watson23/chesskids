@@ -35,7 +35,7 @@ const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
   "head-crown": {
     base: {},
     expressions: {
-      "standing-happy":        { rotate: 3 },
+      "standing-happy":        { left: "55%", rotate: 3 },
       "standing-winking":      { top: "-17%", left: "49%" },
       "standing-celebrating":  { top: "-9%", left: "54%", widthScale: 0.52, rotate: 10 },
       "standing-neutral":      { left: "51%" },

@@ -89,12 +89,21 @@ export async function speak(text: string, options: TTSOptions): Promise<void> {
   utterance.pitch = options.pitch ?? 1.1;
 
   const langPrefix = options.lang === "fi" ? "fi" : "en";
-  const voice = pickBestVoice(voices, langPrefix);
+  let voice = pickBestVoice(voices, langPrefix);
+
+  // If no voice found for this language (e.g. Chrome iPad lacks Finnish),
+  // fall back to any available voice — spoken with an accent is better than silence.
+  if (!voice && voices.length > 0) {
+    voice = pickBestVoice(voices, "en") ?? voices[0];
+  }
   if (voice) utterance.voice = voice;
 
   return new Promise((resolve) => {
     utterance.onend = () => resolve();
-    utterance.onerror = () => resolve();
+    utterance.onerror = (e) => {
+      console.warn("[TTS] Speech error:", e.error, "lang:", utterance.lang, "voice:", utterance.voice?.name);
+      resolve();
+    };
     window.speechSynthesis.speak(utterance);
     // Chrome bug: speech can get stuck. Resume after short delay.
     setTimeout(() => {
