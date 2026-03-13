@@ -157,6 +157,32 @@ html, body {
 }
 .animate-chest-shake { animation: chest-shake 0.3s ease-in-out 3; }
 
+@keyframes chest-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+.animate-chest-glow { animation: chest-glow 2s ease-in-out infinite; }
+
+@keyframes chest-sparkle {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) translateY(calc(var(--sparkle-radius) * -1)) scale(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) rotate(calc(var(--sparkle-angle) * 0.3)) translateY(calc(var(--sparkle-radius) * -1)) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, -50%) rotate(var(--sparkle-angle)) translateY(calc(var(--sparkle-radius) * -1)) scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(calc(var(--sparkle-angle) + 60deg)) translateY(calc(var(--sparkle-radius) * -1.2)) scale(0);
+    opacity: 0;
+  }
+}
+.animate-chest-sparkle { animation: chest-sparkle 2.5s ease-in-out infinite; }
+
 @keyframes valid-move-pulse {
   0%, 100% { opacity: 0.4; transform: scale(0.8); }
   50% { opacity: 0.7; transform: scale(1); }
