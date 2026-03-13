@@ -3,8 +3,7 @@
 import { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
-import PieceColorPreview from "@/components/PieceColorPreview";
-import { BOARD_THEMES, PIECE_COLOR_SETS } from "@/data/themes";
+import { BOARD_THEMES } from "@/data/themes";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "@/hooks/useAudio";
@@ -13,7 +12,7 @@ import PikuWithOutfit from "@/components/PikuWithOutfit";
 import { getAvailableBySlot } from "@/data/outfits";
 import { updateEquippedOutfit } from "@/lib/firestore";
 import { useLocale } from "@/hooks/useLocale";
-import type { BoardTheme, PieceColorSet } from "@/types/chess";
+import type { BoardTheme } from "@/types/chess";
 import type { LocaleKey } from "@/types/locale";
 
 interface RewardCollectionProps {
@@ -29,7 +28,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
   const unlockedRewards = activeChild?.unlockedRewards ?? [];
   const activeThemeId = activeChild?.activeBoardTheme ?? "classic";
-  const activePieceId = activeChild?.activePieceColor ?? "classic";
 
   const { t } = useLocale();
   const equippedOutfit = activeChild?.equippedOutfit ?? {};
@@ -93,28 +91,6 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
     [user, activeChild, activeThemeId, unlockedRewards, sfx, saving, refreshChildren]
   );
 
-  const selectPieceColor = useCallback(
-    async (colorSet: PieceColorSet) => {
-      if (!user || !activeChild || saving) return;
-      if (colorSet.id === activePieceId) return;
-      sfx("button-tap");
-      setSaving(true);
-      try {
-        await updateChildRewards(
-          user.uid,
-          activeChild.id,
-          unlockedRewards,
-          undefined,
-          colorSet.id
-        );
-        await refreshChildren();
-      } catch (err) {
-        console.error("Failed to update piece color:", err);
-      }
-      setSaving(false);
-    },
-    [user, activeChild, activePieceId, unlockedRewards, sfx, saving, refreshChildren]
-  );
 
   if (!open) return null;
 
@@ -177,40 +153,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           </div>
         </div>
 
-        {/* Pieces section — wrapping grid, frosted background for contrast */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-2">
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="var(--ck-purple)">
-              <path d="M12 2a4 4 0 00-4 4c0 1.2.6 2.3 1.4 3C7 10.5 5 13 5 16h14c0-3-2-5.5-4.4-7A4.5 4.5 0 0016 6a4 4 0 00-4-4z" opacity="0.7" />
-              <rect x="4" y="18" width="16" height="4" rx="2" />
-            </svg>
-            <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>Pieces</span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {PIECE_COLOR_SETS.map((colorSet) => {
-              const isActive = colorSet.id === activePieceId;
-
-              return (
-                <button
-                  key={colorSet.id}
-                  onClick={() => selectPieceColor(colorSet)}
-                  className={`relative flex items-center justify-center p-2 rounded-xl transition-all ${isActive ? "ring-3 ring-amber-400 bg-white/40" : "opacity-75 bg-white/20"}`}
-                >
-                  <PieceColorPreview colorSet={colorSet} size={32} />
-
-                  {isActive && (
-                    <div className="absolute -top-1 -right-1">
-                      <Image src="/icons/icon-check-circle.webp" alt="Active" width={18} height={18} className="object-contain" style={{ width: 18, height: "auto" }} />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Outfits — closest to Pikku */}
+        {/* Outfits */}
         <div className="mb-3">
           {/* Head outfits */}
           <div className="mb-3">

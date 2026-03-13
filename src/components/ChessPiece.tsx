@@ -36,5 +36,5 @@ export default function ChessPiece({
   const stroke = color === "white" ? colorSet.whiteBorder : colorSet.blackBorder;
   const PieceSVG = PIECE_COMPONENTS[type];
 
-  return <PieceSVG fill={fill} stroke={stroke} size={size} />;
+  return <PieceSVG fill={fill} stroke={stroke} size={size} pieceColor={color} />;
 }

@@ -27,38 +27,3 @@ export const DEFAULT_PIECE_COLORS: PieceColorSet = {
   name: "Classic",
 };
 
-export const PIECE_COLOR_SETS: PieceColorSet[] = [
-  DEFAULT_PIECE_COLORS,
-  {
-    id: "gold",
-    whiteColor: "#ffd700",
-    whiteBorder: "#b8960f",
-    blackColor: "#4a4a5a",
-    blackBorder: "#2a2a3a",
-    name: "Gold",
-  },
-  {
-    id: "coral",
-    whiteColor: "#F4845F",
-    whiteBorder: "#D66A47",
-    blackColor: "#667eea",
-    blackBorder: "#3b4fd4",
-    name: "Coral & Blue",
-  },
-  {
-    id: "nature",
-    whiteColor: "#a8e6cf",
-    whiteBorder: "#5cb88a",
-    blackColor: "#845ec2",
-    blackBorder: "#5a3d8a",
-    name: "Nature",
-  },
-  {
-    id: "rainbow-w",
-    whiteColor: "#FF6B8A",
-    whiteBorder: "#D44A6A",
-    blackColor: "#6C5CE7",
-    blackBorder: "#4A3DB5",
-    name: "Rainbow",
-  },
-];
