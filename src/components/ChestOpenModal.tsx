@@ -1,126 +1,106 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Confetti from "@/components/Confetti";
-import MiniBoardPreview from "@/components/MiniBoardPreview";
-import PieceColorPreview from "@/components/PieceColorPreview";
-import { BOARD_THEMES, PIECE_COLOR_SETS } from "@/data/themes";
+import PikuWithOutfit from "@/components/PikuWithOutfit";
+import { getOutfitItem } from "@/data/outfits";
 import { useAudio } from "@/hooks/useAudio";
-import type { ChestDefinition, Reward } from "@/types/lesson";
+import type { ChestDefinition } from "@/types/lesson";
 
 interface ChestOpenModalProps {
   chest: ChestDefinition;
   onClose: () => void;
 }
 
-/** Sparkle particles that burst from the chest — circles, stars, and diamonds */
+/** Sparkle particles that burst from the chest */
 type SparkleShape = "circle" | "star" | "diamond";
 const SPARKLE_SHAPES: SparkleShape[] = ["circle", "star", "diamond", "circle", "star", "circle", "diamond", "star", "circle", "star", "diamond", "circle"];
 
 const SPARKLES = Array.from({ length: 12 }, (_, i) => {
   const angle = (i / 12) * Math.PI * 2;
-  const distance = 50 + (i % 3) * 20;
+  const distance = 60 + (i % 3) * 25;
   return {
     id: i,
     tx: Math.cos(angle) * distance,
     ty: Math.sin(angle) * distance - 20,
     delay: (i % 4) * 0.05,
-    size: 5 + (i % 3) * 2,
+    size: 6 + (i % 3) * 3,
     shape: SPARKLE_SHAPES[i],
   };
 });
 
-function ChestOpenSVG({ phase }: { phase: number }) {
-  const bodyColor = "#FCD34D";
-  const lidColor = "#F59E0B";
-  const claspColor = "#FDE68A";
-
-  return (
-    <svg width={120} height={110} viewBox="0 0 40 36" style={{ overflow: "visible" }}>
-      {/* Body */}
-      <rect x="2" y="16" width="36" height="18" rx="4" fill={bodyColor} stroke={lidColor} strokeWidth="2.5" />
-      {/* Lid — separate group for animation */}
-      <g
-        style={{
-          transformOrigin: "20px 18px",
-          transform: phase >= 2 ? "rotateX(-110deg)" : "rotateX(0deg)",
-          transition: "transform 0.8s ease-out",
-        }}
-      >
-        <path
-          d="M 2 18 Q 2 6, 20 4 Q 38 6, 38 18"
-          fill={lidColor}
-          stroke={lidColor}
-          strokeWidth="1.5"
-        />
-      </g>
-      {/* Clasp */}
-      <rect x="14" y="13" width="12" height="9" rx="3" fill={claspColor} stroke={bodyColor} strokeWidth="2" />
-      {/* Keyhole */}
-      <circle cx="20" cy="17.5" r="2.2" fill="#92400e" />
-    </svg>
-  );
-}
-
-function RewardCard({ reward }: { reward: Reward }) {
-  const theme = BOARD_THEMES.find((t) => t.id === reward.themeId);
-  const colorSet = PIECE_COLOR_SETS.find((p) => p.id === reward.pieceColorId);
-
-  if (reward.type === "board-theme" && theme) {
-    return (
-      <div className="flex flex-col items-center gap-2">
-        <MiniBoardPreview theme={theme} size="md" />
-        <span className="text-sm font-bold" style={{ color: "var(--ck-text-light)" }}>
-          {theme.name}
-        </span>
-      </div>
-    );
-  }
-
-  if (reward.type === "piece-color" && colorSet) {
-    return (
-      <div className="flex flex-col items-center gap-2">
-        <PieceColorPreview colorSet={colorSet} size={48} />
-        <span className="text-sm font-bold" style={{ color: "var(--ck-text-light)" }}>
-          {colorSet.name}
-        </span>
-      </div>
-    );
-  }
-
-  return null;
-}
-
 export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) {
+  // Phases: 1=chest bounces in, 2=chest opens+sparkles, 3=show reward item, 4=pikku reveal+done
   const [phase, setPhase] = useState(1);
+  const [currentRewardIdx, setCurrentRewardIdx] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [pikkyRevealed, setPikkyRevealed] = useState(false);
   const { sfx } = useAudio();
 
-  // Phase transitions
+  const outfitRewards = chest.rewards
+    .filter((r) => r.type === "outfit" && r.outfitId)
+    .map((r) => {
+      const outfit = getOutfitItem(r.outfitId!);
+      return outfit ? { reward: r, outfit } : null;
+    })
+    .filter(Boolean) as { reward: typeof chest.rewards[0]; outfit: NonNullable<ReturnType<typeof getOutfitItem>> }[];
+
+  const totalRewards = outfitRewards.length;
+  const currentOutfit = outfitRewards[currentRewardIdx] ?? null;
+  const isLastReward = currentRewardIdx >= totalRewards - 1;
+
+  // Phase auto-transitions
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    // Phase 1 → 2: chest opens
+    // Phase 1 → 2: chest opens after bounce
     timers.push(setTimeout(() => {
       setPhase(2);
       sfx("chest-open");
     }, 1000));
 
-    // Phase 2 → 3: reward reveals
+    // Phase 2 → 3: first reward rises
     timers.push(setTimeout(() => {
       setPhase(3);
+      setShowConfetti(true);
       sfx("confetti");
-    }, 2500));
-
-    // Phase 3 → 4: equipped
-    timers.push(setTimeout(() => {
-      setPhase(4);
-    }, 3300));
+    }, 2200));
 
     return () => timers.forEach(clearTimeout);
   }, [sfx]);
 
-  // Memoize sparkle styles
+  // Handle tap to advance rewards or reveal Pikku
+  const handleTap = useCallback(() => {
+    if (phase < 3) return; // not ready yet
+
+    if (pikkyRevealed) {
+      onClose();
+      return;
+    }
+
+    if (isLastReward) {
+      // Show Pikku with the last outfit
+      setPikkyRevealed(true);
+      sfx("confetti");
+      setShowConfetti(true);
+    } else {
+      // Next reward
+      setCurrentRewardIdx((prev) => prev + 1);
+      setShowConfetti(false);
+      setTimeout(() => {
+        setShowConfetti(true);
+        sfx("confetti");
+      }, 100);
+    }
+  }, [phase, pikkyRevealed, isLastReward, onClose, sfx]);
+
+  // Build last outfit's head/body images for PikuWithOutfit
+  const lastOutfit = outfitRewards[outfitRewards.length - 1]?.outfit;
+  const pikuHead = lastOutfit?.slot === "head" ? lastOutfit.image : undefined;
+  const pikuBody = lastOutfit?.slot === "body" ? lastOutfit.image : undefined;
+
+  // Memoize sparkle elements
   const sparkleElements = useMemo(
     () =>
       SPARKLES.map((s) => {
@@ -185,89 +165,119 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
   );
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center">
-      {/* Dark overlay — fades in */}
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" onClick={phase >= 3 ? handleTap : undefined}>
+      {/* Celebration background */}
       <div
-        className="absolute inset-0 transition-opacity duration-300"
-        style={{ background: "rgba(0,0,0,0.65)" }}
-        onClick={phase >= 4 ? onClose : undefined}
+        className="absolute inset-0 transition-opacity duration-500"
+        style={{
+          backgroundImage: "url(/bg-chest-celebration.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
         aria-hidden="true"
       />
+      {/* Slight dark overlay for contrast */}
+      <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
 
-      {/* Confetti for phase 3+ */}
-      <Confetti active={phase >= 3} particleCount={80} />
+      {/* Confetti */}
+      <Confetti active={showConfetti} particleCount={80} />
 
       {/* Center content */}
       <div className="relative z-50 flex flex-col items-center">
-        {/* Chest */}
-        <div className={`relative ${phase === 1 ? "animate-chest-bounce-in" : ""}`}>
-          {/* Light burst behind chest */}
-          {phase >= 2 && (
-            <div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{ top: "-20px" }}
-            >
-              <div
-                className="w-32 h-32 rounded-full animate-light-burst"
-                style={{
-                  background: "radial-gradient(circle, rgba(252,211,77,0.8) 0%, rgba(252,211,77,0.3) 40%, transparent 70%)",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Sparkle particles */}
-          {phase >= 2 && phase < 4 && (
-            <div className="absolute inset-0 pointer-events-none">
-              {sparkleElements}
-            </div>
-          )}
-
-          {/* Chest glow */}
-          {phase === 1 && (
-            <div
-              className="absolute -inset-6 rounded-full animate-pulse"
-              style={{ background: "rgba(252, 211, 77, 0.3)" }}
-            />
-          )}
-
-          <div className={phase === 1 ? "animate-chest-shake" : ""}>
-            <ChestOpenSVG phase={phase} />
-          </div>
-        </div>
-
-        {/* Reward card — rises from behind chest */}
-        {phase >= 3 && (
-          <div
-            className="mt-4 animate-reward-rise rounded-2xl p-5 flex flex-col items-center gap-4"
-            style={{
-              background: "white",
-              border: "3px solid var(--ck-gold)",
-              boxShadow: "0 0 24px rgba(252, 211, 77, 0.4), 0 8px 32px rgba(0,0,0,0.15)",
-              minWidth: 200,
-            }}
-          >
-            {chest.rewards.map((reward) => (
-              <RewardCard key={reward.id} reward={reward} />
-            ))}
-
-            {/* Equipped checkmark */}
-            {phase >= 4 && (
-              <div className="animate-celebrate-pop flex items-center gap-1.5">
-                <Image src="/icons/icon-check-circle.webp" alt="Equipped" width={28} height={28} className="object-contain" style={{ width: 28, height: "auto" }} />
+        {/* Chest image */}
+        {!pikkyRevealed && (
+          <div className={`relative ${phase === 1 ? "animate-chest-bounce-in" : ""}`}>
+            {/* Light burst */}
+            {phase >= 2 && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: "-20px" }}>
+                <div
+                  className="w-40 h-40 rounded-full animate-light-burst"
+                  style={{
+                    background: "radial-gradient(circle, rgba(252,211,77,0.8) 0%, rgba(252,211,77,0.3) 40%, transparent 70%)",
+                  }}
+                />
               </div>
             )}
+
+            {/* Sparkles */}
+            {phase >= 2 && !pikkyRevealed && (
+              <div className="absolute inset-0 pointer-events-none">
+                {sparkleElements}
+              </div>
+            )}
+
+            {/* Glow pulse before opening */}
+            {phase === 1 && (
+              <div
+                className="absolute -inset-8 rounded-full animate-pulse"
+                style={{ background: "rgba(252, 211, 77, 0.3)" }}
+              />
+            )}
+
+            <div className={phase === 1 ? "animate-chest-shake" : ""}>
+              <Image
+                src={phase >= 2 ? "/icons/icon-chest-open-left-side.webp" : "/icons/icon-chest-closed-left-side.webp"}
+                alt="Treasure chest"
+                width={160}
+                height={160}
+                style={{ width: 160, height: "auto" }}
+                priority
+              />
+            </div>
           </div>
         )}
 
-        {/* Close button — appears in phase 4 */}
-        {phase >= 4 && (
-          <button
-            onClick={onClose}
-            className="mt-5 btn-3d btn-3d-gold animate-slide-in"
-          >
-            <span className="text-lg">&#10003;</span>
-          </button>
+        {/* Reward item display */}
+        {phase >= 3 && !pikkyRevealed && currentOutfit && (
+          <div className="animate-reward-rise flex flex-col items-center" key={`reward-${currentRewardIdx}`}>
+            {/* Golden glow behind item */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: 140,
+                height: 140,
+                background: "radial-gradient(circle, rgba(252,211,77,0.5) 0%, rgba(252,211,77,0.15) 50%, transparent 70%)",
+                top: -20,
+              }}
+            />
+            <div className="relative">
+              <Image
+                src={currentOutfit.outfit.iconImage ?? currentOutfit.outfit.image}
+                alt="New reward"
+                width={120}
+                height={120}
+                style={{ width: 120, height: "auto", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
+              />
+            </div>
+
+            {/* Tap indicator — gentle pulsing ring (no text) */}
+            <div
+              className="mt-6 w-12 h-12 rounded-full animate-pulse"
+              style={{
+                background: "radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 60%, transparent 70%)",
+              }}
+            />
+          </div>
+        )}
+
+        {/* Pikku reveal — slides up from bottom */}
+        {pikkyRevealed && (
+          <div className="animate-reward-rise flex flex-col items-center">
+            <PikuWithOutfit
+              expression="standing-celebrating"
+              headImage={pikuHead}
+              bodyImage={pikuBody}
+              size={200}
+            />
+
+            {/* Close button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              className="mt-6 btn-3d btn-3d-gold animate-celebrate-pop"
+            >
+              <span className="text-lg">&#10003;</span>
+            </button>
+          </div>
         )}
       </div>
     </div>
