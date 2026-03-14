@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   title: "Piku Chess — My First Chess Moves",
   description: "Learn chess from the very first move — for kids ages 3–6!",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
