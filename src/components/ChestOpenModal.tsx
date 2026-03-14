@@ -52,29 +52,26 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
   const currentOutfit = outfitRewards[currentRewardIdx] ?? null;
   const isLastReward = currentRewardIdx >= totalRewards - 1;
 
-  // Phase auto-transitions
+  // Phase 2 → 3 auto-transition: first reward rises after chest opens
   useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    // Phase 1 → 2: chest opens after bounce
-    timers.push(setTimeout(() => {
-      setPhase(2);
-      sfx("chest-open");
-    }, 1000));
-
-    // Phase 2 → 3: first reward rises
-    timers.push(setTimeout(() => {
+    if (phase !== 2) return;
+    const timer = setTimeout(() => {
       setPhase(3);
       setShowConfetti(true);
       sfx("confetti");
-    }, 2200));
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [phase, sfx]);
 
-    return () => timers.forEach(clearTimeout);
-  }, [sfx]);
-
-  // Handle tap to advance rewards or reveal Pikku
+  // Handle tap to open chest, advance rewards, or reveal Pikku
   const handleTap = useCallback(() => {
-    if (phase < 3) return; // not ready yet
+    // Phase 1: kid taps to open the chest
+    if (phase === 1) {
+      setPhase(2);
+      sfx("chest-open");
+      return;
+    }
+    if (phase === 2) return; // opening animation playing
 
     if (pikkyRevealed) {
       onClose();
@@ -166,7 +163,7 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
   );
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" onClick={phase >= 3 ? handleTap : undefined}>
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" onClick={phase !== 2 ? handleTap : undefined}>
       {/* Celebration background */}
       <div
         className="absolute inset-0 transition-opacity duration-500"
@@ -210,12 +207,12 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
             {/* Glow pulse before opening */}
             {phase === 1 && (
               <div
-                className="absolute -inset-8 rounded-full animate-pulse"
-                style={{ background: "rgba(252, 211, 77, 0.3)" }}
+                className="absolute -inset-8 rounded-full animate-chest-glow"
+                style={{ background: "radial-gradient(circle, rgba(252,211,77,0.5) 0%, rgba(251,191,36,0.2) 50%, transparent 70%)" }}
               />
             )}
 
-            <div className={phase === 1 ? "animate-chest-shake" : ""}>
+            <div className={phase === 1 ? "animate-chest-shake cursor-pointer" : ""}>
               <Image
                 src={phase >= 2 ? "/icons/icon-chest-open-left-side.webp" : "/icons/icon-chest-closed-left-side.webp"}
                 alt="Treasure chest"
@@ -225,6 +222,16 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
                 priority
               />
             </div>
+
+            {/* Tap to open hint */}
+            {phase === 1 && (
+              <div className="mt-4 flex flex-col items-center animate-bounce-gentle">
+                <span className="text-3xl" role="img" aria-label="tap">👆</span>
+                <span className="text-white text-sm font-bold mt-1 drop-shadow-md">
+                  {t("tap_hint")}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
