@@ -17,6 +17,7 @@ interface ChessBoardProps {
   selectedSquare: Square | null;
   validMoves: Square[];
   correctMoves?: Square[];
+  watchHighlights?: Square[];
   lastMove: { from: Square; to: Square } | null;
   onSquareTap: (square: Square) => void;
   onWatchTap?: () => void;
@@ -32,6 +33,7 @@ interface BoardSquareProps {
   isSelected: boolean;
   isValidMove: boolean;
   isCorrectMove: boolean;
+  isWatchHighlight: boolean;
   interactive: boolean;
   pieceColors: PieceColorSet;
   onTap: (square: Square) => void;
@@ -45,6 +47,7 @@ const BoardSquare = memo(function BoardSquare({
   isSelected,
   isValidMove,
   isCorrectMove,
+  isWatchHighlight,
   interactive,
   pieceColors,
   onTap,
@@ -115,6 +118,29 @@ const BoardSquare = memo(function BoardSquare({
         />
       )}
 
+      {/* Watch highlight — soft blue glow (observe, don't tap) */}
+      {isWatchHighlight && !hasPiece && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="w-[40%] h-[40%] rounded-full animate-watch-highlight-pulse"
+            style={{
+              background: "radial-gradient(circle, #93C5FD 0%, #3B82F6 100%)",
+              boxShadow: "0 0 12px rgba(59, 130, 246, 0.6), 0 0 6px rgba(147, 197, 253, 0.4)",
+            }}
+          />
+        </div>
+      )}
+
+      {isWatchHighlight && hasPiece && (
+        <div
+          className="absolute inset-[3%] rounded-full pointer-events-none animate-watch-highlight-pulse"
+          style={{
+            border: "5px solid #3B82F6",
+            boxShadow: "inset 0 0 10px rgba(59, 130, 246, 0.3), 0 0 12px rgba(59, 130, 246, 0.4)",
+          }}
+        />
+      )}
+
       {/* Legal move indicator — subtle green dot (not correct, just legal) */}
       {isValidMove && !isCorrectMove && !hasPiece && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -151,6 +177,7 @@ export default function ChessBoard({
   selectedSquare,
   validMoves,
   correctMoves = [],
+  watchHighlights = [],
   lastMove,
   onSquareTap,
   onWatchTap,
@@ -205,6 +232,7 @@ export default function ChessBoard({
             const isSelected = selectedSquare === square;
             const isValidMove = validMoves.includes(square);
             const isCorrectMove = correctMoves.includes(square);
+            const isWatchHighlight = watchHighlights.includes(square);
             const isLastMove =
               lastMove !== null &&
               (lastMove.from === square || lastMove.to === square);
@@ -230,6 +258,7 @@ export default function ChessBoard({
                 isSelected={isSelected}
                 isValidMove={isValidMove}
                 isCorrectMove={isCorrectMove}
+                isWatchHighlight={isWatchHighlight}
                 interactive={interactive}
                 pieceColors={pieceColors}
                 onTap={handleSquareTap}

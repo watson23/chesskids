@@ -335,8 +335,9 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                 theme={boardTheme}
                 pieceColors={pieceColors}
                 selectedSquare={selectedSquare}
-                validMoves={validMoves}
+                validMoves={state.phase === "watch" ? [] : validMoves}
                 correctMoves={correctMoveSquares}
+                watchHighlights={state.phase === "watch" ? validMoves : []}
                 lastMove={lastMove}
                 onSquareTap={handleSquareTap}
                 onWatchTap={state.phase === "watch" ? handleWatchTap : undefined}
