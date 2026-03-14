@@ -5,6 +5,7 @@ import Image from "next/image";
 import NavIcon from "@/components/NavIcon";
 import type { PuzzleDefinition } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
+import { getLegalMovesFromBoard } from "@/lib/chess-helpers";
 import type { LocaleKey } from "@/types/locale";
 import type { PuzzleProgress } from "@/types/user";
 import ChessBoard from "@/components/ChessBoard";
@@ -68,6 +69,7 @@ export default function PuzzlePlayer({
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [validMoves, setValidMoves] = useState<Square[]>([]);
+  const [correctMoveSquares, setCorrectMoveSquares] = useState<Square[]>([]);
   const [lastMove, setLastMove] = useState<{
     from: Square;
     to: Square;
@@ -146,7 +148,11 @@ export default function PuzzlePlayer({
         if (isValidSource && piece) {
           setSelectedSquare(square);
           sfx("piece-pickup");
-          // No destination hints in practice — puzzles test learned skills
+          // Show all legal moves as subtle dots, correct moves as golden
+          const allLegal = getLegalMovesFromBoard(boardPieces, square, piece.color);
+          const correctDestinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
+          setValidMoves(allLegal);
+          setCorrectMoveSquares(correctDestinations);
         }
         return;
       }
@@ -155,6 +161,7 @@ export default function PuzzlePlayer({
       if (square === selectedSquare) {
         setSelectedSquare(null);
         setValidMoves([]);
+        setCorrectMoveSquares([]);
         return;
       }
 
@@ -194,6 +201,7 @@ export default function PuzzlePlayer({
         setLastMove({ from: selectedSquare, to: square });
         setSelectedSquare(null);
         setValidMoves([]);
+        setCorrectMoveSquares([]);
         sfx("piece-place");
         say(currentPuzzle.successNarrationKey);
 
@@ -240,6 +248,7 @@ export default function PuzzlePlayer({
         say(currentPuzzle.wrongMoveNarrationKey);
         setSelectedSquare(null);
         setValidMoves([]);
+        setCorrectMoveSquares([]);
         setWrongFlash(true);
         setNarrationOverride("try_again");
         setTimeout(() => setWrongFlash(false), 600);
@@ -374,6 +383,7 @@ export default function PuzzlePlayer({
                 pieceColors={pieceColors}
                 selectedSquare={selectedSquare}
                 validMoves={validMoves}
+                correctMoves={correctMoveSquares}
                 lastMove={lastMove}
                 onSquareTap={handleSquareTap}
                 interactive={phase === "solving"}

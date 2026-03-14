@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
 import type { Square, ChessPiece } from "@/types/chess";
+import { getLegalMovesFromBoard } from "@/lib/chess-helpers";
 import type { LocaleKey } from "@/types/locale";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
@@ -45,6 +46,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [validMoves, setValidMoves] = useState<Square[]>([]);
+  const [correctMoveSquares, setCorrectMoveSquares] = useState<Square[]>([]);
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
   const [boardPieces, setBoardPieces] = useState<Record<string, ChessPiece>>({});
   const [showTapHint, setShowTapHint] = useState(false);
@@ -147,8 +149,11 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         if (isValidSource && piece) {
           setSelectedSquare(square);
           sfx("piece-pickup");
-          const destinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
-          setValidMoves(destinations);
+          // Show all legal moves as subtle dots, correct moves as golden
+          const allLegal = getLegalMovesFromBoard(boardPieces, square, piece.color);
+          const correctDestinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
+          setValidMoves(allLegal);
+          setCorrectMoveSquares(correctDestinations);
         }
         return;
       }
@@ -156,6 +161,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
       if (square === selectedSquare) {
         setSelectedSquare(null);
         setValidMoves([]);
+        setCorrectMoveSquares([]);
         return;
       }
 
@@ -214,6 +220,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         setLastMove({ from: selectedSquare, to: square });
         setSelectedSquare(null);
         setValidMoves([]);
+        setCorrectMoveSquares([]);
         sfx("piece-place");
         say(currentPuzzle.successNarrationKey);
         setNarrationOverride(currentPuzzle.successNarrationKey);
@@ -228,6 +235,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         say(currentPuzzle.wrongMoveNarrationKey);
         setSelectedSquare(null);
         setValidMoves([]);
+        setCorrectMoveSquares([]);
         setWrongFlash(true);
         setNarrationOverride("try_again");
         setTimeout(() => setWrongFlash(false), 600);
@@ -328,6 +336,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                 pieceColors={pieceColors}
                 selectedSquare={selectedSquare}
                 validMoves={validMoves}
+                correctMoves={correctMoveSquares}
                 lastMove={lastMove}
                 onSquareTap={handleSquareTap}
                 onWatchTap={state.phase === "watch" ? handleWatchTap : undefined}

@@ -66,6 +66,57 @@ export function boardToRecord(fen: string): Record<string, ChessPiece> {
 }
 
 /**
+ * Converts a board pieces record into a FEN string.
+ * Used by lessons/puzzles to calculate legal moves via chess.js.
+ * Turn is inferred from the moving piece color. Castling/en passant
+ * are omitted (not relevant for showing legal move indicators).
+ */
+export function boardPiecesToFen(
+  pieces: Record<string, ChessPiece>,
+  turn: "white" | "black" = "white"
+): string {
+  const typeToChar: Record<PieceType, string> = {
+    pawn: "p", knight: "n", bishop: "b", rook: "r", queen: "q", king: "k",
+  };
+  const rows: string[] = [];
+  for (let rank = 8; rank >= 1; rank--) {
+    let row = "";
+    let empty = 0;
+    for (let file = 0; file < 8; file++) {
+      const sq = `${String.fromCharCode(97 + file)}${rank}`;
+      const piece = pieces[sq];
+      if (piece) {
+        if (empty > 0) { row += empty; empty = 0; }
+        const ch = typeToChar[piece.type];
+        row += piece.color === "white" ? ch.toUpperCase() : ch;
+      } else {
+        empty++;
+      }
+    }
+    if (empty > 0) row += empty;
+    rows.push(row);
+  }
+  return `${rows.join("/")} ${turn === "white" ? "w" : "b"} KQkq - 0 1`;
+}
+
+/**
+ * Returns all legal destination squares for a piece, given a board pieces record.
+ * Builds a temporary FEN and delegates to chess.js.
+ */
+export function getLegalMovesFromBoard(
+  pieces: Record<string, ChessPiece>,
+  square: Square,
+  turn: "white" | "black"
+): Square[] {
+  const fen = boardPiecesToFen(pieces, turn);
+  try {
+    return getValidMovesForSquare(fen, square);
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Checks if the game is over in the given position.
  * Returns the game-over state and the specific result.
  */

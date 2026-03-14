@@ -16,6 +16,7 @@ interface ChessBoardProps {
   pieceColors: PieceColorSet;
   selectedSquare: Square | null;
   validMoves: Square[];
+  correctMoves?: Square[];
   lastMove: { from: Square; to: Square } | null;
   onSquareTap: (square: Square) => void;
   onWatchTap?: () => void;
@@ -30,6 +31,7 @@ interface BoardSquareProps {
   bgColor: string;
   isSelected: boolean;
   isValidMove: boolean;
+  isCorrectMove: boolean;
   interactive: boolean;
   pieceColors: PieceColorSet;
   onTap: (square: Square) => void;
@@ -42,6 +44,7 @@ const BoardSquare = memo(function BoardSquare({
   bgColor,
   isSelected,
   isValidMove,
+  isCorrectMove,
   interactive,
   pieceColors,
   onTap,
@@ -89,26 +92,51 @@ const BoardSquare = memo(function BoardSquare({
         </div>
       )}
 
-      {/* Valid move indicator */}
-      {isValidMove && !hasPiece && (
+      {/* Correct move indicator — golden pulsing dot/ring (lessons & puzzles) */}
+      {isCorrectMove && !hasPiece && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
-            className="w-[38%] h-[38%] rounded-full"
+            className="w-[44%] h-[44%] rounded-full animate-correct-move-pulse"
             style={{
-              background: "radial-gradient(circle, #6EE7B7 0%, #34D399 100%)",
-              boxShadow: "0 0 8px rgba(110, 231, 183, 0.6), 0 2px 4px rgba(0,0,0,0.15)",
+              background: "radial-gradient(circle, #FDE68A 0%, #F59E0B 100%)",
+              boxShadow: "0 0 14px rgba(245, 158, 11, 0.7), 0 0 6px rgba(253, 230, 138, 0.5), 0 2px 4px rgba(0,0,0,0.15)",
             }}
           />
         </div>
       )}
 
-      {/* Valid capture indicator (ring around capturable piece) */}
-      {isValidMove && hasPiece && (
+      {isCorrectMove && hasPiece && (
+        <div
+          className="absolute inset-[3%] rounded-full pointer-events-none animate-correct-move-pulse"
+          style={{
+            border: "5px solid #F59E0B",
+            boxShadow: "inset 0 0 10px rgba(245, 158, 11, 0.4), 0 0 12px rgba(245, 158, 11, 0.5)",
+          }}
+        />
+      )}
+
+      {/* Legal move indicator — subtle green dot (not correct, just legal) */}
+      {isValidMove && !isCorrectMove && !hasPiece && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="w-[30%] h-[30%] rounded-full"
+            style={{
+              background: "radial-gradient(circle, #9CA3AF 0%, #6B7280 100%)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              opacity: 0.5,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Legal capture indicator — subtle ring (not correct, just legal) */}
+      {isValidMove && !isCorrectMove && hasPiece && (
         <div
           className="absolute inset-[3%] rounded-full pointer-events-none"
           style={{
-            border: "5px solid #F472B6",
-            boxShadow: "inset 0 0 8px rgba(244, 114, 182, 0.4), 0 0 8px rgba(244, 114, 182, 0.3)",
+            border: "4px solid #9CA3AF",
+            opacity: 0.4,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
           }}
         />
       )}
@@ -122,6 +150,7 @@ export default function ChessBoard({
   pieceColors,
   selectedSquare,
   validMoves,
+  correctMoves = [],
   lastMove,
   onSquareTap,
   onWatchTap,
@@ -175,6 +204,7 @@ export default function ChessBoard({
             const piece = pieces[square];
             const isSelected = selectedSquare === square;
             const isValidMove = validMoves.includes(square);
+            const isCorrectMove = correctMoves.includes(square);
             const isLastMove =
               lastMove !== null &&
               (lastMove.from === square || lastMove.to === square);
@@ -199,6 +229,7 @@ export default function ChessBoard({
                 bgColor={bgColor}
                 isSelected={isSelected}
                 isValidMove={isValidMove}
+                isCorrectMove={isCorrectMove}
                 interactive={interactive}
                 pieceColors={pieceColors}
                 onTap={handleSquareTap}

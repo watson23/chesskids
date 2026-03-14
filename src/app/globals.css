@@ -189,6 +189,12 @@ html, body {
 }
 .animate-valid-move { animation: valid-move-pulse 1.5s ease-in-out infinite; }
 
+@keyframes correct-move-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 14px rgba(245, 158, 11, 0.7), 0 0 6px rgba(253, 230, 138, 0.5); }
+  50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.9), 0 0 10px rgba(253, 230, 138, 0.7); }
+}
+.animate-correct-move-pulse { animation: correct-move-pulse 1.2s ease-in-out infinite; }
+
 @keyframes capture-fade {
   0% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(0.5); }
