@@ -1,6 +1,6 @@
 {
-  "name": "My First Chess Moves",
-  "short_name": "First Chess Moves",
+  "name": "Piku Chess — My First Chess Moves",
+  "short_name": "Piku Chess",
   "description": "Chess for kids — no reading needed!",
   "start_url": "/",
   "display": "standalone",
