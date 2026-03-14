@@ -135,9 +135,12 @@ export default function HeroSection({ t, onPlayFree, onGoogleSignIn }: HeroSecti
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-6 animate-gentle-bounce opacity-50">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 5v14M5 12l7 7 7-7" stroke="var(--ck-text-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <div className="absolute bottom-6 flex flex-col items-center gap-1 animate-gentle-bounce opacity-70">
+        <span className="text-xs font-bold" style={{ color: "var(--ck-text-light)" }}>
+          {language === "fi" ? "Lue lisää" : "Learn more"}
+        </span>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M7 10l5 5 5-5" stroke="var(--ck-text-light)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
     </section>

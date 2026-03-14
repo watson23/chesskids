@@ -16,7 +16,7 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata: Metadata = {
   title: "Piku Chess — My First Chess Moves",
-  description: "Chess for kids — no reading needed!",
+  description: "Learn chess from the very first move — for kids ages 3–6!",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
