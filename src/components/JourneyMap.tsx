@@ -32,30 +32,30 @@ interface JourneyMapProps {
  * Position of the igloo door at the end of the path.
  * Pikku stands here when all lessons are completed.
  */
-const IGLOO_POSITION = { x: 25, y: 12 };
+const IGLOO_POSITION = { x: 68, y: 7 };
 
 /**
  * Hand-tuned lesson positions tracing the winding snowy path
- * in the illustrated background (journey-map-bg.webp).
+ * in the illustrated background (journey-map-bg.webp, 1376×3104).
  * Coordinates are {x%, y%} of the map container.
  * Bottom of map = high y (start), top = low y (end).
- * Lessons use the bottom ~70%, leaving the top for future lessons.
  */
 const LESSON_POSITIONS: { x: number; y: number }[] = [
-  { x: 54, y: 93 },  // 1  Board Intro      — good
-  { x: 40, y: 87 },  // 2  Pawn             — nudge left
-  { x: 35, y: 81 },  // 3  Knight
-  { x: 42, y: 75 },  // 4  Bishop
-  { x: 60, y: 69 },  // 5  Rook             — 0.5 bubble up
-  { x: 71, y: 63 },  // 6  Queen
-  { x: 52, y: 57 },  // 7  King
-  { x: 44, y: 51 },  // 8  Castling         — nudge left
-  { x: 58, y: 45 },  // 9  En Passant       — 0.5 bubble left
-  { x: 72, y: 39 },  // 10 Promotion        — 0.5 more right
-  { x: 57, y: 33 },  // 11 Check & Checkmate — 1 bubble right
-  { x: 43, y: 28 },  // 12 Stalemate
-  { x: 47, y: 21 },  // 13 Forks
-  { x: 30, y: 16.5 },  // 14 Pins
+  { x: 72, y: 94 },    //  1  Board Intro
+  { x: 65, y: 88.3 },  //  2  How Chess Works
+  { x: 46, y: 82.6 },  //  3  Pawn
+  { x: 34, y: 76.9 },  //  4  Knight
+  { x: 43, y: 71.1 },  //  5  Bishop
+  { x: 67, y: 66 },    //  6  Rook
+  { x: 68, y: 59.7 },  //  7  Queen
+  { x: 43, y: 54 },    //  8  King
+  { x: 51, y: 48.3 },  //  9  Check
+  { x: 73, y: 42 },    // 10  Checkmate
+  { x: 62, y: 36.9 },  // 11  Piece Values
+  { x: 43, y: 32 },    // 12  Protecting
+  { x: 50, y: 27 },    // 13  Castling
+  { x: 54, y: 20.5 },  // 14  Promotion
+  { x: 70, y: 17 },    // 15  Capstone
 ];
 
 function getLessonPosition(index: number, _total: number) {
@@ -73,11 +73,11 @@ function getLessonPosition(index: number, _total: number) {
  * Keyed by chest index.
  */
 const CHEST_POSITIONS: Record<number, { x: number; y: number }> = {
-  0: { x: 72.5, y: 80.75 }, // 6★  — right side, on the chessboard circle
-  1: { x: 22, y: 63.5 },    // 15★ — left side, between lessons 5-6
-  2: { x: 60.75, y: 52.75 }, // 24★ — right side, between lessons 7-8
-  3: { x: 22, y: 47 },      // 33★ — left side, between lessons 9-10
-  4: { x: 77, y: 23 },      // 42★ — right side, near lessons 12-13
+  0: { x: 25, y: 85 },       //  6★ — left side, after Pawn (lesson 3)
+  1: { x: 69, y: 76 },       // 15★ — right side, after Bishop (lesson 5)
+  2: { x: 22, y: 60 },       // 24★ — left side, after Queen (lesson 7)
+  3: { x: 75, y: 46 },       // 33★ — right side, after Checkmate (lesson 10)
+  4: { x: 25, y: 17 },       // 42★ — left side, after Promotion (lesson 14)
 };
 
 function getChestPosition(positionOnMap: number, _total: number, chestIndex: number) {
@@ -89,21 +89,6 @@ function getChestPosition(positionOnMap: number, _total: number, chestIndex: num
   return { x: 75, y };
 }
 
-function buildPathData(total: number): string {
-  const count = Math.min(total, LESSON_POSITIONS.length);
-  const points = Array.from({ length: count }, (_, i) => LESSON_POSITIONS[i]);
-  if (points.length === 0) return "";
-  let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
-    const cpX = (prev.x + curr.x) / 2;
-    const cpY = (prev.y + curr.y) / 2;
-    d += ` Q ${prev.x} ${(prev.y + cpY) / 2}, ${cpX} ${cpY}`;
-    d += ` Q ${curr.x} ${(cpY + curr.y) / 2}, ${curr.x} ${curr.y}`;
-  }
-  return d;
-}
 
 export default function JourneyMap({
   currentLesson,
@@ -281,19 +266,17 @@ export default function JourneyMap({
     sfx("wrong-move");
   }, [sfx]);
 
-  const pathData = buildPathData(LESSONS.length);
-
   return (
     <div
       ref={scrollRef}
       className="relative w-full h-dvh overflow-y-auto overflow-x-hidden"
     >
-      {/* Container uses aspect-ratio to match the background image (1024×1536 = 2:3)
+      {/* Container uses aspect-ratio to match the background image (1376×3104)
            so lesson nodes placed at % positions always align with the illustrated path,
            without stretching the image. */}
       <div
         className="relative w-full"
-        style={{ aspectRatio: "1024 / 1536" }}
+        style={{ aspectRatio: "1376 / 3104" }}
       >
         {/* Illustrated journey map background */}
         <img
@@ -302,34 +285,6 @@ export default function JourneyMap({
           aria-hidden="true"
           className="absolute inset-0 w-full h-full"
         />
-
-        {/* Dotted trail connecting lesson nodes */}
-        <svg
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          {/* Path glow */}
-          <path
-            d={pathData}
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-            opacity={0.35}
-            strokeLinecap="round"
-          />
-          {/* Main dotted trail */}
-          <path
-            d={pathData}
-            fill="none"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeDasharray="2.5,2"
-            strokeLinecap="round"
-            opacity={0.7}
-          />
-        </svg>
 
         {/* Lesson stops */}
         {LESSONS.map((lesson, index) => {

@@ -34,7 +34,6 @@ const boardIntro: Lesson = {
   puzzles: [
     {
       narrationKey: "board_intro_puzzle_light",
-      // King on d4 (dark square) — move it to any adjacent light square
       boardSetup: pos(["d4", "king", "white"]),
       correctMoves: [
         { from: "d4" as Square, to: "c4" as Square },
@@ -47,7 +46,6 @@ const boardIntro: Lesson = {
     },
     {
       narrationKey: "board_intro_puzzle_dark",
-      // King on e5 (dark square) — move it to any adjacent dark square
       boardSetup: pos(["e5", "king", "white"]),
       correctMoves: [
         { from: "e5" as Square, to: "d4" as Square },
@@ -62,12 +60,99 @@ const boardIntro: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 2. Pawn ----------
+// ---------- 2. How Chess Works (NEW) ----------
+const howChessWorksLesson: Lesson = {
+  id: "how-chess-works",
+  icon: "special",
+  steps: [
+    {
+      narrationKey: "how_chess_intro",
+      // Show a few white and black pieces facing each other
+      boardSetup: pos(
+        ["e1", "king", "white"],
+        ["d1", "queen", "white"],
+        ["e2", "pawn", "white"],
+        ["d2", "pawn", "white"],
+        ["e8", "king", "black"],
+        ["d8", "queen", "black"],
+        ["e7", "pawn", "black"],
+        ["d7", "pawn", "black"]
+      ),
+    },
+    {
+      narrationKey: "how_chess_turns",
+      // Simple position — white pawn moves forward
+      boardSetup: pos(
+        ["e2", "pawn", "white"],
+        ["e7", "pawn", "black"]
+      ),
+      animation: {
+        piece: "e2" as Square,
+        path: ["e4"] as Square[],
+        highlights: ["e4"] as Square[],
+      },
+    },
+    {
+      narrationKey: "how_chess_capture",
+      // White rook captures black pawn
+      boardSetup: pos(
+        ["d1", "rook", "white"],
+        ["d5", "pawn", "black"]
+      ),
+      animation: {
+        piece: "d1" as Square,
+        path: ["d5"] as Square[],
+        highlights: ["d5"] as Square[],
+      },
+    },
+    {
+      narrationKey: "how_chess_goal",
+      // Show a checkmate position — king trapped
+      boardSetup: pos(
+        ["h8", "king", "black"],
+        ["a8", "rook", "white"],
+        ["g6", "king", "white"]
+      ),
+    },
+  ],
+  puzzles: [
+    {
+      narrationKey: "how_chess_puzzle_capture",
+      // Rook on d1, black pawn on d5 — capture along d-file
+      boardSetup: pos(
+        ["d1", "rook", "white"],
+        ["d5", "pawn", "black"]
+      ),
+      correctMoves: [{ from: "d1" as Square, to: "d5" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+    {
+      narrationKey: "how_chess_puzzle_capture_2",
+      // Bishop on c1, black knight on f4
+      // Diagonal c1→d2→e3→f4 — valid bishop move
+      boardSetup: pos(
+        ["c1", "bishop", "white"],
+        ["f4", "knight", "black"]
+      ),
+      correctMoves: [{ from: "c1" as Square, to: "f4" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+  ],
+  starsForChest: 2,
+};
+
+// ---------- 3. Pawn ----------
 const pawnLesson: Lesson = {
   id: "pawn",
   icon: "pawn",
   pieceFocus: "pawn",
   steps: [
+    {
+      narrationKey: "pawn_intro",
+      boardSetup: pos(["e4", "pawn", "white"]),
+    },
     {
       narrationKey: "pawn_moves",
       boardSetup: pos(["e2", "pawn", "white"]),
@@ -125,12 +210,16 @@ const pawnLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 3. Knight ----------
+// ---------- 4. Knight ----------
 const knightLesson: Lesson = {
   id: "knight",
   icon: "knight",
   pieceFocus: "knight",
   steps: [
+    {
+      narrationKey: "knight_intro",
+      boardSetup: pos(["d4", "knight", "white"]),
+    },
     {
       narrationKey: "knight_moves",
       boardSetup: pos(["e4", "knight", "white"]),
@@ -185,12 +274,16 @@ const knightLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 4. Bishop ----------
+// ---------- 5. Bishop ----------
 const bishopLesson: Lesson = {
   id: "bishop",
   icon: "bishop",
   pieceFocus: "bishop",
   steps: [
+    {
+      narrationKey: "bishop_intro",
+      boardSetup: pos(["d4", "bishop", "white"]),
+    },
     {
       narrationKey: "bishop_moves",
       boardSetup: pos(["c1", "bishop", "white"]),
@@ -240,12 +333,16 @@ const bishopLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 5. Rook ----------
+// ---------- 6. Rook ----------
 const rookLesson: Lesson = {
   id: "rook",
   icon: "rook",
   pieceFocus: "rook",
   steps: [
+    {
+      narrationKey: "rook_intro",
+      boardSetup: pos(["d4", "rook", "white"]),
+    },
     {
       narrationKey: "rook_moves",
       boardSetup: pos(["a1", "rook", "white"]),
@@ -308,12 +405,16 @@ const rookLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 6. Queen ----------
+// ---------- 7. Queen ----------
 const queenLesson: Lesson = {
   id: "queen",
   icon: "queen",
   pieceFocus: "queen",
   steps: [
+    {
+      narrationKey: "queen_intro",
+      boardSetup: pos(["d4", "queen", "white"]),
+    },
     {
       narrationKey: "queen_moves",
       boardSetup: pos(["d1", "queen", "white"]),
@@ -374,12 +475,16 @@ const queenLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 7. King ----------
+// ---------- 8. King ----------
 const kingLesson: Lesson = {
   id: "king",
   icon: "king",
   pieceFocus: "king",
   steps: [
+    {
+      narrationKey: "king_intro",
+      boardSetup: pos(["e4", "king", "white"]),
+    },
     {
       narrationKey: "king_moves",
       boardSetup: pos(["e4", "king", "white"]),
@@ -440,7 +545,322 @@ const kingLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 8. Castling ----------
+// ---------- 9. Check ----------
+const checkLesson: Lesson = {
+  id: "check",
+  icon: "king",
+  steps: [
+    {
+      narrationKey: "check_intro",
+      // Rook on e1 gives check to king on e8
+      boardSetup: pos(
+        ["e8", "king", "black"],
+        ["e1", "rook", "white"],
+        ["a1", "king", "white"]
+      ),
+      animation: {
+        piece: "e1" as Square,
+        path: ["e8"] as Square[],
+        highlights: ["e8"] as Square[],
+      },
+    },
+    {
+      narrationKey: "check_escape_move",
+      // King escapes check by moving away
+      boardSetup: pos(
+        ["e8", "king", "black"],
+        ["e1", "rook", "white"],
+        ["a1", "king", "white"]
+      ),
+      animation: {
+        piece: "e8" as Square,
+        path: ["d8"] as Square[],
+        highlights: ["d8", "f8", "d7", "f7"] as Square[],
+      },
+    },
+    {
+      narrationKey: "check_escape_block",
+      // Block the check with a bishop
+      // Bishop on c5 can move to e7 to block rook e1→e8 line
+      // Diagonal c5→d6→e7 — yes, c5 to e7 is a valid bishop move
+      boardSetup: pos(
+        ["e8", "king", "black"],
+        ["e1", "rook", "white"],
+        ["a1", "king", "white"],
+        ["c5", "bishop", "black"]
+      ),
+      animation: {
+        piece: "c5" as Square,
+        path: ["e7"] as Square[],
+        highlights: ["e7"] as Square[],
+      },
+    },
+  ],
+  puzzles: [
+    {
+      narrationKey: "check_puzzle_give",
+      // Give check: rook from a1 to e1 (attacks king on e8 along e-file)
+      boardSetup: pos(
+        ["e8", "king", "black"],
+        ["a1", "rook", "white"],
+        ["h1", "king", "white"]
+      ),
+      correctMoves: [{ from: "a1" as Square, to: "e1" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+    {
+      narrationKey: "check_puzzle_give_2",
+      // Give check: bishop from a2 to e6 (attacks king on f7)
+      // Diagonal: a2-b3-c4-d5-e6, and e6 attacks f7
+      boardSetup: pos(
+        ["f7", "king", "black"],
+        ["a2", "bishop", "white"],
+        ["a1", "king", "white"]
+      ),
+      correctMoves: [{ from: "a2" as Square, to: "e6" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+  ],
+  starsForChest: 2,
+};
+
+// ---------- 10. Checkmate ----------
+const checkmateLesson: Lesson = {
+  id: "checkmate",
+  icon: "king",
+  steps: [
+    {
+      narrationKey: "checkmate_intro",
+      // Two rooks + king trap black king — classic ladder mate position
+      boardSetup: pos(
+        ["h8", "king", "black"],
+        ["a8", "rook", "white"],
+        ["g6", "king", "white"],
+        ["b7", "rook", "white"]
+      ),
+    },
+    {
+      narrationKey: "checkmate_example",
+      // Queen delivers back-rank mate against pawns
+      boardSetup: pos(
+        ["g8", "king", "black"],
+        ["f7", "pawn", "black"],
+        ["g7", "pawn", "black"],
+        ["h7", "pawn", "black"],
+        ["d1", "queen", "white"],
+        ["e1", "king", "white"]
+      ),
+      animation: {
+        piece: "d1" as Square,
+        path: ["d8"] as Square[],
+        highlights: ["d8"] as Square[],
+      },
+    },
+    {
+      narrationKey: "checkmate_vs_check",
+      // Show a checkmate position — king has no escape
+      boardSetup: pos(
+        ["h8", "king", "black"],
+        ["a8", "rook", "white"],
+        ["g6", "king", "white"]
+      ),
+    },
+  ],
+  puzzles: [
+    {
+      narrationKey: "checkmate_puzzle",
+      // Back rank mate: rook to a8
+      // White king on g6 covers g7/g8/h7, rook on a8 checks h8
+      boardSetup: pos(
+        ["h8", "king", "black"],
+        ["a1", "rook", "white"],
+        ["g6", "king", "white"]
+      ),
+      correctMoves: [{ from: "a1" as Square, to: "a8" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+    {
+      narrationKey: "checkmate_puzzle_2",
+      // Queen captures g7 pawn = checkmate
+      // King on h8 blocked by own h7 pawn, queen on g7 covers g8
+      boardSetup: pos(
+        ["h8", "king", "black"],
+        ["g7", "pawn", "black"],
+        ["h7", "pawn", "black"],
+        ["g5", "queen", "white"],
+        ["e1", "king", "white"]
+      ),
+      correctMoves: [{ from: "g5" as Square, to: "g7" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+  ],
+  starsForChest: 2,
+};
+
+// ---------- 11. Piece Values (NEW) ----------
+const pieceValuesLesson: Lesson = {
+  id: "piece-values",
+  icon: "tactics",
+  steps: [
+    {
+      narrationKey: "piece_values_intro",
+      // Show all piece types — queen most prominent
+      boardSetup: pos(
+        ["a1", "pawn", "white"],
+        ["c1", "knight", "white"],
+        ["e1", "bishop", "white"],
+        ["g1", "rook", "white"],
+        ["d4", "queen", "white"]
+      ),
+    },
+    {
+      narrationKey: "piece_values_order",
+      // Line them up in order of value
+      boardSetup: pos(
+        ["a2", "pawn", "white"],
+        ["b2", "knight", "white"],
+        ["c2", "bishop", "white"],
+        ["e2", "rook", "white"],
+        ["g2", "queen", "white"]
+      ),
+    },
+    {
+      narrationKey: "piece_values_best_capture",
+      // Queen can capture rook or pawn — show why rook is better
+      boardSetup: pos(
+        ["d1", "queen", "white"],
+        ["d7", "rook", "black"],
+        ["b3", "pawn", "black"]
+      ),
+      animation: {
+        piece: "d1" as Square,
+        path: ["d7"] as Square[],
+        highlights: ["d7"] as Square[],
+      },
+    },
+  ],
+  puzzles: [
+    {
+      narrationKey: "piece_values_puzzle",
+      // Queen on d1, black rook on d7, black pawn on b3
+      // d1→d7 (straight line) captures rook (5pts)
+      // d1→b3 (diagonal d1→c2→b3) captures pawn (1pt)
+      // Best: take the rook
+      boardSetup: pos(
+        ["d1", "queen", "white"],
+        ["d7", "rook", "black"],
+        ["b3", "pawn", "black"]
+      ),
+      correctMoves: [{ from: "d1" as Square, to: "d7" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+    {
+      narrationKey: "piece_values_puzzle_2",
+      // Rook on a1, black queen on a7, black bishop on e1
+      // a1→a7 (file) captures queen (9pts)
+      // a1→e1 (rank) captures bishop (3pts)
+      // Best: take the queen
+      boardSetup: pos(
+        ["a1", "rook", "white"],
+        ["a7", "queen", "black"],
+        ["e1", "bishop", "black"]
+      ),
+      correctMoves: [{ from: "a1" as Square, to: "a7" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+  ],
+  starsForChest: 2,
+};
+
+// ---------- 12. Protecting ----------
+const protectingLesson: Lesson = {
+  id: "protecting",
+  icon: "special",
+  steps: [
+    {
+      narrationKey: "protecting_intro",
+      // Pawn c3 guards pawn d4 (c3 captures diagonally to d4)
+      boardSetup: pos(
+        ["d4", "pawn", "white"],
+        ["c3", "pawn", "white"]
+      ),
+      animation: {
+        piece: "c3" as Square,
+        path: [] as Square[],
+        highlights: ["c3", "d4"] as Square[],
+      },
+    },
+    {
+      narrationKey: "protecting_why",
+      // Black bishop threatens d4 via a7-b6-c5-d4 diagonal, but c3 guards it
+      boardSetup: pos(
+        ["d4", "pawn", "white"],
+        ["c3", "pawn", "white"],
+        ["a7", "bishop", "black"]
+      ),
+      animation: {
+        piece: "a7" as Square,
+        path: [] as Square[],
+        highlights: ["d4", "c3"] as Square[],
+      },
+    },
+    {
+      narrationKey: "protecting_safe_attack",
+      // Knight on e4 protected by pawn on d3 (d3 captures diagonally to e4)
+      boardSetup: pos(
+        ["e4", "knight", "white"],
+        ["d3", "pawn", "white"],
+        ["f6", "knight", "black"]
+      ),
+      animation: {
+        piece: "d3" as Square,
+        path: [] as Square[],
+        highlights: ["d3", "e4"] as Square[],
+      },
+    },
+  ],
+  puzzles: [
+    {
+      narrationKey: "protecting_puzzle",
+      // Move f2 pawn to f3 to protect e4 pawn
+      // f3 pawn captures diagonally to e4 and g4
+      // Bishop on d6 threatens e4 via d6... wait, does it? d6 diagonals: c7/b8, e7/f8, c5/b4/a3, e5/f4/g3/h2
+      // d6 does NOT attack e4. Let me use a better threat.
+      // Use knight on f6: f6 attacks e4 (knight move f6→e4: -1,-2 from f6 = e4. Yes!)
+      boardSetup: pos(
+        ["e4", "pawn", "white"],
+        ["f2", "pawn", "white"],
+        ["f6", "knight", "black"]
+      ),
+      correctMoves: [{ from: "f2" as Square, to: "f3" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+    {
+      narrationKey: "protecting_puzzle_2",
+      // Move e3 pawn to e4 to protect d5 pawn
+      // e4 pawn captures diagonally to d5 and f5
+      // Black knight on c7 threatens d5 (c7→d5: +1,-2 = d5. Yes!)
+      boardSetup: pos(
+        ["d5", "pawn", "white"],
+        ["e3", "pawn", "white"],
+        ["c7", "knight", "black"]
+      ),
+      correctMoves: [{ from: "e3" as Square, to: "e4" as Square }],
+      wrongMoveNarrationKey: "try_again",
+      successNarrationKey: "great_move",
+    },
+  ],
+  starsForChest: 2,
+};
+
+// ---------- 13. Castling ----------
 const castlingLesson: Lesson = {
   id: "castling",
   icon: "special",
@@ -503,62 +923,7 @@ const castlingLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 9. En Passant ----------
-const enPassantLesson: Lesson = {
-  id: "en-passant",
-  icon: "special",
-  steps: [
-    {
-      narrationKey: "en_passant_intro",
-      boardSetup: pos(
-        ["e5", "pawn", "white"],
-        ["d7", "pawn", "black"]
-      ),
-      animation: {
-        piece: "d7" as Square,
-        path: ["d5"] as Square[],
-        highlights: ["d5", "d6"] as Square[],
-      },
-    },
-    {
-      narrationKey: "en_passant_capture",
-      boardSetup: pos(
-        ["e5", "pawn", "white"],
-        ["d5", "pawn", "black"]
-      ),
-      animation: {
-        piece: "e5" as Square,
-        path: ["d6"] as Square[],
-        highlights: ["d6"] as Square[],
-      },
-    },
-  ],
-  puzzles: [
-    {
-      narrationKey: "en_passant_puzzle",
-      boardSetup: pos(
-        ["e5", "pawn", "white"],
-        ["d5", "pawn", "black"]
-      ),
-      correctMoves: [{ from: "e5" as Square, to: "d6" as Square }],
-      wrongMoveNarrationKey: "try_again",
-      successNarrationKey: "great_move",
-    },
-    {
-      narrationKey: "en_passant_puzzle_2",
-      boardSetup: pos(
-        ["c5", "pawn", "white"],
-        ["d5", "pawn", "black"]
-      ),
-      correctMoves: [{ from: "c5" as Square, to: "d6" as Square }],
-      wrongMoveNarrationKey: "try_again",
-      successNarrationKey: "great_move",
-    },
-  ],
-  starsForChest: 2,
-};
-
-// ---------- 10. Promotion ----------
+// ---------- 14. Promotion ----------
 const promotionLesson: Lesson = {
   id: "promotion",
   icon: "special",
@@ -602,64 +967,57 @@ const promotionLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 11. Check & Checkmate ----------
-const checkCheckmateLesson: Lesson = {
-  id: "check-checkmate",
-  icon: "king",
+// ---------- 15. Putting It Together ----------
+const capstoneLesson: Lesson = {
+  id: "capstone",
+  icon: "tactics",
   steps: [
     {
-      narrationKey: "check_intro",
+      narrationKey: "capstone_intro",
+      // Show all the pieces the kid has learned
       boardSetup: pos(
-        ["e8", "king", "black"],
-        ["e1", "rook", "white"],
-        ["a1", "king", "white"]
-      ),
-      animation: {
-        piece: "e1" as Square,
-        path: ["e8"] as Square[],
-        highlights: ["e8"] as Square[],
-      },
-    },
-    {
-      narrationKey: "checkmate_intro",
-      boardSetup: pos(
-        ["h8", "king", "black"],
-        ["a8", "rook", "white"],
-        ["g6", "king", "white"],
-        ["b7", "rook", "white"]
-      ),
-    },
-    {
-      narrationKey: "checkmate_example",
-      boardSetup: pos(
-        ["g8", "king", "black"],
-        ["f7", "pawn", "black"],
-        ["g7", "pawn", "black"],
-        ["h7", "pawn", "black"],
+        ["e1", "king", "white"],
         ["d1", "queen", "white"],
-        ["e1", "king", "white"]
+        ["a1", "rook", "white"],
+        ["h1", "rook", "white"],
+        ["c1", "bishop", "white"],
+        ["f1", "bishop", "white"],
+        ["b1", "knight", "white"],
+        ["g1", "knight", "white"]
       ),
-      animation: {
-        piece: "d1" as Square,
-        path: ["d8"] as Square[],
-        highlights: ["d8"] as Square[],
-      },
+    },
+    {
+      narrationKey: "capstone_tips",
+      // A mid-game position showing pieces working together
+      boardSetup: pos(
+        ["e1", "king", "white"],
+        ["d4", "pawn", "white"],
+        ["e4", "pawn", "white"],
+        ["c3", "knight", "white"],
+        ["e8", "king", "black"],
+        ["d5", "pawn", "black"]
+      ),
     },
   ],
   puzzles: [
     {
-      narrationKey: "check_puzzle",
+      narrationKey: "capstone_puzzle_capture",
+      // Capture the rook (most valuable) with queen along d-file
       boardSetup: pos(
-        ["e8", "king", "black"],
-        ["a1", "rook", "white"],
-        ["a2", "king", "white"]
+        ["d1", "queen", "white"],
+        ["d7", "rook", "black"],
+        ["b4", "knight", "black"],
+        ["e1", "king", "white"],
+        ["e8", "king", "black"]
       ),
-      correctMoves: [{ from: "a1" as Square, to: "e1" as Square }],
+      correctMoves: [{ from: "d1" as Square, to: "d7" as Square }],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
     {
-      narrationKey: "checkmate_puzzle",
+      narrationKey: "capstone_puzzle_checkmate",
+      // Back rank mate: rook to a8
+      // White king on g6 covers g7/g8/h7
       boardSetup: pos(
         ["h8", "king", "black"],
         ["a1", "rook", "white"],
@@ -673,218 +1031,23 @@ const checkCheckmateLesson: Lesson = {
   starsForChest: 2,
 };
 
-// ---------- 12. Stalemate ----------
-const stalemateLesson: Lesson = {
-  id: "stalemate",
-  icon: "special",
-  steps: [
-    {
-      narrationKey: "stalemate_intro",
-      boardSetup: pos(
-        ["h1", "king", "white"],
-        ["f2", "queen", "white"],
-        ["h8", "king", "black"]
-      ),
-    },
-    {
-      narrationKey: "stalemate_trapped",
-      boardSetup: pos(
-        ["h1", "king", "white"],
-        ["g6", "queen", "white"],
-        ["h8", "king", "black"]
-      ),
-      animation: {
-        piece: "h8" as Square,
-        path: ["h8"] as Square[],
-        highlights: ["g8", "g7", "h7"] as Square[],
-      },
-    },
-  ],
-  puzzles: [
-    {
-      narrationKey: "stalemate_puzzle_avoid",
-      boardSetup: pos(
-        ["g1", "king", "white"],
-        ["f7", "queen", "white"],
-        ["h8", "king", "black"]
-      ),
-      correctMoves: [
-        { from: "f7" as Square, to: "f6" as Square },
-        { from: "f7" as Square, to: "e7" as Square },
-        { from: "f7" as Square, to: "g7" as Square },
-      ],
-      wrongMoveNarrationKey: "stalemate_oops",
-      successNarrationKey: "great_move",
-    },
-    {
-      narrationKey: "stalemate_puzzle_checkmate",
-      boardSetup: pos(
-        ["f1", "king", "white"],
-        ["e6", "queen", "white"],
-        ["h8", "king", "black"]
-      ),
-      correctMoves: [
-        { from: "e6" as Square, to: "g8" as Square },
-      ],
-      wrongMoveNarrationKey: "stalemate_oops",
-      successNarrationKey: "great_move",
-    },
-  ],
-  starsForChest: 2,
-};
-
-// ---------- 13. Forks ----------
-const forksLesson: Lesson = {
-  id: "forks",
-  icon: "tactics",
-  steps: [
-    {
-      narrationKey: "fork_intro",
-      boardSetup: pos(
-        ["e8", "king", "black"],
-        ["a8", "rook", "black"],
-        ["d5", "knight", "white"],
-        ["e1", "king", "white"]
-      ),
-      animation: {
-        piece: "d5" as Square,
-        path: ["c7"] as Square[],
-        highlights: ["e8", "a8"] as Square[],
-      },
-    },
-    {
-      narrationKey: "fork_explain",
-      boardSetup: pos(
-        ["e8", "king", "black"],
-        ["a8", "rook", "black"],
-        ["c7", "knight", "white"],
-        ["e1", "king", "white"]
-      ),
-      animation: {
-        piece: "c7" as Square,
-        path: [] as Square[],
-        highlights: ["e8", "a8"] as Square[],
-      },
-    },
-  ],
-  puzzles: [
-    {
-      narrationKey: "fork_puzzle",
-      // Knight d3 moves to e5, forking king on d7 and rook on f7
-      // d3 -> e5 is a valid knight move
-      // From e5: attacks c4, c6, d3, d7, f3, f7, g4, g6
-      boardSetup: pos(
-        ["d7", "king", "black"],
-        ["f7", "rook", "black"],
-        ["d3", "knight", "white"],
-        ["a1", "king", "white"]
-      ),
-      correctMoves: [{ from: "d3" as Square, to: "e5" as Square }],
-      wrongMoveNarrationKey: "try_again",
-      successNarrationKey: "great_move",
-    },
-    {
-      narrationKey: "fork_puzzle_2",
-      // Knight b5 moves to c7, forking king on e8 and rook on a8
-      // b5 -> c7 is a valid knight move
-      // From c7: attacks a6, a8, b5, d5, e6, e8
-      boardSetup: pos(
-        ["e8", "king", "black"],
-        ["a8", "rook", "black"],
-        ["b5", "knight", "white"],
-        ["e1", "king", "white"]
-      ),
-      correctMoves: [{ from: "b5" as Square, to: "c7" as Square }],
-      wrongMoveNarrationKey: "try_again",
-      successNarrationKey: "great_move",
-    },
-  ],
-  starsForChest: 2,
-};
-
-// ---------- 14. Pins ----------
-const pinsLesson: Lesson = {
-  id: "pins",
-  icon: "tactics",
-  steps: [
-    {
-      narrationKey: "pin_intro",
-      // Bishop on a4 pins knight on c6 to king on e8
-      // Diagonal: a4 - b5 - c6 - d7 - e8
-      boardSetup: pos(
-        ["e8", "king", "black"],
-        ["c6", "knight", "black"],
-        ["a4", "bishop", "white"],
-        ["e1", "king", "white"]
-      ),
-      animation: {
-        piece: "a4" as Square,
-        path: [] as Square[],
-        highlights: ["c6", "e8"] as Square[],
-      },
-    },
-    {
-      narrationKey: "pin_explain",
-      // Bishop on a3 pins rook on d6 to king on f8
-      // Diagonal: a3 - b4 - c5 - d6 - e7 - f8
-      boardSetup: pos(
-        ["f8", "king", "black"],
-        ["d6", "rook", "black"],
-        ["a3", "bishop", "white"],
-        ["e1", "king", "white"]
-      ),
-      animation: {
-        piece: "a3" as Square,
-        path: [] as Square[],
-        highlights: ["d6", "f8"] as Square[],
-      },
-    },
-  ],
-  puzzles: [
-    {
-      narrationKey: "pin_puzzle",
-      boardSetup: pos(
-        ["e8", "king", "black"],
-        ["e5", "queen", "black"],
-        ["e1", "rook", "white"],
-        ["a1", "king", "white"]
-      ),
-      correctMoves: [{ from: "e1" as Square, to: "e5" as Square }],
-      wrongMoveNarrationKey: "try_again",
-      successNarrationKey: "great_move",
-    },
-    {
-      narrationKey: "pin_puzzle_2",
-      boardSetup: pos(
-        ["h5", "king", "black"],
-        ["f5", "knight", "black"],
-        ["a5", "rook", "white"],
-        ["a1", "king", "white"]
-      ),
-      correctMoves: [{ from: "a5" as Square, to: "f5" as Square }],
-      wrongMoveNarrationKey: "try_again",
-      successNarrationKey: "great_move",
-    },
-  ],
-  starsForChest: 2,
-};
-
 // ---------- Export ----------
 export const LESSONS: Lesson[] = [
-  boardIntro,
-  pawnLesson,
-  knightLesson,
-  bishopLesson,
-  rookLesson,
-  queenLesson,
-  kingLesson,
-  castlingLesson,
-  enPassantLesson,
-  promotionLesson,
-  checkCheckmateLesson,
-  stalemateLesson,   // 12 — Stalemate
-  forksLesson,       // 13 — Forks
-  pinsLesson,        // 14 — Pins
+  boardIntro,          //  1 — Board Intro
+  howChessWorksLesson, //  2 — How Chess Works
+  pawnLesson,          //  3 — Pawn
+  knightLesson,        //  4 — Knight
+  bishopLesson,        //  5 — Bishop
+  rookLesson,          //  6 — Rook
+  queenLesson,         //  7 — Queen
+  kingLesson,          //  8 — King
+  checkLesson,         //  9 — Check
+  checkmateLesson,     // 10 — Checkmate
+  pieceValuesLesson,   // 11 — Piece Values
+  protectingLesson,    // 12 — Protecting
+  castlingLesson,      // 13 — Castling
+  promotionLesson,     // 14 — Promotion
+  capstoneLesson,      // 15 — Putting It Together
 ];
 
 export function getLessonById(id: string): Lesson | undefined {

@@ -35,7 +35,7 @@ export const CHESTS: ChestDefinition[] = [
   },
   {
     index: 3,
-    afterLesson: "en-passant",
+    afterLesson: "checkmate",
     rewards: [
       { id: "outfit-wizard-hat", type: "outfit", chestIndex: 3, outfitId: "wizard-hat" },
     ],
@@ -43,7 +43,7 @@ export const CHESTS: ChestDefinition[] = [
   },
   {
     index: 4,
-    afterLesson: "stalemate",
+    afterLesson: "promotion",
     rewards: [
       { id: "outfit-medal-snowflake", type: "outfit", chestIndex: 4, outfitId: "medal-snowflake" },
     ],
