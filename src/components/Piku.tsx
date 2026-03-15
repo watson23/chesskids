@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-type Expression =
+export type Expression =
   | "happy"
   | "sad"
   | "celebrating"

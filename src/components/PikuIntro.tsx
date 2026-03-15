@@ -58,7 +58,7 @@ export default function PikuIntro({ childName, onContinue }: PikuIntroProps) {
 
         {/* Speech bubble with greeting */}
         <div className="flex items-center gap-2 max-w-[340px]">
-          <SpeechBubble text={greeting} visible pointer="top" />
+          <SpeechBubble text={greeting} visible pointer="bottom" />
           <button
             onClick={(e) => {
               e.stopPropagation();

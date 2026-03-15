@@ -58,7 +58,7 @@ function HomeContent() {
   const [justCompletedLesson, setJustCompletedLesson] = useState<string | null>(null);
   const [justUnlockedLesson, setJustUnlockedLesson] = useState<number | null>(null);
 
-  // Reset all transient state when switching child profiles
+  // Reset all state when switching child profiles
   const prevChildId = useRef(activeChild?.id);
   useEffect(() => {
     if (activeChild?.id === prevChildId.current) return;
@@ -66,10 +66,15 @@ function HomeContent() {
     // Reset refs
     completionProcessed.current = false;
     skipNextSync.current = false;
-    // Reset UI overlays
+    // Reset data state so stale data from previous child doesn't persist
+    setCurrentLesson(0);
+    setTotalStars(0);
+    setLessonProgress({});
+    setOpenedChests([]);
+    setFirestoreReady(false);
+    // Reset UI overlays (keep settings open so user can switch between profiles)
     setOpenChestIndex(null);
     setShowAddChild(false);
-    setShowSettings(false);
     setShowRewards(false);
     setShowPikuIntro(false);
     // Reset animations
@@ -304,6 +309,7 @@ function HomeContent() {
     <div className="relative min-h-dvh">
       {/* Journey Map */}
       <JourneyMap
+        key={activeChild?.id}
         currentLesson={currentLesson}
         lessonProgress={lessonProgress}
         totalStars={totalStars}

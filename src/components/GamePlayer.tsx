@@ -7,7 +7,7 @@ import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
 
-import Piku from "@/components/Piku";
+import Piku, { type Expression } from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
@@ -39,7 +39,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
   const [showStuckNudge, setShowStuckNudge] = useState(false);
-  const [pikuMood, setPikuMood] = useState<string | null>(null);
+  const [pikuMood, setPikuMood] = useState<Expression | null>(null);
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPieceCountRef = useRef<number>(32);
