@@ -46,8 +46,8 @@ function HomeContent() {
   const [showRewards, setShowRewards] = useState(false);
   const [showPikuIntro, setShowPikuIntro] = useState(false);
 
-  // Guard against processing completion params multiple times
-  const completionProcessed = useRef(false);
+  // Guard against processing completion params multiple times — track which lesson+stars combo was last processed
+  const lastProcessedCompletion = useRef<string | null>(null);
   // Track whether Firestore data has loaded for the current child
   const [firestoreReady, setFirestoreReady] = useState(false);
 
@@ -67,7 +67,7 @@ function HomeContent() {
     if (activeChild?.id === prevChildId.current) return;
     prevChildId.current = activeChild?.id;
     // Reset refs
-    completionProcessed.current = false;
+    lastProcessedCompletion.current = null;
     skipNextSync.current = false;
     // Reset data state so stale data from previous child doesn't persist
     setCurrentLesson(0);
@@ -177,13 +177,17 @@ function HomeContent() {
   );
 
   useEffect(() => {
-    if (!user || !activeChild || !firestoreReady || completionProcessed.current) return;
+    if (!user || !activeChild || !firestoreReady) return;
 
     const completedLessonId = searchParams.get("completed");
     const starsParam = searchParams.get("stars");
     if (!completedLessonId || !starsParam) return;
 
-    completionProcessed.current = true;
+    // Don't re-process the same completion (guards against effect re-runs from dep changes)
+    const completionKey = `${completedLessonId}:${starsParam}`;
+    if (lastProcessedCompletion.current === completionKey) return;
+    lastProcessedCompletion.current = completionKey;
+
     const stars = parseInt(starsParam, 10);
     if (isNaN(stars) || stars < 1 || stars > 3) {
       router.replace("/", { scroll: false });
@@ -205,11 +209,6 @@ function HomeContent() {
     user, activeChild, firestoreReady, searchParams,
     lessonProgress, router, processCompletion,
   ]);
-
-  // Reset completion guard when search params change
-  useEffect(() => {
-    completionProcessed.current = false;
-  }, [searchParams]);
 
   const handleLessonTap = useCallback(
     (lessonId: string) => {
