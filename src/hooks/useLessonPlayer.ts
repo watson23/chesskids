@@ -45,7 +45,11 @@ export function useLessonPlayer(lesson: Lesson) {
       if (nextIndex < totalWatchSteps) {
         return { ...prev, stepIndex: nextIndex };
       }
-      // All watch steps done, switch to try phase
+      // All watch steps done
+      if (totalPuzzles === 0) {
+        // No puzzles — go straight to celebrate with 3 stars
+        return { ...prev, phase: "celebrate" as LessonPhase, stars: 3 };
+      }
       return {
         ...prev,
         phase: "try" as LessonPhase,
@@ -53,7 +57,7 @@ export function useLessonPlayer(lesson: Lesson) {
         puzzleIndex: 0,
       };
     });
-  }, [totalWatchSteps]);
+  }, [totalWatchSteps, totalPuzzles]);
 
   const recordAttempt = useCallback(
     (correct: boolean) => {
