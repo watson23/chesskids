@@ -148,7 +148,7 @@ export default function LessonStop({
 
       {/* The round node */}
       <div
-        className={`w-[60px] h-[60px] rounded-full flex items-center justify-center ${status === "current" ? "animate-gentle-bounce" : ""}${justUnlocked ? " animate-unlock-glow" : ""}`}
+        className={`w-[60px] h-[60px] rounded-full flex items-center justify-center ${status === "current" ? "animate-glow-bounce" : ""}${justUnlocked ? " animate-unlock-glow" : ""}`}
         style={nodeStyle}
       >
         <LessonIcon icon={lesson.icon} />

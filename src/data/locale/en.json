@@ -127,7 +127,7 @@
   "difficulty_easy_desc": "Perfect for beginners",
   "difficulty_medium_desc": "A bit more challenging",
   "difficulty_hard_desc": "For brave knights!",
-  "onboarding_start": "Welcome, {name}! Tap the glowing bubble to start your chess adventure!",
+  "onboarding_start": "Welcome, {name}! Tap the glowing green circle to start your chess adventure!",
   "game_ai_thinking": "Hmm, let me think...",
   "game_your_turn": "Your turn! Pick a piece.",
   "landing_hero_speech": "Hi! I'm Piku! Let's learn chess!",

@@ -127,7 +127,7 @@
   "difficulty_easy_desc": "Sopii aloittelijoille",
   "difficulty_medium_desc": "Hieman haastavampi",
   "difficulty_hard_desc": "Rohkeille ritareille!",
-  "onboarding_start": "Tervetuloa, {name}! Napauta hehkuvaa kuplaa ja aloita shakkiseikkailu!",
+  "onboarding_start": "Tervetuloa, {name}! Napauta hehkuvaa vihreää palloa ja aloita shakkiseikkailu!",
   "game_ai_thinking": "Hmm, annas kun mietin...",
   "game_your_turn": "Sinun vuorosi! Valitse nappula.",
   "landing_hero_speech": "Hei! Olen Piku! Opetellaan shakkia!",
