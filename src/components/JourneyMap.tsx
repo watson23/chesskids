@@ -154,6 +154,7 @@ export default function JourneyMap({
 
     const container = scrollRef.current;
     const timers: ReturnType<typeof setTimeout>[] = [];
+    const isAllComplete = justUnlockedLesson >= LESSONS.length;
 
     // Helper to scroll to a lesson index
     function scrollToLesson(index: number) {
@@ -161,6 +162,13 @@ export default function JourneyMap({
       const { y } = getLessonPosition(index, LESSONS.length);
       const mapHeight = container.scrollHeight;
       const targetScroll = (y / 100) * mapHeight - container.clientHeight / 2;
+      container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+    }
+
+    function scrollToPosition(pos: { y: number }) {
+      if (!container) return;
+      const mapHeight = container.scrollHeight;
+      const targetScroll = (pos.y / 100) * mapHeight - container.clientHeight / 2;
       container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
     }
 
@@ -174,12 +182,12 @@ export default function JourneyMap({
       sfx("confetti");
     }, 300));
 
-    // 1000ms: start Piku walking to newly unlocked lesson
+    // 1000ms: start Piku walking to newly unlocked lesson (or igloo if all done)
     // Set walking state first so the CSS transition is applied,
     // then update position on the next frame so the transition animates.
     timers.push(setTimeout(() => {
       setPikuWalking(true);
-      const newPos = getLessonPosition(justUnlockedLesson, LESSONS.length);
+      const newPos = isAllComplete ? IGLOO_POSITION : getLessonPosition(justUnlockedLesson, LESSONS.length);
       const oldPos = getLessonPosition(justUnlockedLesson - 1, LESSONS.length);
 
       // Delay position update by one frame so the transition CSS is applied first
@@ -212,51 +220,77 @@ export default function JourneyMap({
       timers.push(setTimeout(() => cancelAnimationFrame(rafId), walkDuration + 100) as unknown as ReturnType<typeof setTimeout>);
     }, 1000));
 
-    // 2500ms: walking done, trigger unlock animation on newly unlocked lesson
-    timers.push(setTimeout(() => {
-      setPikuWalking(false);
-      setSparkleLesson(null);
-      setUnlockingIndex(justUnlockedLesson);
-      sfx("chest-open");
-    }, 2500));
-
-    // 3100ms: clear unlock animation, start persistent glow
-    timers.push(setTimeout(() => {
-      setUnlockingIndex(null);
-      setGlowingIndex(justUnlockedLesson);
-    }, 3100));
-
-    // Check if this lesson completion unlocked a chest
-    const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
-    const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
-
-    if (hasNewChest) {
-      // 4000ms: scroll to the newly unlocked chest + Piku voice callout
+    if (isAllComplete) {
+      // All lessons done — Piku walks to igloo, play celebration
       timers.push(setTimeout(() => {
-        setGlowingIndex(null);
-        const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
-        if (container) {
-          const mapHeight = container.scrollHeight;
-          const targetScroll = (chestPos.y / 100) * mapHeight - container.clientHeight / 2;
-          container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
-        }
-        say("chest_appeared");
-      }, 4000));
+        setPikuWalking(false);
+        setSparkleLesson(null);
+        sfx("confetti");
+        say("celebrate_all_complete");
+      }, 2500));
 
-      // 7000ms: done — chest stays glowing on map via existing unlocked styling
-      timers.push(setTimeout(() => {
-        onUnlockAnimationDone?.();
-      }, 7000));
+      // Check for final chest too
+      const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
+      const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
+
+      if (hasNewChest) {
+        timers.push(setTimeout(() => {
+          const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
+          scrollToPosition(chestPos);
+          say("chest_appeared");
+        }, 4000));
+
+        timers.push(setTimeout(() => {
+          onUnlockAnimationDone?.();
+        }, 7000));
+      } else {
+        timers.push(setTimeout(() => {
+          onUnlockAnimationDone?.();
+        }, 4000));
+      }
     } else {
-      // No chest — finish normally
+      // 2500ms: walking done, trigger unlock animation on newly unlocked lesson
       timers.push(setTimeout(() => {
-        onUnlockAnimationDone?.();
+        setPikuWalking(false);
+        setSparkleLesson(null);
+        setUnlockingIndex(justUnlockedLesson);
+        sfx("chest-open");
+      }, 2500));
+
+      // 3100ms: clear unlock animation, start persistent glow
+      timers.push(setTimeout(() => {
+        setUnlockingIndex(null);
+        setGlowingIndex(justUnlockedLesson);
       }, 3100));
 
-      // 6100ms: clear glow
-      timers.push(setTimeout(() => {
-        setGlowingIndex(null);
-      }, 6100));
+      // Check if this lesson completion unlocked a chest
+      const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
+      const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
+
+      if (hasNewChest) {
+        // 4000ms: scroll to the newly unlocked chest + Piku voice callout
+        timers.push(setTimeout(() => {
+          setGlowingIndex(null);
+          const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
+          scrollToPosition(chestPos);
+          say("chest_appeared");
+        }, 4000));
+
+        // 7000ms: done — chest stays glowing on map via existing unlocked styling
+        timers.push(setTimeout(() => {
+          onUnlockAnimationDone?.();
+        }, 7000));
+      } else {
+        // No chest — finish normally
+        timers.push(setTimeout(() => {
+          onUnlockAnimationDone?.();
+        }, 3100));
+
+        // 6100ms: clear glow
+        timers.push(setTimeout(() => {
+          setGlowingIndex(null);
+        }, 6100));
+      }
     }
 
     return () => timers.forEach(clearTimeout);

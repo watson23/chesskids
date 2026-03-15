@@ -33,7 +33,7 @@ export default function NarrationArea({ narrationKey, phase, onReplay }: Narrati
   const expression = getExpression(phase);
 
   return (
-    <div className="flex items-end gap-3 w-full max-w-[360px] px-2 overflow-hidden" style={{ height: 120 }}>
+    <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: 120 }}>
       <div className="flex-shrink-0">
         <Piku expression={expression} size={110} />
       </div>

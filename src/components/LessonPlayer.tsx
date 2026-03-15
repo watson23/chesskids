@@ -109,7 +109,50 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
       const timer = setTimeout(() => {
         if (!cancelled) say(currentStep.narrationKey);
       }, 50);
-      return () => { cancelled = true; clearTimeout(timer); };
+
+      // Auto-animate piece movement after a delay (e.g. castling, checkmate demos)
+      let animTimer: ReturnType<typeof setTimeout> | null = null;
+      if (currentStep.animation?.piece && currentStep.animation?.path?.length) {
+        animTimer = setTimeout(() => {
+          if (cancelled) return;
+          const anim = currentStep.animation!;
+          const from = anim.piece;
+          const to = anim.path[anim.path.length - 1];
+          setBoardPieces((prev) => {
+            const newPieces = { ...prev };
+            const piece = newPieces[from];
+            if (piece) {
+              delete newPieces[from];
+              newPieces[to] = piece;
+              // Castling: if king moves 2 squares, also move the rook
+              if (piece.type === "king") {
+                const fromFile = from.charCodeAt(0);
+                const toFile = to.charCodeAt(0);
+                const rank = to[1];
+                if (toFile - fromFile === 2) {
+                  const rookFrom = `h${rank}` as Square;
+                  const rookTo = `f${rank}` as Square;
+                  if (newPieces[rookFrom]) {
+                    newPieces[rookTo] = newPieces[rookFrom];
+                    delete newPieces[rookFrom];
+                  }
+                } else if (fromFile - toFile === 2) {
+                  const rookFrom = `a${rank}` as Square;
+                  const rookTo = `d${rank}` as Square;
+                  if (newPieces[rookFrom]) {
+                    newPieces[rookTo] = newPieces[rookFrom];
+                    delete newPieces[rookFrom];
+                  }
+                }
+              }
+            }
+            return newPieces;
+          });
+          setLastMove({ from, to });
+        }, 1200);
+      }
+
+      return () => { cancelled = true; clearTimeout(timer); if (animTimer) clearTimeout(animTimer); };
     } else if (state.phase === "try" && currentPuzzle) {
       setBoardPieces(currentPuzzle.boardSetup);
       setSelectedSquare(null);
