@@ -54,6 +54,9 @@ function HomeContent() {
   // Skip next Firestore sync to prevent race condition after completion
   const skipNextSync = useRef(false);
 
+  // Track that a child was just created — deferred past cleanup effect
+  const pendingPikuIntro = useRef(false);
+
   // Unlock animation state
   const [justCompletedLesson, setJustCompletedLesson] = useState<string | null>(null);
   const [justUnlockedLesson, setJustUnlockedLesson] = useState<number | null>(null);
@@ -80,6 +83,14 @@ function HomeContent() {
     // Reset animations
     setJustCompletedLesson(null);
     setJustUnlockedLesson(null);
+  }, [activeChild?.id]);
+
+  // Show PikuIntro after cleanup effect has run (runs in definition order)
+  useEffect(() => {
+    if (pendingPikuIntro.current) {
+      pendingPikuIntro.current = false;
+      setShowPikuIntro(true);
+    }
   }, [activeChild?.id]);
 
   /** Load progress from Firestore when activeChild changes */
@@ -255,8 +266,8 @@ function HomeContent() {
       try {
         const child = await addChildToFirestore(user.uid, name, avatar);
         await refreshChildren();
+        pendingPikuIntro.current = true;
         setActiveChild(child);
-        setShowPikuIntro(true);
         setShowSettings(false);
       } catch (err) {
         console.error("Failed to add child:", err);
@@ -315,6 +326,7 @@ function HomeContent() {
         totalStars={totalStars}
         openedChests={openedChests}
         completedLessons={Object.keys(lessonProgress)}
+        firestoreReady={firestoreReady}
         onLessonTap={handleLessonTap}
         onChestTap={handleChestTap}
         justCompletedLesson={justCompletedLesson}
@@ -364,7 +376,7 @@ function HomeContent() {
       <ParentSettings
         open={showSettings}
         onClose={() => setShowSettings(false)}
-        onChildAdded={() => setShowPikuIntro(true)}
+        onChildAdded={() => { pendingPikuIntro.current = true; }}
       />
 
       {/* Chest open modal */}

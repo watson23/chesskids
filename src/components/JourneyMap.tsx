@@ -19,6 +19,7 @@ interface JourneyMapProps {
   onLessonTap: (lessonId: string) => void;
   onChestTap: (chestIndex: number) => void;
   onLockedChestTap?: (chestIndex: number) => void;
+  firestoreReady?: boolean;
   justCompletedLesson?: string | null;
   justUnlockedLesson?: number | null;
   onUnlockAnimationDone?: () => void;
@@ -112,6 +113,7 @@ export default function JourneyMap({
   onLessonTap,
   onChestTap,
   onLockedChestTap,
+  firestoreReady = true,
   justCompletedLesson,
   justUnlockedLesson,
   onUnlockAnimationDone,
@@ -391,7 +393,7 @@ export default function JourneyMap({
         )}
 
         {/* Piku mascot standing next to current lesson, or at the igloo when all done */}
-        {!(currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
+        {!(firestoreReady && currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
           const allDone = currentLesson >= LESSONS.length;
           return (
             <div
@@ -415,7 +417,7 @@ export default function JourneyMap({
         })()}
 
         {/* First-time onboarding overlay — stays until player taps first lesson */}
-        {currentLesson === 0 && !onboardingDismissed && !justCompletedLesson && (() => {
+        {firestoreReady && currentLesson === 0 && !onboardingDismissed && !justCompletedLesson && (() => {
           const pos = getLessonPosition(0, LESSONS.length);
           return (
             <JourneyMapOnboarding
