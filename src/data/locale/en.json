@@ -127,7 +127,8 @@
   "difficulty_easy_desc": "Perfect for beginners",
   "difficulty_medium_desc": "A bit more challenging",
   "difficulty_hard_desc": "For brave knights!",
-  "onboarding_start": "Welcome, {name}! Tap the glowing green circle to start your chess adventure!",
+  "piku_intro_greeting": "Hi {name}! I'm Piku! Let's learn chess together!",
+  "onboarding_start": "This is your chess adventure! Tap the green circle to start!",
   "game_ai_thinking": "Hmm, let me think...",
   "game_your_turn": "Your turn! Pick a piece.",
   "landing_hero_speech": "Hi! I'm Piku! Let's learn chess!",
@@ -217,7 +218,8 @@
   "stuck_nudge": "Good game! Want to play again?",
   "keep_playing": "Keep playing",
   "watch_first": "Watch first! It's Piku's turn to show you.",
-  "game_over_win": "You won! Amazing!",
+  "game_over_win": "Checkmate! You won!",
   "game_over_loss": "Good game! Want to try again?",
-  "game_over_draw": "It's a draw! Well played!"
+  "game_over_draw": "It's a draw! Well played!",
+  "see_board": "See the board"
 }

@@ -127,7 +127,8 @@
   "difficulty_easy_desc": "Sopii aloittelijoille",
   "difficulty_medium_desc": "Hieman haastavampi",
   "difficulty_hard_desc": "Rohkeille ritareille!",
-  "onboarding_start": "Tervetuloa, {name}! Napauta hehkuvaa vihreää palloa ja aloita shakkiseikkailu!",
+  "piku_intro_greeting": "Hei {name}! Minä olen Piku! Opetellaan shakkia yhdessä!",
+  "onboarding_start": "Tämä on sinun shakkiseikkailusi! Aloita napauttamalla vihreää ympyrää!",
   "game_ai_thinking": "Hmm, annas kun mietin...",
   "game_your_turn": "Sinun vuorosi! Valitse nappula.",
   "landing_hero_speech": "Hei! Olen Piku! Opetellaan shakkia!",
@@ -217,7 +218,8 @@
   "stuck_nudge": "Hyvä peli! Pelataan uudestaan?",
   "keep_playing": "Jatka pelaamista",
   "watch_first": "Katso ensin! Pikun vuoro näyttää.",
-  "game_over_win": "Sinä voitit! Mahtavaa!",
+  "game_over_win": "Shakkimatti! Sinä voitit!",
   "game_over_loss": "Hyvä peli! Haluatko yrittää uudestaan?",
-  "game_over_draw": "Tasapeli! Hyvin pelattu!"
+  "game_over_draw": "Tasapeli! Hyvin pelattu!",
+  "see_board": "Katso lauta"
 }

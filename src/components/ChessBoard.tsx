@@ -18,6 +18,7 @@ interface ChessBoardProps {
   validMoves: Square[];
   correctMoves?: Square[];
   watchHighlights?: Square[];
+  checkSquare?: Square | null;
   lastMove: { from: Square; to: Square } | null;
   onSquareTap: (square: Square) => void;
   onWatchTap?: () => void;
@@ -34,6 +35,7 @@ interface BoardSquareProps {
   isValidMove: boolean;
   isCorrectMove: boolean;
   isWatchHighlight: boolean;
+  isInCheck: boolean;
   interactive: boolean;
   pieceColors: PieceColorSet;
   onTap: (square: Square) => void;
@@ -48,6 +50,7 @@ const BoardSquare = memo(function BoardSquare({
   isValidMove,
   isCorrectMove,
   isWatchHighlight,
+  isInCheck,
   interactive,
   pieceColors,
   onTap,
@@ -141,28 +144,39 @@ const BoardSquare = memo(function BoardSquare({
         />
       )}
 
-      {/* Legal move indicator — subtle green dot (not correct, just legal) */}
+      {/* Check indicator — red pulsing ring around king in check */}
+      {isInCheck && (
+        <div
+          className="absolute inset-[3%] rounded-full pointer-events-none animate-pulse"
+          style={{
+            border: "4px solid #EF4444",
+            boxShadow: "inset 0 0 12px rgba(239, 68, 68, 0.4), 0 0 16px rgba(239, 68, 68, 0.6)",
+          }}
+        />
+      )}
+
+      {/* Legal move indicator — soft green dot */}
       {isValidMove && !isCorrectMove && !hasPiece && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
             className="w-[30%] h-[30%] rounded-full"
             style={{
-              background: "radial-gradient(circle, #9CA3AF 0%, #6B7280 100%)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-              opacity: 0.5,
+              background: "radial-gradient(circle, #86EFAC 0%, #4ADE80 100%)",
+              boxShadow: "0 1px 4px rgba(74, 222, 128, 0.4)",
+              opacity: 0.7,
             }}
           />
         </div>
       )}
 
-      {/* Legal capture indicator — subtle ring (not correct, just legal) */}
+      {/* Legal capture indicator — green ring */}
       {isValidMove && !isCorrectMove && hasPiece && (
         <div
           className="absolute inset-[3%] rounded-full pointer-events-none"
           style={{
-            border: "4px solid #9CA3AF",
-            opacity: 0.4,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+            border: "4px solid #4ADE80",
+            opacity: 0.55,
+            boxShadow: "0 0 6px rgba(74, 222, 128, 0.3)",
           }}
         />
       )}
@@ -178,6 +192,7 @@ export default function ChessBoard({
   validMoves,
   correctMoves = [],
   watchHighlights = [],
+  checkSquare = null,
   lastMove,
   onSquareTap,
   onWatchTap,
@@ -237,8 +252,14 @@ export default function ChessBoard({
               lastMove !== null &&
               (lastMove.from === square || lastMove.to === square);
 
+            const isCheck = checkSquare === square;
+
             let bgColor: string;
-            if (isSelected) {
+            if (isCheck) {
+              bgColor = light
+                ? blendColors(theme.lightSquare, "#EF4444", 0.35)
+                : blendColors(theme.darkSquare, "#EF4444", 0.35);
+            } else if (isSelected) {
               bgColor = "#fbbf24"; // amber-400
             } else if (isLastMove) {
               bgColor = light
@@ -259,6 +280,7 @@ export default function ChessBoard({
                 isValidMove={isValidMove}
                 isCorrectMove={isCorrectMove}
                 isWatchHighlight={isWatchHighlight}
+                isInCheck={isCheck}
                 interactive={interactive}
                 pieceColors={pieceColors}
                 onTap={handleSquareTap}

@@ -10,9 +10,10 @@ import { addChild as addChildToFirestore } from "@/lib/firestore";
 interface ParentSettingsProps {
   open: boolean;
   onClose: () => void;
+  onChildAdded?: () => void;
 }
 
-export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
+export default function ParentSettings({ open, onClose, onChildAdded }: ParentSettingsProps) {
   const { language, setLanguage, soundEnabled, setSoundEnabled, t } = useAudio();
   const {
     user,
@@ -37,12 +38,14 @@ export default function ParentSettings({ open, onClose }: ParentSettingsProps) {
         const child = await addChildToFirestore(user.uid, name, avatar);
         await refreshChildren();
         setActiveChild(child);
+        onChildAdded?.();
+        onClose();
       } catch (err) {
         console.error("Failed to add child:", err);
       }
       setShowAddChild(false);
     },
-    [user, refreshChildren, setActiveChild]
+    [user, refreshChildren, setActiveChild, onChildAdded, onClose]
   );
 
   return (

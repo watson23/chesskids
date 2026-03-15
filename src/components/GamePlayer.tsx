@@ -7,6 +7,7 @@ import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
 
+import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
 import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
@@ -34,6 +35,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const { boardTheme, pieceColors } = useActiveTheme();
   const { t } = useLocale();
   const [gameResult, setGameResult] = useState<"win" | "loss" | "draw" | null>(null);
+  const [showResultOverlay, setShowResultOverlay] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [showTapHint, setShowTapHint] = useState(false);
   const [showStuckNudge, setShowStuckNudge] = useState(false);
@@ -58,6 +60,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     lastMove,
     turn,
     gameOver,
+    checkSquare,
     handleSquareTap,
     programmaticMove,
     reset,
@@ -72,22 +75,25 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
     if (!gameOver.over) return;
 
     if (gameOver.result === "checkmate") {
-      // If it's black's turn and checkmate, that means white delivered checkmate
-      // (the game is over after white's move, now it's "black's turn" but they're mated)
       if (turn === "black") {
+        // Win: let the kid admire the checkmate position first
         setGameResult("win");
         sfx("confetti");
         say("game_over_win");
-        // Unlock bear opponent when the player beats the owl (level 3)
         if (difficulty >= 3) {
           localStorage.setItem("mfcm_owl_beaten", "true");
         }
+        // Show overlay after a delay so the board is visible with confetti
+        const timer = setTimeout(() => setShowResultOverlay(true), 3500);
+        return () => clearTimeout(timer);
       } else {
         setGameResult("loss");
+        setShowResultOverlay(true);
         say("game_over_loss");
       }
     } else {
       setGameResult("draw");
+      setShowResultOverlay(true);
       say("game_over_draw");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -189,6 +195,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const handleRematch = useCallback(() => {
     sfx("button-tap");
     setGameResult(null);
+    setShowResultOverlay(false);
     setIsAIThinking(false);
     setShowTapHint(false);
     setShowStuckNudge(false);
@@ -329,6 +336,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
             pieceColors={pieceColors}
             selectedSquare={gameResult ? null : selectedSquare}
             validMoves={gameResult ? [] : validMoves}
+            checkSquare={gameResult ? null : checkSquare}
             lastMove={lastMove}
             onSquareTap={handleSquareTap}
             interactive={!gameResult && turn === "white" && !isAIThinking}
@@ -366,8 +374,11 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
             </div>
           )}
 
+          {/* Win: confetti on the board before the overlay appears */}
+          {gameResult === "win" && !showResultOverlay && <Confetti active />}
+
           {/* Game over overlay on top of the board */}
-          {gameResult && (
+          {showResultOverlay && gameResult && (
             <div
               className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
               style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(3px)" }}
@@ -396,39 +407,53 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
                 pointer="bottom"
               />
 
-              {/* Action buttons — big and obvious */}
+              {/* Action buttons — big icons, no text needed */}
               <div className="flex gap-4 mt-6">
                 <button
                   onClick={handleRematch}
-                  className="btn-3d btn-3d-purple flex items-center gap-2 px-8 py-3 text-white font-bold text-lg"
+                  className="btn-3d btn-3d-purple p-4"
+                  aria-label={t("rematch")}
                 >
-                  <Image src="/icons/icon-retry.webp" alt="" width={28} height={28} className="object-contain" />
-                  <span>{t("rematch")}</span>
+                  <Image src="/icons/icon-retry.webp" alt="" width={36} height={36} className="object-contain" />
                 </button>
                 <button
                   onClick={handleExit}
-                  className="btn-3d btn-3d-gray p-3"
+                  className="btn-3d btn-3d-gray p-4"
+                  aria-label="Home"
                 >
-                  <Image src="/icons/icon-back.webp" alt="" width={28} height={28} className="object-contain" />
+                  <Image src="/icons/icon-home.webp" alt="" width={36} height={36} className="object-contain" />
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Floating buttons on the board when result is known but overlay is not shown (admiring the position) */}
+          {gameResult && !showResultOverlay && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-3 animate-slide-in">
+              <button
+                onClick={handleRematch}
+                className="btn-3d btn-3d-purple p-3"
+                aria-label={t("rematch")}
+              >
+                <Image src="/icons/icon-retry.webp" alt="" width={28} height={28} className="object-contain" />
+              </button>
+              <button
+                onClick={handleExit}
+                className="btn-3d btn-3d-gray p-3"
+                aria-label="Home"
+              >
+                <Image src="/icons/icon-home.webp" alt="" width={28} height={28} className="object-contain" />
+              </button>
             </div>
           )}
         </div>
 
         {/* Piku coach below the board */}
-        <div className="flex items-start gap-2 w-full max-w-[360px]">
-          <div className="flex-shrink-0 w-[72px] h-[86px] relative overflow-hidden">
-            <Image
-              src={`/mascot/piku-${pikuExpression}.webp`}
-              alt="Piku"
-              width={72}
-              height={108}
-              className="drop-shadow-md absolute bottom-0 left-0"
-              style={{ width: 72, height: "auto" }}
-            />
+        <div className="flex items-end gap-2 w-full max-w-[400px]">
+          <div className="drop-shadow-md">
+            <Piku expression={pikuExpression} size={100} />
           </div>
-          <div className="pt-2">
+          <div className="pb-2 min-w-0">
             <SpeechBubble text={pikuText} icon={pikuIcon} visible={!!pikuText} />
           </div>
         </div>

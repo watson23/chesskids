@@ -8,6 +8,7 @@ import ChestOpenModal from "@/components/ChestOpenModal";
 import RewardCollection from "@/components/RewardCollection";
 import ChildSelector from "@/components/ChildSelector";
 import AddChildModal from "@/components/AddChildModal";
+import PikuIntro from "@/components/PikuIntro";
 import ParentSettings from "@/components/ParentSettings";
 import StarCounter from "@/components/StarCounter";
 import { CHESTS } from "@/data/chests";
@@ -43,6 +44,7 @@ function HomeContent() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
+  const [showPikuIntro, setShowPikuIntro] = useState(false);
 
   // Guard against processing completion params multiple times
   const completionProcessed = useRef(false);
@@ -56,11 +58,32 @@ function HomeContent() {
   const [justCompletedLesson, setJustCompletedLesson] = useState<string | null>(null);
   const [justUnlockedLesson, setJustUnlockedLesson] = useState<number | null>(null);
 
+  // Reset all transient state when switching child profiles
+  const prevChildId = useRef(activeChild?.id);
+  useEffect(() => {
+    if (activeChild?.id === prevChildId.current) return;
+    prevChildId.current = activeChild?.id;
+    // Reset refs
+    completionProcessed.current = false;
+    skipNextSync.current = false;
+    // Reset UI overlays
+    setOpenChestIndex(null);
+    setShowAddChild(false);
+    setShowSettings(false);
+    setShowRewards(false);
+    setShowPikuIntro(false);
+    // Reset animations
+    setJustCompletedLesson(null);
+    setJustUnlockedLesson(null);
+  }, [activeChild?.id]);
+
   /** Load progress from Firestore when activeChild changes */
   useEffect(() => {
     if (!user || !activeChild) return;
     let cancelled = false;
     setFirestoreReady(false);
+    // Always reset skipNextSync for a fresh child load
+    skipNextSync.current = false;
 
     async function load() {
       try {
@@ -68,13 +91,8 @@ function HomeContent() {
         if (cancelled) return;
         setLessonProgress(progress);
 
-        // After completion, skip Firestore overwrite to avoid race condition
-        if (skipNextSync.current) {
-          skipNextSync.current = false;
-        } else {
-          setCurrentLesson(resolveCurrentLessonIndex(activeChild!.currentLesson));
-          setTotalStars(activeChild!.totalStars);
-        }
+        setCurrentLesson(resolveCurrentLessonIndex(activeChild!.currentLesson));
+        setTotalStars(activeChild!.totalStars);
 
         // Determine opened chests from rewards
         const unlockedRewardIds = activeChild!.unlockedRewards ?? [];
@@ -122,19 +140,7 @@ function HomeContent() {
               console.error("Failed to save progress:", err)
             );
 
-            // Unlock champion outfits when the final lesson is completed
-            const isLastLesson = LESSONS[LESSONS.length - 1]?.id === completedLessonId;
-            if (isLastLesson) {
-              updateChildRewards(
-                user.uid, activeChild.id,
-                [...(activeChild.unlockedRewards ?? [])],
-                undefined, undefined,
-                ["champion-crown", "champion-cape"],
-                { head: "champion-crown", body: "champion-cape" }
-              ).then(() => refreshChildren()).catch((err) =>
-                console.error("Failed to save champion rewards:", err)
-              );
-            }
+
           }
           return newCurrent;
         });
@@ -245,6 +251,8 @@ function HomeContent() {
         const child = await addChildToFirestore(user.uid, name, avatar);
         await refreshChildren();
         setActiveChild(child);
+        setShowPikuIntro(true);
+        setShowSettings(false);
       } catch (err) {
         console.error("Failed to add child:", err);
       }
@@ -279,6 +287,16 @@ function HomeContent() {
           />
         )}
       </>
+    );
+  }
+
+  // Piku intro for new players — shown once after child creation
+  if (showPikuIntro && activeChild) {
+    return (
+      <PikuIntro
+        childName={activeChild.name}
+        onContinue={() => setShowPikuIntro(false)}
+      />
     );
   }
 
@@ -340,6 +358,7 @@ function HomeContent() {
       <ParentSettings
         open={showSettings}
         onClose={() => setShowSettings(false)}
+        onChildAdded={() => setShowPikuIntro(true)}
       />
 
       {/* Chest open modal */}

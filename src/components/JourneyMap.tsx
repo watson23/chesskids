@@ -174,15 +174,23 @@ export default function JourneyMap({
     }, 300));
 
     // 1000ms: start Piku walking to newly unlocked lesson
+    // Set walking state first so the CSS transition is applied,
+    // then update position on the next frame so the transition animates.
     timers.push(setTimeout(() => {
       setPikuWalking(true);
       const newPos = getLessonPosition(justUnlockedLesson, LESSONS.length);
-      setPikuPosition(newPos);
+      const oldPos = getLessonPosition(justUnlockedLesson - 1, LESSONS.length);
+
+      // Delay position update by one frame so the transition CSS is applied first
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setPikuPosition(newPos);
+        });
+      });
 
       // Scroll to follow Piku during walk using rAF interpolation
       const walkDuration = 1500; // matches CSS transition duration
       const walkStart = performance.now();
-      const oldPos = getLessonPosition(justUnlockedLesson - 1, LESSONS.length);
       let rafId: number;
       function scrollFollow(now: number) {
         if (!container) return;
@@ -393,9 +401,7 @@ export default function JourneyMap({
                   ? `${pikuPosition.x}%`
                   : `calc(${pikuPosition.x}% + clamp(20px, 8vw, 36px))`,
                 top: `${pikuPosition.y}%`,
-                ...(pikuWalking
-                  ? { transition: "left 1.5s ease-in-out, top 1.5s ease-in-out" }
-                  : {}),
+                transition: pikuWalking ? "left 1.5s ease-in-out, top 1.5s ease-in-out" : "none",
               }}
             >
               <PikuWithOutfit

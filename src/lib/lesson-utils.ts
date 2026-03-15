@@ -16,6 +16,9 @@ export function resolveCurrentLessonIndex(currentLesson: string | number): numbe
 
   if (currentLesson === "") return 0;
 
+  // All lessons completed sentinel
+  if (currentLesson === "__all_complete__") return LESSONS.length;
+
   // New format: lesson ID string — find the index of the NEXT lesson
   // If currentLesson is "pawn-intro", that means the player should play "pawn-intro" next,
   // so the index is the position of that lesson in the array

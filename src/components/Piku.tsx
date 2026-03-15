@@ -60,14 +60,24 @@ export default function Piku({ expression = "happy", size = 80 }: PikuProps) {
   const src = expressionToImage[expression];
 
   return (
-    <Image
-      src={src}
-      alt={`Piku the penguin — ${expression}`}
-      width={size}
-      height={size}
-      style={{ width: size, height: size, objectFit: "contain" }}
-      priority={size >= 100}
-      draggable={false}
-    />
+    <div
+      style={{ width: size, height: size, position: "relative" }}
+      className="flex-shrink-0"
+    >
+      <Image
+        src={src}
+        alt={`Piku the penguin — ${expression}`}
+        width={size}
+        height={size}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          objectPosition: "center bottom",
+        }}
+        priority={size >= 100}
+        draggable={false}
+      />
+    </div>
   );
 }

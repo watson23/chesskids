@@ -138,3 +138,23 @@ export function getCurrentTurn(fen: string): "white" | "black" {
   const chess = new Chess(fen);
   return chess.turn() === "w" ? "white" : "black";
 }
+
+/**
+ * Returns the square of the king that is in check, or null if no king is in check.
+ */
+export function getCheckSquare(fen: string): Square | null {
+  const chess = new Chess(fen);
+  if (!chess.isCheck()) return null;
+  // The side to move is the one in check
+  const kingColor = chess.turn(); // 'w' or 'b'
+  const board = chess.board();
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col];
+      if (piece && piece.type === "k" && piece.color === kingColor) {
+        return piece.square as Square;
+      }
+    }
+  }
+  return null;
+}

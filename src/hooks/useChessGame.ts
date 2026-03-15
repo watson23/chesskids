@@ -8,6 +8,7 @@ import {
   isGameOver,
   boardToRecord,
   getCurrentTurn,
+  getCheckSquare,
 } from "@/lib/chess-helpers";
 
 const STARTING_FEN =
@@ -35,6 +36,8 @@ interface UseChessGameReturn {
   turn: "white" | "black";
   /** Whether the game is over and the result */
   gameOver: { over: boolean; result: "checkmate" | "stalemate" | "draw" | null };
+  /** Square of the king in check, or null */
+  checkSquare: Square | null;
   /** Handle a square being tapped — select or move */
   handleSquareTap: (square: Square) => void;
   /** Execute a move programmatically (bypasses playerColor check, for AI) */
@@ -59,6 +62,7 @@ export function useChessGame(options: UseChessGameOptions = {}): UseChessGameRet
   const pieces = useMemo(() => boardToRecord(fen), [fen]);
   const turn = useMemo(() => getCurrentTurn(fen), [fen]);
   const gameOver = useMemo(() => isGameOver(fen), [fen]);
+  const checkSquare = useMemo(() => getCheckSquare(fen), [fen]);
 
   const clearSelection = useCallback(() => {
     setSelectedSquare(null);
@@ -180,6 +184,7 @@ export function useChessGame(options: UseChessGameOptions = {}): UseChessGameRet
     lastMove,
     turn,
     gameOver,
+    checkSquare,
     handleSquareTap,
     programmaticMove,
     reset,
