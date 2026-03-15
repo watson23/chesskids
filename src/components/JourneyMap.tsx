@@ -24,6 +24,7 @@ interface JourneyMapProps {
   justUnlockedLesson?: number | null;
   onUnlockAnimationDone?: () => void;
   childName?: string;
+  childId?: string;
   equippedOutfit?: { head?: string; body?: string };
 }
 
@@ -118,6 +119,7 @@ export default function JourneyMap({
   justUnlockedLesson,
   onUnlockAnimationDone,
   childName,
+  childId,
   equippedOutfit,
 }: JourneyMapProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -131,6 +133,18 @@ export default function JourneyMap({
     const allDone = currentLesson >= LESSONS.length;
     return allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
   });
+
+  // Reset internal state when switching children
+  const prevChildId = useRef(childId);
+  useEffect(() => {
+    if (childId === prevChildId.current) return;
+    prevChildId.current = childId;
+    setOnboardingDismissed(false);
+    setSparkleLesson(null);
+    setUnlockingIndex(null);
+    setGlowingIndex(null);
+    setPikuWalking(false);
+  }, [childId]);
 
   // Keep Piku position in sync when currentLesson changes (not during walk animation)
   useEffect(() => {

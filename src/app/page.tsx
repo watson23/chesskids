@@ -320,7 +320,6 @@ function HomeContent() {
     <div className="relative min-h-dvh">
       {/* Journey Map */}
       <JourneyMap
-        key={activeChild?.id}
         currentLesson={currentLesson}
         lessonProgress={lessonProgress}
         totalStars={totalStars}
@@ -333,6 +332,7 @@ function HomeContent() {
         justUnlockedLesson={justUnlockedLesson}
         onUnlockAnimationDone={handleUnlockAnimationDone}
         childName={activeChild?.name}
+        childId={activeChild?.id}
         equippedOutfit={activeChild?.equippedOutfit}
       />
 
