@@ -232,8 +232,9 @@ const knightLesson: Lesson = {
         ["b1", "knight", "white"]
       ),
       correctMoves: [
-        { from: "b1" as Square, to: "c3" as Square },
         { from: "b1" as Square, to: "a3" as Square },
+        { from: "b1" as Square, to: "c3" as Square },
+        { from: "b1" as Square, to: "d2" as Square },
       ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
@@ -605,20 +606,28 @@ const checkLesson: Lesson = {
         ["a1", "rook", "white"],
         ["h1", "king", "white"]
       ),
-      correctMoves: [{ from: "a1" as Square, to: "e1" as Square }],
+      correctMoves: [
+        { from: "a1" as Square, to: "e1" as Square },
+        { from: "a1" as Square, to: "a8" as Square },
+      ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
     {
       narrationKey: "check_puzzle_give_2",
-      // Give check: bishop from a2 to e6 (attacks king on f7)
-      // Diagonal: a2-b3-c4-d5-e6, and e6 attacks f7
+      // Give check: bishop from a2 — any square on the a2-g8 diagonal checks king on f7
+      // b3, c4, d5, e6 all give check (f7 is the king itself)
       boardSetup: pos(
         ["f7", "king", "black"],
         ["a2", "bishop", "white"],
         ["a1", "king", "white"]
       ),
-      correctMoves: [{ from: "a2" as Square, to: "e6" as Square }],
+      correctMoves: [
+        { from: "a2" as Square, to: "b3" as Square },
+        { from: "a2" as Square, to: "c4" as Square },
+        { from: "a2" as Square, to: "d5" as Square },
+        { from: "a2" as Square, to: "e6" as Square },
+      ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
@@ -863,7 +872,12 @@ const protectingLesson: Lesson = {
         ["a1", "rook", "white"],
         ["a7", "bishop", "black"]
       ),
-      correctMoves: [{ from: "a1" as Square, to: "d1" as Square }],
+      correctMoves: [
+        { from: "a1" as Square, to: "d1" as Square },
+        { from: "a1" as Square, to: "d2" as Square },
+        { from: "a1" as Square, to: "d3" as Square },
+        { from: "a1" as Square, to: "a4" as Square },
+      ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
     },
