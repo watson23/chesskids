@@ -112,6 +112,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
       // Auto-animate piece movement after a delay (e.g. castling, checkmate demos)
       let animTimer: ReturnType<typeof setTimeout> | null = null;
+      let clearTimer: ReturnType<typeof setTimeout> | null = null;
       if (currentStep.animation?.piece && currentStep.animation?.path?.length) {
         animTimer = setTimeout(() => {
           if (cancelled) return;
@@ -149,10 +150,16 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
             return newPieces;
           });
           setLastMove({ from, to });
+          // Clear all indicators after a brief pause so the board is clean
+          clearTimer = setTimeout(() => {
+            if (cancelled) return;
+            setValidMoves([]);
+            setLastMove(null);
+          }, 1500);
         }, 1200);
       }
 
-      return () => { cancelled = true; clearTimeout(timer); if (animTimer) clearTimeout(animTimer); };
+      return () => { cancelled = true; clearTimeout(timer); if (animTimer) clearTimeout(animTimer); if (clearTimer) clearTimeout(clearTimer); };
     } else if (state.phase === "try" && currentPuzzle) {
       setBoardPieces(currentPuzzle.boardSetup);
       setSelectedSquare(null);

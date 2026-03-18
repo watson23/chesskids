@@ -34,7 +34,7 @@ const boardIntro: Lesson = {
   puzzles: [
     {
       narrationKey: "board_intro_puzzle_light",
-      boardSetup: pos(["d4", "king", "white"], ["h8", "king", "black"]),
+      boardSetup: pos(["d4", "king", "white"]),
       correctMoves: [
         { from: "d4" as Square, to: "c4" as Square },
         { from: "d4" as Square, to: "d3" as Square },
@@ -46,7 +46,7 @@ const boardIntro: Lesson = {
     },
     {
       narrationKey: "board_intro_puzzle_dark",
-      boardSetup: pos(["e5", "king", "white"], ["a1", "king", "black"]),
+      boardSetup: pos(["e5", "king", "white"]),
       correctMoves: [
         { from: "e5" as Square, to: "d4" as Square },
         { from: "e5" as Square, to: "d6" as Square },
@@ -83,8 +83,7 @@ const howChessWorksLesson: Lesson = {
       narrationKey: "how_chess_turns",
       // Simple position — white pawn moves forward
       boardSetup: pos(
-        ["e2", "pawn", "white"],
-        ["e7", "pawn", "black"]
+        ["e2", "pawn", "white"]
       ),
       animation: {
         piece: "e2" as Square,
@@ -581,17 +580,17 @@ const checkLesson: Lesson = {
     {
       narrationKey: "check_escape_block",
       // Block the check with a bishop
-      // Bishop on a3 moves to e7 to block rook e1→e8 line
-      // Diagonal a3→b4→c5→d6→e7 — valid bishop move
-      // Bishop is far from king so no visual confusion
+      // Bishop on c5 moves to e7 to block rook e1→e8 line
+      // Diagonal c5→d6→e7 — valid bishop move
+      // c5 is clearly off the e-file and not checking either king
       boardSetup: pos(
         ["e8", "king", "black"],
         ["e1", "rook", "white"],
         ["h1", "king", "white"],
-        ["a3", "bishop", "black"]
+        ["c5", "bishop", "black"]
       ),
       animation: {
-        piece: "a3" as Square,
+        piece: "c5" as Square,
         path: ["e7"] as Square[],
         highlights: ["e7"] as Square[],
       },
@@ -615,18 +614,17 @@ const checkLesson: Lesson = {
     },
     {
       narrationKey: "check_puzzle_give_2",
-      // Give check: bishop from a2 — any square on the a2-g8 diagonal checks king on f7
-      // b3, c4, d5, e6 all give check (f7 is the king itself)
+      // Give check: bishop d5 → e4, which checks king on h7 via e4-f5-g6-h7 diagonal
+      // Black pawn on f7 blocks the d5 NE diagonal (d5-e6-f7) so Bg8 can't check
+      // Only Be4 gives check
       boardSetup: pos(
-        ["f7", "king", "black"],
-        ["a2", "bishop", "white"],
+        ["h7", "king", "black"],
+        ["d5", "bishop", "white"],
+        ["f7", "pawn", "black"],
         ["a1", "king", "white"]
       ),
       correctMoves: [
-        { from: "a2" as Square, to: "b3" as Square },
-        { from: "a2" as Square, to: "c4" as Square },
-        { from: "a2" as Square, to: "d5" as Square },
-        { from: "a2" as Square, to: "e6" as Square },
+        { from: "d5" as Square, to: "e4" as Square },
       ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
@@ -700,11 +698,11 @@ const checkmateLesson: Lesson = {
     {
       narrationKey: "checkmate_puzzle_2",
       // Queen captures g7 pawn = checkmate
-      // King on h8 blocked by own h7 pawn, queen on g7 covers g8
+      // King on g8 trapped: Qg7 covers f8, h8, f7; h7 blocked by own pawn
       // Bishop on b2 protects queen on g7 via b2-c3-d4-e5-f6-g7 diagonal
-      // So Kxg7 is not possible — true checkmate
+      // So Kxg7 is not possible — true checkmate, and the only one on the board
       boardSetup: pos(
-        ["h8", "king", "black"],
+        ["g8", "king", "black"],
         ["g7", "pawn", "black"],
         ["h7", "pawn", "black"],
         ["g5", "queen", "white"],
@@ -864,19 +862,19 @@ const protectingLesson: Lesson = {
     },
     {
       narrationKey: "protecting_puzzle_2",
-      // Move rook from a1 to d1 to protect knight on d4
-      // Black bishop on a7 threatens d4 via a7-b6-c5-d4 diagonal ✓
-      // Rook on d1 protects d4 along d-file
+      // Move rook from h1 to d1 to protect knight on d4
+      // Black bishop on g7 threatens d4 via g7-f6-e5-d4 diagonal
+      // Black pawn on h4 blocks rook from going to h4 (4th rank protection)
+      // Rook can't capture bishop on g7 (different file/rank from h1)
+      // Only Rd1 protects d4 (along d-file via 1st rank)
       boardSetup: pos(
         ["d4", "knight", "white"],
-        ["a1", "rook", "white"],
-        ["a7", "bishop", "black"]
+        ["h1", "rook", "white"],
+        ["g7", "bishop", "black"],
+        ["h4", "pawn", "black"]
       ),
       correctMoves: [
-        { from: "a1" as Square, to: "d1" as Square },
-        { from: "a1" as Square, to: "d2" as Square },
-        { from: "a1" as Square, to: "d3" as Square },
-        { from: "a1" as Square, to: "a4" as Square },
+        { from: "h1" as Square, to: "d1" as Square },
       ],
       wrongMoveNarrationKey: "try_again",
       successNarrationKey: "great_move",
@@ -1038,11 +1036,12 @@ const capstoneLesson: Lesson = {
     {
       narrationKey: "capstone_puzzle_capture",
       // Capture the rook (most valuable) with queen along d-file
+      // Knight on b3 is also capturable (queen diagonal) but worth less (3 vs 5)
       // Black king on g8 — far enough that it can't recapture on d7
       boardSetup: pos(
         ["d1", "queen", "white"],
         ["d7", "rook", "black"],
-        ["b4", "knight", "black"],
+        ["b3", "knight", "black"],
         ["e1", "king", "white"],
         ["g8", "king", "black"]
       ),
