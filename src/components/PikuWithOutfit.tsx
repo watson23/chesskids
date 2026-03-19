@@ -117,6 +117,7 @@ interface PikuWithOutfitProps {
   headImage?: string; // e.g. "/outfits/head-crown.webp"
   bodyImage?: string; // e.g. "/outfits/body-red-scarf.webp"
   size?: number; // base Piku size in px, default 100
+  cssSize?: string; // CSS value like "clamp(40px, 10vw, 72px)" — overrides size for responsive layouts
 }
 
 export default function PikuWithOutfit({
@@ -124,34 +125,53 @@ export default function PikuWithOutfit({
   headImage,
   bodyImage,
   size = 100,
+  cssSize,
 }: PikuWithOutfitProps) {
   const src = standingExpressionToImage[expression];
   const head = resolveHeadPos(extractItemKey(headImage), expression);
   const body = resolveBodyPos(extractItemKey(bodyImage), expression);
 
+  // When cssSize is provided, use CSS-driven sizing with fill mode.
+  // Accessories use percentage-based positioning so they scale with the container.
+  const useCssSize = !!cssSize;
+
   return (
     <div
       style={{
         position: "relative",
-        width: size,
-        height: size,
+        width: useCssSize ? cssSize : size,
+        height: useCssSize ? cssSize : size,
       }}
     >
       {/* Base standing Piku */}
-      <Image
-        src={src}
-        alt={`Piku the penguin — ${expression}`}
-        width={size}
-        height={size}
-        style={{
-          width: size,
-          height: size,
-          objectFit: "contain",
-          pointerEvents: "none",
-        }}
-        priority={size >= 100}
-        draggable={false}
-      />
+      {useCssSize ? (
+        <Image
+          src={src}
+          alt={`Piku the penguin — ${expression}`}
+          fill
+          sizes={cssSize}
+          style={{
+            objectFit: "contain",
+            pointerEvents: "none",
+          }}
+          draggable={false}
+        />
+      ) : (
+        <Image
+          src={src}
+          alt={`Piku the penguin — ${expression}`}
+          width={size}
+          height={size}
+          style={{
+            width: size,
+            height: size,
+            objectFit: "contain",
+            pointerEvents: "none",
+          }}
+          priority={size >= 100}
+          draggable={false}
+        />
+      )}
 
       {/* Head overlay (e.g. crown, hat) */}
       {headImage && (
@@ -165,7 +185,7 @@ export default function PikuWithOutfit({
             top: head.top,
             left: head.left,
             transform: `translateX(-50%) rotate(${head.rotate}deg)`,
-            width: Math.round(size * head.widthScale),
+            width: useCssSize ? `${head.widthScale * 100}%` : Math.round(size * head.widthScale),
             height: "auto",
             objectFit: "contain",
             pointerEvents: "none",
@@ -186,7 +206,7 @@ export default function PikuWithOutfit({
             top: body.top,
             left: body.left,
             transform: `translateX(-50%) rotate(${body.rotate}deg)`,
-            width: Math.round(size * body.widthScale),
+            width: useCssSize ? `${body.widthScale * 100}%` : Math.round(size * body.widthScale),
             height: "auto",
             objectFit: "contain",
             pointerEvents: "none",

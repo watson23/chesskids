@@ -89,6 +89,31 @@ function getChestPosition(positionOnMap: number, _total: number, chestIndex: num
   return { x: 75, y };
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────
+
+/** Cancellable delay for async animation sequences. */
+function delay(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(new DOMException("Aborted", "AbortError")); return; }
+    const id = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => { clearTimeout(id); reject(new DOMException("Aborted", "AbortError")); }, { once: true });
+  });
+}
+
+/** Compute the CSS `left` value for Piku at a given position. */
+function pikuLeftCSS(pos: { x: number }, atIgloo: boolean): string {
+  return atIgloo ? `${pos.x}%` : `calc(${pos.x}% + clamp(20px, 8vw, 36px))`;
+}
+
+/** Compute the CSS `top` value for Piku at a given position (vertically centered without transforms). */
+function pikuTopCSS(pos: { y: number }): string {
+  return `calc(${pos.y}% - clamp(20px, 5vw, 36px))`;
+}
+
+/** Responsive Piku size as a CSS clamp value. */
+const PIKU_CSS_SIZE = "clamp(40px, 10vw, 72px)";
+
+// ── Component ────────────────────────────────────────────────────────
 
 export default function JourneyMap({
   currentLesson,
@@ -108,16 +133,15 @@ export default function JourneyMap({
   equippedOutfit,
 }: JourneyMapProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pikuRef = useRef<HTMLDivElement>(null);
+  const walkingRef = useRef(false);
   const { sfx, say } = useAudio();
   const [sparkleLesson, setSparkleLesson] = useState<string | null>(null);
   const [unlockingIndex, setUnlockingIndex] = useState<number | null>(null);
   const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
-  const [pikuWalking, setPikuWalking] = useState(false);
-  const [pikuPosition, setPikuPosition] = useState<{ x: number; y: number }>(() => {
-    const allDone = currentLesson >= LESSONS.length;
-    return allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
-  });
+
+  const allDone = currentLesson >= LESSONS.length;
 
   // Reset internal state when switching children
   const prevChildId = useRef(childId);
@@ -128,17 +152,19 @@ export default function JourneyMap({
     setSparkleLesson(null);
     setUnlockingIndex(null);
     setGlowingIndex(null);
-    setPikuWalking(false);
+    walkingRef.current = false;
   }, [childId]);
 
-  // Keep Piku position in sync when currentLesson changes (not during walk animation)
+  // ── Imperative Piku positioning ────────────────────────────────────
+  // Set Piku's position directly via ref (no state, no re-renders).
   useEffect(() => {
-    if (pikuWalking) return;
-    const allDone = currentLesson >= LESSONS.length;
-    setPikuPosition(allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length));
-  }, [currentLesson, pikuWalking]);
+    if (walkingRef.current || !pikuRef.current) return;
+    const pos = allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
+    pikuRef.current.style.left = pikuLeftCSS(pos, allDone);
+    pikuRef.current.style.top = pikuTopCSS(pos);
+  }, [currentLesson, allDone]);
 
-  // Auto-scroll to current lesson on mount / lesson change
+  // ── Auto-scroll to current lesson on mount / lesson change ─────────
   useEffect(() => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
@@ -148,157 +174,178 @@ export default function JourneyMap({
     container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
   }, [currentLesson]);
 
-  // Unlock animation sequence
+  // ── WAAPI-based walk animation ─────────────────────────────────────
+  const walkPikuTo = useCallback((newPos: { x: number; y: number }, atIgloo: boolean): Animation | null => {
+    const el = pikuRef.current;
+    const container = scrollRef.current;
+    if (!el || !container) return null;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Read current position
+    const oldLeft = el.style.left;
+    const oldTop = el.style.top;
+    const newLeft = pikuLeftCSS(newPos, atIgloo);
+    const newTop = pikuTopCSS(newPos);
+
+    if (reducedMotion) {
+      // Instant teleport
+      el.style.left = newLeft;
+      el.style.top = newTop;
+      return null;
+    }
+
+    // Parse old Y% for scroll interpolation
+    // oldTop is like "calc(72% - clamp(...))" — extract the percentage
+    const oldYMatch = oldTop.match(/([\d.]+)%/);
+    const oldY = oldYMatch ? parseFloat(oldYMatch[1]) : newPos.y;
+
+    walkingRef.current = true;
+
+    // Build keyframes with walk bounce overlaid.
+    // We use 5 keyframes to create 2 bounce cycles during the walk.
+    const keyframes: Keyframe[] = [
+      { left: oldLeft, top: oldTop, offset: 0 },
+      { left: oldLeft, top: oldTop, transform: "translateY(-4px)", offset: 0.15 },
+      { left: newLeft, top: newTop, transform: "translateY(0px)", offset: 0.35 },
+      { left: newLeft, top: newTop, transform: "translateY(-4px)", offset: 0.55 },
+      { left: newLeft, top: newTop, transform: "translateY(0px)", offset: 0.75 },
+      { left: newLeft, top: newTop, transform: "translateY(-3px)", offset: 0.9 },
+      { left: newLeft, top: newTop, transform: "translateY(0px)", offset: 1 },
+    ];
+
+    const animation = el.animate(keyframes, {
+      duration: 1500,
+      easing: "ease-in-out",
+      fill: "forwards",
+    });
+
+    // Scroll follow: read animation progress each frame for perfect sync
+    let rafId: number;
+    function followScroll() {
+      if (!container) return;
+      const timing = animation.effect?.getComputedTiming();
+      const progress = typeof timing?.progress === "number" ? timing.progress : 0;
+      const currentY = oldY + (newPos.y - oldY) * progress;
+      const mapHeight = container.scrollHeight;
+      const targetScroll = (currentY / 100) * mapHeight - container.clientHeight / 2;
+      container.scrollTo({ top: Math.max(0, targetScroll) });
+      if (animation.playState !== "finished" && animation.playState !== "idle") {
+        rafId = requestAnimationFrame(followScroll);
+      }
+    }
+    rafId = requestAnimationFrame(followScroll);
+
+    animation.finished.then(() => {
+      cancelAnimationFrame(rafId);
+      // Commit final styles and remove the WAAPI fill
+      el.style.left = newLeft;
+      el.style.top = newTop;
+      animation.cancel();
+      walkingRef.current = false;
+    }).catch(() => {
+      // Animation was cancelled (e.g. component unmount)
+      cancelAnimationFrame(rafId);
+      walkingRef.current = false;
+    });
+
+    return animation;
+  }, []);
+
+  // ── Scroll helpers ─────────────────────────────────────────────────
+  const scrollToLesson = useCallback((index: number) => {
+    if (!scrollRef.current) return;
+    const { y } = getLessonPosition(index, LESSONS.length);
+    const mapHeight = scrollRef.current.scrollHeight;
+    const targetScroll = (y / 100) * mapHeight - scrollRef.current.clientHeight / 2;
+    scrollRef.current.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+  }, []);
+
+  const scrollToPosition = useCallback((pos: { y: number }) => {
+    if (!scrollRef.current) return;
+    const mapHeight = scrollRef.current.scrollHeight;
+    const targetScroll = (pos.y / 100) * mapHeight - scrollRef.current.clientHeight / 2;
+    scrollRef.current.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+  }, []);
+
+  // ── Unlock animation sequence (async with AbortController) ─────────
   useEffect(() => {
     if (!justCompletedLesson || justUnlockedLesson == null || !scrollRef.current) return;
 
-    const container = scrollRef.current;
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    const controller = new AbortController();
+    const { signal } = controller;
     const isAllComplete = justUnlockedLesson >= LESSONS.length;
 
-    // Helper to scroll to a lesson index
-    function scrollToLesson(index: number) {
-      if (!container) return;
-      const { y } = getLessonPosition(index, LESSONS.length);
-      const mapHeight = container.scrollHeight;
-      const targetScroll = (y / 100) * mapHeight - container.clientHeight / 2;
-      container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
-    }
+    (async () => {
+      try {
+        // Step 1: Scroll to completed lesson
+        const completedIndex = LESSONS.findIndex((l) => l.id === justCompletedLesson);
+        if (completedIndex >= 0) scrollToLesson(completedIndex);
 
-    function scrollToPosition(pos: { y: number }) {
-      if (!container) return;
-      const mapHeight = container.scrollHeight;
-      const targetScroll = (pos.y / 100) * mapHeight - container.clientHeight / 2;
-      container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
-    }
-
-    // 0ms: scroll to completed lesson
-    const completedIndex = LESSONS.findIndex((l) => l.id === justCompletedLesson);
-    if (completedIndex >= 0) scrollToLesson(completedIndex);
-
-    // 300ms: sparkle on completed lesson
-    timers.push(setTimeout(() => {
-      setSparkleLesson(justCompletedLesson);
-      sfx("confetti");
-    }, 300));
-
-    // 1000ms: start Piku walking to newly unlocked lesson (or igloo if all done)
-    // Set walking state first so the CSS transition is applied,
-    // then update position on the next frame so the transition animates.
-    timers.push(setTimeout(() => {
-      setPikuWalking(true);
-      const newPos = isAllComplete ? IGLOO_POSITION : getLessonPosition(justUnlockedLesson, LESSONS.length);
-      const oldPos = getLessonPosition(justUnlockedLesson - 1, LESSONS.length);
-
-      // Delay position update by one frame so the transition CSS is applied first
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setPikuPosition(newPos);
-        });
-      });
-
-      // Scroll to follow Piku during walk using rAF interpolation
-      const walkDuration = 1500; // matches CSS transition duration
-      const walkStart = performance.now();
-      let rafId: number;
-      function scrollFollow(now: number) {
-        if (!container) return;
-        const elapsed = now - walkStart;
-        const t = Math.min(elapsed / walkDuration, 1);
-        // Ease-in-out interpolation to match CSS transition
-        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        const currentY = oldPos.y + (newPos.y - oldPos.y) * ease;
-        const mapHeight = container.scrollHeight;
-        const targetScroll = (currentY / 100) * mapHeight - container.clientHeight / 2;
-        container.scrollTo({ top: Math.max(0, targetScroll) });
-        if (t < 1) {
-          rafId = requestAnimationFrame(scrollFollow);
-        }
-      }
-      rafId = requestAnimationFrame(scrollFollow);
-      // Store rafId cleanup
-      timers.push(setTimeout(() => cancelAnimationFrame(rafId), walkDuration + 100) as unknown as ReturnType<typeof setTimeout>);
-    }, 1000));
-
-    if (isAllComplete) {
-      // All lessons done — Piku walks to igloo, play celebration
-      timers.push(setTimeout(() => {
-        setPikuWalking(false);
-        setSparkleLesson(null);
+        // Step 2: Sparkle on completed lesson
+        await delay(300, signal);
+        setSparkleLesson(justCompletedLesson);
         sfx("confetti");
-        say("celebrate_all_complete");
-      }, 2500));
 
-      // Check for final chest too
-      const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
-      const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
+        // Step 3: Walk Piku to newly unlocked lesson (or igloo)
+        await delay(700, signal);
+        const newPos = isAllComplete ? IGLOO_POSITION : getLessonPosition(justUnlockedLesson, LESSONS.length);
+        const walkAnim = walkPikuTo(newPos, isAllComplete);
+        if (walkAnim) {
+          await walkAnim.finished;
+        }
 
-      if (hasNewChest) {
-        timers.push(setTimeout(() => {
-          const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
-          scrollToPosition(chestPos);
-          say("chest_appeared");
-        }, 4000));
-
-        timers.push(setTimeout(() => {
-          onUnlockAnimationDone?.();
-        }, 7000));
-      } else {
-        timers.push(setTimeout(() => {
-          onUnlockAnimationDone?.();
-        }, 4000));
-      }
-    } else {
-      // 2500ms: walking done, trigger unlock animation on newly unlocked lesson
-      timers.push(setTimeout(() => {
-        setPikuWalking(false);
+        // Step 4: Post-walk actions
         setSparkleLesson(null);
-        setUnlockingIndex(justUnlockedLesson);
-        sfx("chest-open");
-      }, 2500));
 
-      // 3100ms: clear unlock animation, start persistent glow
-      timers.push(setTimeout(() => {
-        setUnlockingIndex(null);
-        setGlowingIndex(justUnlockedLesson);
-      }, 3100));
+        if (isAllComplete) {
+          sfx("confetti");
+          say("celebrate_all_complete");
+        } else {
+          setUnlockingIndex(justUnlockedLesson);
+          sfx("chest-open");
+          await delay(600, signal);
+          setUnlockingIndex(null);
+          setGlowingIndex(justUnlockedLesson);
+        }
 
-      // Check if this lesson completion unlocked a chest
-      const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
-      const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
+        // Step 5: Check for newly unlocked chest
+        const newlyUnlockedChest = getChestForLesson(justCompletedLesson);
+        const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
 
-      if (hasNewChest) {
-        // 4000ms: scroll to the newly unlocked chest + Piku voice callout
-        timers.push(setTimeout(() => {
-          setGlowingIndex(null);
+        if (hasNewChest) {
+          await delay(1500, signal);
           const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
           scrollToPosition(chestPos);
           say("chest_appeared");
-        }, 4000));
-
-        // 7000ms: done — chest stays glowing on map via existing unlocked styling
-        timers.push(setTimeout(() => {
-          onUnlockAnimationDone?.();
-        }, 7000));
-      } else {
-        // No chest — finish normally
-        timers.push(setTimeout(() => {
-          onUnlockAnimationDone?.();
-        }, 3100));
-
-        // 6100ms: clear glow
-        timers.push(setTimeout(() => {
+          await delay(3000, signal);
+        } else if (!isAllComplete) {
+          await delay(3000, signal);
           setGlowingIndex(null);
-        }, 6100));
-      }
-    }
+        } else {
+          await delay(1500, signal);
+        }
 
-    return () => timers.forEach(clearTimeout);
-  }, [justCompletedLesson, justUnlockedLesson, sfx, say, openedChests, onUnlockAnimationDone]);
+        onUnlockAnimationDone?.();
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        throw e;
+      }
+    })();
+
+    return () => controller.abort();
+  }, [justCompletedLesson, justUnlockedLesson, sfx, say, openedChests, onUnlockAnimationDone, scrollToLesson, scrollToPosition, walkPikuTo]);
 
   const handleLockedTap = useCallback(() => {
     sfx("wrong-move");
   }, [sfx]);
+
+  // ── Derived state ──────────────────────────────────────────────────
+  const showOnboarding = firestoreReady && currentLesson === 0 && !onboardingDismissed && !justCompletedLesson;
+  const showPiku = !showOnboarding;
+
+  // Initial Piku position (for the ref-based element)
+  const initialPos = allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
 
   return (
     <div
@@ -396,31 +443,26 @@ export default function JourneyMap({
         )}
 
         {/* Piku mascot standing next to current lesson, or at the igloo when all done */}
-        {!(firestoreReady && currentLesson === 0 && !onboardingDismissed && !justCompletedLesson) && (() => {
-          const allDone = currentLesson >= LESSONS.length;
-          return (
-            <div
-              className={`absolute pointer-events-none -translate-y-1/2 journey-piku${pikuWalking ? " animate-piku-walk-bounce" : ""}`}
-              style={{
-                left: allDone
-                  ? `${pikuPosition.x}%`
-                  : `calc(${pikuPosition.x}% + clamp(20px, 8vw, 36px))`,
-                top: `${pikuPosition.y}%`,
-                transition: pikuWalking ? "left 1.5s ease-in-out, top 1.5s ease-in-out" : "none",
-              }}
-            >
-              <PikuWithOutfit
-                expression={allDone ? "standing-celebrating" : "standing-happy"}
-                headImage={equippedOutfit?.head}
-                bodyImage={equippedOutfit?.body}
-                size={72}
-              />
-            </div>
-          );
-        })()}
+        {showPiku && (
+          <div
+            ref={pikuRef}
+            className="absolute pointer-events-none"
+            style={{
+              left: pikuLeftCSS(initialPos, allDone),
+              top: pikuTopCSS(initialPos),
+            }}
+          >
+            <PikuWithOutfit
+              expression={allDone ? "standing-celebrating" : "standing-happy"}
+              headImage={equippedOutfit?.head}
+              bodyImage={equippedOutfit?.body}
+              cssSize={PIKU_CSS_SIZE}
+            />
+          </div>
+        )}
 
         {/* First-time onboarding overlay — stays until player taps first lesson */}
-        {firestoreReady && currentLesson === 0 && !onboardingDismissed && !justCompletedLesson && (() => {
+        {showOnboarding && (() => {
           const pos = getLessonPosition(0, LESSONS.length);
           return (
             <JourneyMapOnboarding

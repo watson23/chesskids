@@ -133,15 +133,15 @@ html, body {
 
 @keyframes gentle-bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-4px); }
 }
 .animate-gentle-bounce { animation: gentle-bounce 1.5s ease-in-out infinite; }
 
 @keyframes glow-bounce {
   0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4), 0 0 0 0 rgba(255, 255, 255, 0.6); transform: translateY(0); }
-  50% { box-shadow: 0 0 32px 12px rgba(52, 211, 153, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.3); transform: translateY(-8px); }
+  50% { box-shadow: 0 0 24px 8px rgba(52, 211, 153, 0.45), 0 0 0 4px rgba(255, 255, 255, 0.3); transform: translateY(-3px); }
 }
-.animate-glow-bounce { animation: glow-bounce 1.5s ease-in-out infinite; }
+.animate-glow-bounce { animation: glow-bounce 2s ease-in-out infinite; }
 
 @keyframes confetti-fall {
   0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
@@ -240,7 +240,7 @@ html, body {
 
 @keyframes bounce-gentle {
   0%, 100% { transform: translateY(0); opacity: 0.9; }
-  50% { transform: translateY(-8px); opacity: 1; }
+  50% { transform: translateY(-4px); opacity: 1; }
 }
 .animate-bounce-gentle { animation: bounce-gentle 1.5s ease-in-out infinite; }
 
@@ -337,38 +337,20 @@ html, body {
 }
 .animate-wiggle-locked { animation: wiggle-locked 0.5s ease-in-out; }
 
-/* ---- Piku walking bounce on journey map ---- */
-@keyframes piku-walk-bounce {
-  0%, 100% { transform: translateY(0) translateX(-50%); }
-  50% { transform: translateY(-4px) translateX(-50%); }
-}
-.animate-piku-walk-bounce {
-  animation: piku-walk-bounce 0.3s ease-in-out infinite;
-}
-
 /* ---- Journey map responsive scaling ---- */
-/* Nodes and Piku scale down on narrow screens so they don't overlap.
-   375px → ~0.65, 500px+ → 1.0 */
+/* Nodes and chests scale down on narrow screens so they don't overlap.
+   Piku uses clamp()-based sizing instead of scale to avoid transform conflicts. */
 .journey-node {
   transform-origin: center center;
 }
-.journey-piku {
-  transform-origin: left center;
-}
 @media (max-width: 500px) {
   .journey-node {
-    scale: 0.7;
-  }
-  .journey-piku {
-    scale: 0.65;
+    scale: 0.75;
   }
 }
 @media (max-width: 380px) {
   .journey-node {
-    scale: 0.6;
-  }
-  .journey-piku {
-    scale: 0.55;
+    scale: 0.65;
   }
 }
 
