@@ -157,22 +157,24 @@ export default function JourneyMap({
 
   // ── Imperative Piku positioning ────────────────────────────────────
   // Set Piku's position directly via ref (no state, no re-renders).
+  // Skip when unlock animation is pending — the walk sequence handles positioning.
   useEffect(() => {
-    if (walkingRef.current || !pikuRef.current) return;
+    if (walkingRef.current || !pikuRef.current || justCompletedLesson) return;
     const pos = allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
     pikuRef.current.style.left = pikuLeftCSS(pos, allDone);
     pikuRef.current.style.top = pikuTopCSS(pos);
-  }, [currentLesson, allDone]);
+  }, [currentLesson, allDone, justCompletedLesson]);
 
   // ── Auto-scroll to current lesson on mount / lesson change ─────────
+  // Skip when unlock animation is pending — the unlock sequence manages scrolling.
   useEffect(() => {
-    if (!scrollRef.current) return;
+    if (!scrollRef.current || justCompletedLesson) return;
     const container = scrollRef.current;
     const { y } = getLessonPosition(currentLesson, LESSONS.length);
     const mapHeight = container.scrollHeight;
     const targetScroll = (y / 100) * mapHeight - container.clientHeight / 2;
     container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
-  }, [currentLesson]);
+  }, [currentLesson, justCompletedLesson]);
 
   // ── WAAPI-based walk animation ─────────────────────────────────────
   const walkPikuTo = useCallback((newPos: { x: number; y: number }, atIgloo: boolean): Animation | null => {
@@ -344,8 +346,17 @@ export default function JourneyMap({
   const showOnboarding = firestoreReady && currentLesson === 0 && !onboardingDismissed && !justCompletedLesson;
   const showPiku = !showOnboarding;
 
-  // Initial Piku position (for the ref-based element)
-  const initialPos = allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
+  // Initial Piku position (for the ref-based element).
+  // When an unlock animation is pending, Piku must start at the COMPLETED lesson's
+  // position so the walk animation has somewhere to travel FROM.
+  const pikuStartPos = (() => {
+    if (justCompletedLesson && justUnlockedLesson != null) {
+      const completedIndex = LESSONS.findIndex((l) => l.id === justCompletedLesson);
+      if (completedIndex >= 0) return getLessonPosition(completedIndex, LESSONS.length);
+    }
+    return allDone ? IGLOO_POSITION : getLessonPosition(currentLesson, LESSONS.length);
+  })();
+  const pikuAtIgloo = !justCompletedLesson && allDone;
 
   return (
     <div
@@ -448,8 +459,8 @@ export default function JourneyMap({
             ref={pikuRef}
             className="absolute pointer-events-none"
             style={{
-              left: pikuLeftCSS(initialPos, allDone),
-              top: pikuTopCSS(initialPos),
+              left: pikuLeftCSS(pikuStartPos, pikuAtIgloo),
+              top: pikuTopCSS(pikuStartPos),
             }}
           >
             <PikuWithOutfit

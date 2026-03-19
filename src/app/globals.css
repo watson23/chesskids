@@ -149,17 +149,21 @@ html, body {
 }
 .animate-confetti { animation: confetti-fall 2s ease-in forwards; }
 
+/* Uses individual `scale` property to avoid conflicting with Tailwind v4's
+   individual `translate` property on lesson/chest nodes. */
 @keyframes celebrate-pop {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); opacity: 1; }
+  0% { scale: 0; opacity: 0; }
+  50% { scale: 1.3; }
+  100% { scale: 1; opacity: 1; }
 }
 .animate-celebrate-pop { animation: celebrate-pop 0.5s ease-out; }
 
+/* Uses individual `rotate` property to avoid conflicting with Tailwind v4's
+   individual `translate` property on lesson/chest nodes. */
 @keyframes chest-shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  75% { transform: rotate(5deg); }
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: -5deg; }
+  75% { rotate: 5deg; }
 }
 .animate-chest-shake { animation: chest-shake 0.3s ease-in-out 3; }
 
@@ -274,11 +278,13 @@ html, body {
 .animate-reward-rise { animation: reward-rise 0.5s ease-out forwards; }
 
 /* ---- Lesson unlock animation on journey map ---- */
+/* Uses individual `scale` property to avoid conflicting with Tailwind v4's
+   individual `translate` property on the same element. */
 @keyframes lesson-unlock {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
-  40% { transform: translate(-50%, -50%) scale(1.25); }
-  70% { transform: translate(-50%, -50%) scale(0.95); }
-  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  0% { scale: 0.8; opacity: 0.6; }
+  40% { scale: 1.25; }
+  70% { scale: 0.95; }
+  100% { scale: 1; opacity: 1; }
 }
 .animate-lesson-unlock { animation: lesson-unlock 0.6s ease-out; }
 
