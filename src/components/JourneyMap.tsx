@@ -217,7 +217,7 @@ export default function JourneyMap({
     ];
 
     const animation = el.animate(keyframes, {
-      duration: 1500,
+      duration: 2000,
       easing: "ease-in-out",
       fill: "forwards",
     });
