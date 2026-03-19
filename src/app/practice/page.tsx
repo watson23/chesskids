@@ -120,7 +120,11 @@ export default function PracticePage() {
 
   // Speak the instruction when page loads
   useEffect(() => {
-    say("practice_piku_speech");
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (!cancelled) say("practice_piku_speech");
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [say]);
 
   const handleCategoryTap = useCallback(

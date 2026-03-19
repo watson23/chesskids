@@ -77,10 +77,21 @@ function pickBestVoice(
   return scored[0].voice;
 }
 
+/** Pre-load voices so the first speak() call doesn't hit the async gap. */
+export function preloadVoices(): void {
+  loadVoices();
+}
+
 export async function speak(text: string, options: TTSOptions): Promise<void> {
   if (typeof window === "undefined" || !window.speechSynthesis) return;
 
+  // Chrome/WebKit bug: calling cancel() immediately before speak() can silently
+  // cancel the new utterance too. Add a brief delay when cancelling active speech.
+  const wasSpeaking = window.speechSynthesis.speaking;
   window.speechSynthesis.cancel();
+  if (wasSpeaking) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
 
   const voices = await loadVoices();
   const utterance = new SpeechSynthesisUtterance(text);

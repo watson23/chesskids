@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { speak, stopSpeaking } from "@/lib/tts";
+import { speak, stopSpeaking, preloadVoices } from "@/lib/tts";
 import { playSound } from "@/lib/sounds";
 import { useAuth } from "@/hooks/useAuth";
 import { updateUserSettings } from "@/lib/firestore";
@@ -52,17 +52,32 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
     return "en";
   });
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabledState] = useState(true);
+  const setSoundEnabled = useCallback((enabled: boolean) => {
+    setSoundEnabledState(enabled);
+    if (!enabled) stopSpeaking();
+  }, []);
 
-  // Sync language from Firestore when user logs in
+  // Pre-load TTS voices early so the first speak() call doesn't miss
   useEffect(() => {
-    if (userSettings?.language) {
+    preloadVoices();
+  }, []);
+
+  // Sync language between localStorage and Firestore when user logs in
+  useEffect(() => {
+    if (!userSettings?.language) return;
+    const local = typeof window !== "undefined" ? localStorage.getItem("mfcm_language") : null;
+    if (local && (local === "fi" || local === "en") && local !== userSettings.language) {
+      // User picked a language before signing in — push it to Firestore
+      setLanguageState(local);
+      if (user) updateUserSettings(user.uid, { language: local });
+    } else {
       setLanguageState(userSettings.language);
       if (typeof window !== "undefined") {
         localStorage.setItem("mfcm_language", userSettings.language);
       }
     }
-  }, [userSettings]);
+  }, [userSettings, user]);
 
   const setLanguage = useCallback((lang: "fi" | "en") => {
     setLanguageState(lang);

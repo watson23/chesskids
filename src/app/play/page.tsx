@@ -82,7 +82,11 @@ export default function PlayPage() {
 
   // Speak the instruction when page loads
   useEffect(() => {
-    say("play_piku_speech");
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (!cancelled) say("play_piku_speech");
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [say]);
 
   const handleOpponentTap = useCallback(

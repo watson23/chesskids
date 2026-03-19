@@ -56,7 +56,7 @@ export default function PuzzlePlayer({
   puzzleProgress,
   onPuzzleSolved,
 }: PuzzlePlayerProps) {
-  const { say, sfx } = useAudio();
+  const { say, sfx, stop } = useAudio();
   const { boardTheme, pieceColors } = useActiveTheme();
   const { t } = useLocale();
 
@@ -89,6 +89,9 @@ export default function PuzzlePlayer({
 
   const hasTealStars = puzzleProgress !== undefined;
 
+  // Stop speech when leaving the puzzle
+  useEffect(() => () => stop(), [stop]);
+
   // 4-second idle timer during solving phase — show tap hint
   useEffect(() => {
     if (tapHintTimer.current) clearTimeout(tapHintTimer.current);
@@ -103,17 +106,26 @@ export default function PuzzlePlayer({
 
   // Set up board when puzzle changes
   useEffect(() => {
+    let cancelled = false;
     if (phase === "solving" && currentPuzzle) {
       setBoardPieces(currentPuzzle.boardSetup);
       setSelectedSquare(null);
       setValidMoves([]);
       setLastMove(null);
-      say(currentPuzzle.narrationKey);
+      const timer = setTimeout(() => {
+        if (!cancelled) say(currentPuzzle.narrationKey);
+      }, 300);
+      return () => { cancelled = true; clearTimeout(timer); };
     } else if (phase === "celebrate") {
-      sfx("lesson-complete");
-      const starKey =
-        stars === 3 ? "stars_3" : stars === 2 ? "stars_2" : "stars_1";
-      say(starKey);
+      const timer = setTimeout(() => {
+        if (!cancelled) {
+          sfx("lesson-complete");
+          const starKey =
+            stars === 3 ? "stars_3" : stars === 2 ? "stars_2" : "stars_1";
+          say(starKey);
+        }
+      }, 300);
+      return () => { cancelled = true; clearTimeout(timer); };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, puzzleIndex]);

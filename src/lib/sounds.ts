@@ -21,5 +21,9 @@ export function playSound(effect: SoundEffect, volume = 0.5) {
   const audio = audioCache[effect];
   audio.volume = volume;
   audio.currentTime = 0;
-  audio.play().catch(() => {});
+  audio.play().catch((e) => {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[SFX] Play failed:", effect, e.message);
+    }
+  });
 }

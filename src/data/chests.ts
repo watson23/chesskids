@@ -49,4 +49,12 @@ export const CHESTS: ChestDefinition[] = [
     ],
     positionOnMap: 0.95,
   },
+  {
+    index: 5,
+    afterLesson: "capstone",
+    rewards: [
+      { id: "outfit-crown", type: "outfit", chestIndex: 5, outfitId: "crown" },
+    ],
+    positionOnMap: 1.0,
+  },
 ];

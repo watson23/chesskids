@@ -16,13 +16,18 @@ interface FinalCelebrationProps {
 }
 
 export default function FinalCelebration({ stars, onContinue, equippedOutfit }: FinalCelebrationProps) {
-  const { sfx } = useAudio();
+  const { sfx, say } = useAudio();
   const { t } = useLocale();
 
   useEffect(() => {
-    const timer = setTimeout(() => sfx("confetti"), 100);
-    return () => clearTimeout(timer);
-  }, [sfx]);
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      sfx("confetti");
+      say("celebrate_all_complete");
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [sfx, say]);
 
   return (
     <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto py-6">

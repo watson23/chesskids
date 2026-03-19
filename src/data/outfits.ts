@@ -130,6 +130,7 @@ export function isChestReward(outfitId: string): boolean {
   const CHEST_OUTFIT_IDS = new Set([
     "pink-bow", "blue-bow", "mint-bow", "peach-bow",
     "purple-bow", "gold-bow", "wizard-hat", "medal-snowflake",
+    "crown",
   ]);
   return CHEST_OUTFIT_IDS.has(outfitId);
 }

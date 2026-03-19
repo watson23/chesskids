@@ -186,9 +186,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           {/* Head outfits */}
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>
-                {t("wardrobe_head")}
-              </span>
+              <span className="text-base">🎩</span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
               <button
@@ -230,9 +228,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
           {/* Body outfits */}
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>
-                {t("wardrobe_body")}
-              </span>
+              <span className="text-base">🎀</span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
               <button

@@ -44,7 +44,7 @@ export default function JourneyMapOnboarding({
   return (
     <div
       className="absolute z-10 flex flex-col items-center gap-1 animate-slide-in pointer-events-none"
-      style={{ left: `${x + 14}%`, bottom: "2%", position: "absolute" }}
+      style={{ right: "2%", left: "auto", bottom: "2%", maxWidth: "75%" }}
     >
       <div className="flex items-end gap-1">
         <SpeechBubble text={welcomeText} visible pointer="bottom" />

@@ -29,7 +29,7 @@ interface LessonPlayerProps {
 
 export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const router = useRouter();
-  const { say, sfx } = useAudio();
+  const { say, sfx, stop } = useAudio();
   const { boardTheme, pieceColors } = useActiveTheme();
   const { t } = useLocale();
   const { activeChild } = useAuth();
@@ -57,6 +57,9 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   const [watchTapFeedback, setWatchTapFeedback] = useState(false);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPhaseRef = useRef(state.phase);
+
+  // Stop speech when leaving the lesson
+  useEffect(() => () => stop(), [stop]);
 
   // Brief board fade on phase change (watch → try) + transition sound
   useEffect(() => {
@@ -108,7 +111,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
       const timer = setTimeout(() => {
         if (!cancelled) say(currentStep.narrationKey);
-      }, 50);
+      }, 300);
 
       // Auto-animate piece movement after a delay (e.g. castling, checkmate demos)
       let animTimer: ReturnType<typeof setTimeout> | null = null;
@@ -168,7 +171,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
       const timer = setTimeout(() => {
         if (!cancelled) say(currentPuzzle.narrationKey);
-      }, 50);
+      }, 300);
       return () => { cancelled = true; clearTimeout(timer); };
     } else if (state.phase === "celebrate") {
       const timer = setTimeout(() => {
@@ -182,7 +185,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                 : "stars_1";
           say(starKey);
         }
-      }, 50);
+      }, 300);
       return () => { cancelled = true; clearTimeout(timer); };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

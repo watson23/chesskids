@@ -31,7 +31,7 @@ interface GamePlayerProps {
 }
 
 export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
-  const { say, sfx, language } = useAudio();
+  const { say, sfx, stop, language } = useAudio();
   const { boardTheme, pieceColors } = useActiveTheme();
   const { t } = useLocale();
   const [gameResult, setGameResult] = useState<"win" | "loss" | "draw" | null>(null);
@@ -43,6 +43,9 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPieceCountRef = useRef<number>(32);
+
+  // Stop speech when leaving the game
+  useEffect(() => () => stop(), [stop]);
 
   const handleMove = useCallback(() => {
     sfx("piece-place");
