@@ -6,6 +6,56 @@ import { getDb } from "@/lib/firebase";
 import { LESSONS } from "@/data/lessons";
 import type { UserDocument, ChildProfile, LessonProgress, PuzzleProgress, UserSettings } from "@/types/user";
 
+// ---------------------------------------------------------------------------
+// Lightweight runtime validation for Firestore reads
+// ---------------------------------------------------------------------------
+
+function isRecord(val: unknown): val is Record<string, unknown> {
+  return typeof val === "object" && val !== null && !Array.isArray(val);
+}
+
+function validateChildProfile(data: unknown, id: string): ChildProfile {
+  if (!isRecord(data)) throw new Error(`Invalid child profile doc: ${id}`);
+  return {
+    id,
+    name: typeof data.name === "string" ? data.name : "",
+    avatar: typeof data.avatar === "string" ? data.avatar : "🐧",
+    currentLesson: typeof data.currentLesson === "string" || typeof data.currentLesson === "number"
+      ? data.currentLesson as string | number
+      : LESSONS[0]?.id ?? "",
+    totalStars: typeof data.totalStars === "number" ? data.totalStars : 0,
+    unlockedRewards: Array.isArray(data.unlockedRewards) ? data.unlockedRewards.filter((x): x is string => typeof x === "string") : [],
+    activeBoardTheme: typeof data.activeBoardTheme === "string" ? data.activeBoardTheme : "classic",
+    activePieceColor: typeof data.activePieceColor === "string" ? data.activePieceColor : "classic",
+    equippedOutfit: isRecord(data.equippedOutfit) ? {
+      head: typeof data.equippedOutfit.head === "string" ? data.equippedOutfit.head : undefined,
+      body: typeof data.equippedOutfit.body === "string" ? data.equippedOutfit.body : undefined,
+    } : {},
+    unlockedOutfits: Array.isArray(data.unlockedOutfits) ? data.unlockedOutfits.filter((x): x is string => typeof x === "string") : [],
+  };
+}
+
+function validateLessonProgress(data: unknown): LessonProgress | null {
+  if (!isRecord(data)) return null;
+  if (typeof data.lessonId !== "string") return null;
+  return {
+    lessonId: data.lessonId,
+    stars: typeof data.stars === "number" ? data.stars : 0,
+    completedAt: data.completedAt,
+    attempts: typeof data.attempts === "number" ? data.attempts : 1,
+  };
+}
+
+function validatePuzzleProgress(data: unknown): PuzzleProgress | null {
+  if (!isRecord(data)) return null;
+  if (typeof data.puzzleId !== "string") return null;
+  return {
+    puzzleId: data.puzzleId,
+    solved: typeof data.solved === "boolean" ? data.solved : false,
+    attempts: typeof data.attempts === "number" ? data.attempts : 1,
+  };
+}
+
 export async function getOrCreateUser(uid: string, email: string, displayName: string): Promise<UserDocument> {
   const db = getDb();
   const ref = doc(db, "users", uid);
@@ -24,7 +74,7 @@ export async function getChildren(uid: string): Promise<ChildProfile[]> {
   const db = getDb();
   const colRef = collection(db, "users", uid, "children");
   const snap = await getDocs(colRef);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as ChildProfile));
+  return snap.docs.map((d) => validateChildProfile(d.data(), d.id));
 }
 
 export async function addChild(uid: string, name: string, avatar: string): Promise<ChildProfile> {
@@ -57,7 +107,10 @@ export async function getLessonProgress(uid: string, childId: string): Promise<R
   const colRef = collection(db, "users", uid, "children", childId, "progress");
   const snap = await getDocs(colRef);
   const progress: Record<string, LessonProgress> = {};
-  snap.docs.forEach((d) => { const data = d.data() as LessonProgress; progress[data.lessonId] = data; });
+  snap.docs.forEach((d) => {
+    const validated = validateLessonProgress(d.data());
+    if (validated) progress[validated.lessonId] = validated;
+  });
   return progress;
 }
 
@@ -79,7 +132,10 @@ export async function getPuzzleProgress(
   const colRef = collection(db, "users", uid, "children", childId, "puzzleProgress");
   const snap = await getDocs(colRef);
   const progress: Record<string, PuzzleProgress> = {};
-  snap.docs.forEach((d) => { const data = d.data() as PuzzleProgress; progress[data.puzzleId] = data; });
+  snap.docs.forEach((d) => {
+    const validated = validatePuzzleProgress(d.data());
+    if (validated) progress[validated.puzzleId] = validated;
+  });
   return progress;
 }
 

@@ -8,6 +8,7 @@ import type {
   PieceColorSet,
 } from "@/types/chess";
 import { coordsToSquare, isLightSquare } from "@/lib/board-utils";
+import { CAPTURE_FADE_DURATION } from "@/lib/timing";
 import ChessPiece from "./ChessPiece";
 
 interface ChessBoardProps {
@@ -226,7 +227,7 @@ export default function ChessBoard({
     prevPiecesRef.current = pieces;
     if (Object.keys(fading).length > 0) {
       setFadingPieces(fading);
-      const timer = setTimeout(() => setFadingPieces({}), 350);
+      const timer = setTimeout(() => setFadingPieces({}), CAPTURE_FADE_DURATION);
       return () => clearTimeout(timer);
     }
   }, [pieces]);

@@ -4,6 +4,7 @@ import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPuzzlesByCategory, type PuzzleCategory } from "@/data/puzzles";
 import PuzzlePlayer from "@/components/PuzzlePlayer";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useAuth } from "@/hooks/useAuth";
 import { getPuzzleProgress } from "@/lib/firestore";
 import type { PuzzleProgress } from "@/types/user";
@@ -84,13 +85,15 @@ export default function PracticeCategoryPage({
   }
 
   return (
-    <PuzzlePlayer
-      puzzles={puzzles}
-      onComplete={handleComplete}
-      uid={user?.uid}
-      childId={activeChild?.id}
-      puzzleProgress={puzzleProgress}
-      onPuzzleSolved={handlePuzzleSolved}
-    />
+    <ErrorBoundary>
+      <PuzzlePlayer
+        puzzles={puzzles}
+        onComplete={handleComplete}
+        uid={user?.uid}
+        childId={activeChild?.id}
+        puzzleProgress={puzzleProgress}
+        onPuzzleSolved={handlePuzzleSolved}
+      />
+    </ErrorBoundary>
   );
 }

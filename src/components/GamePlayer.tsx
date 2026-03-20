@@ -13,6 +13,7 @@ import TapHint from "@/components/TapHint";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useAudio } from "@/hooks/useAudio";
 import { getAIMove } from "@/lib/chess-ai";
+import { GAME_RESULT_DELAY, PIKU_MOOD_DURATION } from "@/lib/timing";
 import { isBareKing } from "@/lib/stuck-detection";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
@@ -87,7 +88,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           localStorage.setItem("mfcm_owl_beaten", "true");
         }
         // Show overlay after a delay so the board is visible with confetti
-        const timer = setTimeout(() => setShowResultOverlay(true), 3500);
+        const timer = setTimeout(() => setShowResultOverlay(true), GAME_RESULT_DELAY);
         return () => clearTimeout(timer);
       } else {
         setGameResult("loss");
@@ -163,7 +164,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         // Black just captured — opponent captured player's piece
         setPikuMood("surprised");
       }
-      const timer = setTimeout(() => setPikuMood(null), 2500);
+      const timer = setTimeout(() => setPikuMood(null), PIKU_MOOD_DURATION);
       return () => clearTimeout(timer);
     }
   }, [pieceCount, turn, gameResult]);

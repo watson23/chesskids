@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback } from "react";
 import type { AIDifficulty } from "@/types/chess";
 import GamePlayer from "@/components/GamePlayer";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 function GameContent() {
   const searchParams = useSearchParams();
@@ -20,7 +21,7 @@ function GameContent() {
     router.push("/play");
   }, [router]);
 
-  return <GamePlayer difficulty={level} onExit={handleExit} />;
+  return <ErrorBoundary><GamePlayer difficulty={level} onExit={handleExit} /></ErrorBoundary>;
 }
 
 export default function GamePage() {

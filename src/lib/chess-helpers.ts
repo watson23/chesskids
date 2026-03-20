@@ -111,7 +111,15 @@ export function getLegalMovesFromBoard(
   const fen = boardPiecesToFen(pieces, turn);
   try {
     return getValidMovesForSquare(fen, square);
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        `[chess-helpers] getLegalMovesFromBoard failed for ${square} (${turn}).\n` +
+        `FEN: ${fen}\n` +
+        `Pieces: ${JSON.stringify(pieces)}\n`,
+        error
+      );
+    }
     return [];
   }
 }

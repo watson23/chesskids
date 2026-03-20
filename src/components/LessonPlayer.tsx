@@ -4,9 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
-import type { Square, ChessPiece } from "@/types/chess";
-import { getLegalMovesFromBoard } from "@/lib/chess-helpers";
-import type { LocaleKey } from "@/types/locale";
+import type { Square } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
 import Confetti from "@/components/Confetti";
@@ -18,6 +16,16 @@ import FinalCelebration from "@/components/FinalCelebration";
 import TapHint from "@/components/TapHint";
 import { LESSONS } from "@/data/lessons";
 import { useLessonPlayer } from "@/hooks/useLessonPlayer";
+import { usePuzzleInteraction, applyPieceMove } from "@/hooks/usePuzzleInteraction";
+import {
+  NARRATION_DELAY,
+  SUCCESS_DISPLAY_DURATION,
+  BOARD_TRANSITION_DURATION,
+  WATCH_ANIM_DELAY,
+  WATCH_TAP_FEEDBACK_DURATION,
+  TAP_HINT_IDLE,
+  WATCH_INDICATORS_LINGER,
+} from "@/lib/timing";
 import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
@@ -44,19 +52,28 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
     totalPuzzles,
   } = useLessonPlayer(lesson);
 
-  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-  const [validMoves, setValidMoves] = useState<Square[]>([]);
-  const [correctMoveSquares, setCorrectMoveSquares] = useState<Square[]>([]);
-  const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
-  const [boardPieces, setBoardPieces] = useState<Record<string, ChessPiece>>({});
+  const interaction = usePuzzleInteraction({ sfx, say });
+  const {
+    selectedSquare,
+    validMoves,
+    correctMoveSquares,
+    lastMove,
+    boardPieces,
+    wrongFlash,
+    narrationOverride,
+    setBoardPieces,
+    setLastMove,
+    setValidMoves,
+    resetBoard,
+  } = interaction;
+
   const [showTapHint, setShowTapHint] = useState(false);
-  const [wrongFlash, setWrongFlash] = useState(false);
-  const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
   const [phaseOverride, setPhaseOverride] = useState<"watch" | "try" | "celebrate" | null>(null);
   const [boardTransition, setBoardTransition] = useState(false);
   const [watchTapFeedback, setWatchTapFeedback] = useState(false);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPhaseRef = useRef(state.phase);
+  const narrationAbort = useRef<AbortController | null>(null);
 
   // Stop speech when leaving the lesson
   useEffect(() => () => stop(), [stop]);
@@ -65,7 +82,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   useEffect(() => {
     if (prevPhaseRef.current !== state.phase && state.phase !== "celebrate") {
       setBoardTransition(true);
-      const timer = setTimeout(() => setBoardTransition(false), 300);
+      const timer = setTimeout(() => setBoardTransition(false), BOARD_TRANSITION_DURATION);
       // Sound cue when switching from watch → try
       if (state.phase === "try" && prevPhaseRef.current === "watch") {
         sfx("button-tap");
@@ -81,7 +98,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
     if (watchTapFeedback) return; // debounce
     setWatchTapFeedback(true);
     say("watch_first");
-    setTimeout(() => setWatchTapFeedback(false), 2000);
+    setTimeout(() => setWatchTapFeedback(false), WATCH_TAP_FEEDBACK_DURATION);
   }, [watchTapFeedback, say]);
 
   // 4-second idle timer during try phase — show tap hint
@@ -90,213 +107,85 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
     setShowTapHint(false);
 
     if (state.phase === "try" && !selectedSquare) {
-      tapHintTimer.current = setTimeout(() => setShowTapHint(true), 4000);
+      tapHintTimer.current = setTimeout(() => setShowTapHint(true), TAP_HINT_IDLE);
     }
 
     return () => { if (tapHintTimer.current) clearTimeout(tapHintTimer.current); };
   }, [state.phase, state.puzzleIndex, selectedSquare]);
 
   useEffect(() => {
-    let cancelled = false;
+    // Cancel any pending narration from the previous phase/step
+    narrationAbort.current?.abort();
+    const abort = new AbortController();
+    narrationAbort.current = abort;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const delay = (ms: number, fn: () => void) => {
+      const id = setTimeout(() => { if (!abort.signal.aborted) fn(); }, ms);
+      timers.push(id);
+    };
 
     if (state.phase === "watch" && currentStep) {
-      setBoardPieces(currentStep.boardSetup);
-      setSelectedSquare(null);
-      setValidMoves([]);
-      setLastMove(null);
+      resetBoard(currentStep.boardSetup);
 
       if (currentStep.animation?.highlights) {
         setValidMoves(currentStep.animation.highlights);
       }
 
-      const timer = setTimeout(() => {
-        if (!cancelled) say(currentStep.narrationKey);
-      }, 300);
+      delay(NARRATION_DELAY, () => say(currentStep.narrationKey));
 
       // Auto-animate piece movement after a delay (e.g. castling, checkmate demos)
-      let animTimer: ReturnType<typeof setTimeout> | null = null;
-      let clearTimer: ReturnType<typeof setTimeout> | null = null;
       if (currentStep.animation?.piece && currentStep.animation?.path?.length) {
-        animTimer = setTimeout(() => {
-          if (cancelled) return;
-          const anim = currentStep.animation!;
-          const from = anim.piece;
-          const to = anim.path[anim.path.length - 1];
-          setBoardPieces((prev) => {
-            const newPieces = { ...prev };
-            const piece = newPieces[from];
-            if (piece) {
-              delete newPieces[from];
-              newPieces[to] = piece;
-              // Castling: if king moves 2 squares, also move the rook
-              if (piece.type === "king") {
-                const fromFile = from.charCodeAt(0);
-                const toFile = to.charCodeAt(0);
-                const rank = to[1];
-                if (toFile - fromFile === 2) {
-                  const rookFrom = `h${rank}` as Square;
-                  const rookTo = `f${rank}` as Square;
-                  if (newPieces[rookFrom]) {
-                    newPieces[rookTo] = newPieces[rookFrom];
-                    delete newPieces[rookFrom];
-                  }
-                } else if (fromFile - toFile === 2) {
-                  const rookFrom = `a${rank}` as Square;
-                  const rookTo = `d${rank}` as Square;
-                  if (newPieces[rookFrom]) {
-                    newPieces[rookTo] = newPieces[rookFrom];
-                    delete newPieces[rookFrom];
-                  }
-                }
-              }
-            }
-            return newPieces;
-          });
+        const anim = currentStep.animation;
+        const from = anim.piece;
+        const to = anim.path[anim.path.length - 1];
+
+        delay(WATCH_ANIM_DELAY, () => {
+          setBoardPieces((prev) => applyPieceMove(prev, from, to));
           setLastMove({ from, to });
-          // Clear all indicators after a brief pause so the board is clean
-          clearTimer = setTimeout(() => {
-            if (cancelled) return;
-            setValidMoves([]);
-            setLastMove(null);
-          }, 1500);
-        }, 1200);
+        });
+
+        delay(WATCH_ANIM_DELAY + WATCH_INDICATORS_LINGER, () => {
+          setValidMoves([]);
+          setLastMove(null);
+        });
       }
-
-      return () => { cancelled = true; clearTimeout(timer); if (animTimer) clearTimeout(animTimer); if (clearTimer) clearTimeout(clearTimer); };
     } else if (state.phase === "try" && currentPuzzle) {
-      setBoardPieces(currentPuzzle.boardSetup);
-      setSelectedSquare(null);
-      setValidMoves([]);
-      setLastMove(null);
-
-      const timer = setTimeout(() => {
-        if (!cancelled) say(currentPuzzle.narrationKey);
-      }, 300);
-      return () => { cancelled = true; clearTimeout(timer); };
+      resetBoard(currentPuzzle.boardSetup);
+      delay(NARRATION_DELAY, () => say(currentPuzzle.narrationKey));
     } else if (state.phase === "celebrate") {
-      const timer = setTimeout(() => {
-        if (!cancelled) {
-          sfx("lesson-complete");
-          const starKey =
-            state.stars === 3
-              ? "stars_3"
-              : state.stars === 2
-                ? "stars_2"
-                : "stars_1";
-          say(starKey);
-        }
-      }, 300);
-      return () => { cancelled = true; clearTimeout(timer); };
+      delay(NARRATION_DELAY, () => {
+        sfx("lesson-complete");
+        const starKey =
+          state.stars === 3
+            ? "stars_3"
+            : state.stars === 2
+              ? "stars_2"
+              : "stars_1";
+        say(starKey);
+      });
     }
+
+    return () => { abort.abort(); timers.forEach(clearTimeout); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, state.stepIndex, state.puzzleIndex]);
 
   const handleSquareTap = useCallback(
     (square: Square) => {
-      if (state.phase !== "try" || !currentPuzzle) return;
-      const correctMoves = currentPuzzle.correctMoves;
-
-      if (selectedSquare === null) {
-        const isValidSource = correctMoves.some((m) => m.from === square);
-        const piece = boardPieces[square];
-        if (isValidSource && piece) {
-          setSelectedSquare(square);
-          sfx("piece-pickup");
-          // Show all legal moves as subtle dots, correct moves as golden
-          const allLegal = getLegalMovesFromBoard(boardPieces, square, piece.color);
-          const correctDestinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
-          setValidMoves(allLegal);
-          setCorrectMoveSquares(correctDestinations);
-        }
-        return;
-      }
-
-      if (square === selectedSquare) {
-        setSelectedSquare(null);
-        setValidMoves([]);
-        setCorrectMoveSquares([]);
-        return;
-      }
-
-      const isCorrect = correctMoves.some((m) => m.from === selectedSquare && m.to === square);
-      if (isCorrect) {
-        const piece = boardPieces[selectedSquare];
-        if (piece) {
-          const newPieces = { ...boardPieces };
-          delete newPieces[selectedSquare];
-
-          // Promotion: pawn reaching back rank becomes queen
-          const destRank = square[1];
-          if (piece.type === "pawn" && (destRank === "8" || destRank === "1")) {
-            newPieces[square] = { ...piece, type: "queen" };
-          } else {
-            newPieces[square] = piece;
-          }
-
-          // Castling: king moves 2 squares → also move the rook
-          if (piece.type === "king") {
-            const fromFile = selectedSquare.charCodeAt(0);
-            const toFile = square.charCodeAt(0);
-            const rank = square[1];
-            if (toFile - fromFile === 2) {
-              // Kingside castle
-              const rookFrom = `h${rank}` as Square;
-              const rookTo = `f${rank}` as Square;
-              if (newPieces[rookFrom]) {
-                newPieces[rookTo] = newPieces[rookFrom];
-                delete newPieces[rookFrom];
-              }
-            } else if (fromFile - toFile === 2) {
-              // Queenside castle
-              const rookFrom = `a${rank}` as Square;
-              const rookTo = `d${rank}` as Square;
-              if (newPieces[rookFrom]) {
-                newPieces[rookTo] = newPieces[rookFrom];
-                delete newPieces[rookFrom];
-              }
-            }
-          }
-
-          // En passant: pawn captures diagonally to empty square → remove captured pawn
-          if (piece.type === "pawn") {
-            const fromFile = selectedSquare[0];
-            const toFile = square[0];
-            if (fromFile !== toFile && !boardPieces[square]) {
-              // Diagonal move to empty square = en passant
-              const capturedSquare = `${toFile}${selectedSquare[1]}` as Square;
-              delete newPieces[capturedSquare];
-            }
-          }
-
-          setBoardPieces(newPieces);
-        }
-        setLastMove({ from: selectedSquare, to: square });
-        setSelectedSquare(null);
-        setValidMoves([]);
-        setCorrectMoveSquares([]);
-        sfx("piece-place");
-        say(currentPuzzle.successNarrationKey);
-        setNarrationOverride(currentPuzzle.successNarrationKey);
+      const result = interaction.handleSquareTap(square, currentPuzzle, state.phase === "try");
+      if (result === true) {
+        // Correct move — show success narration briefly, then advance
         setPhaseOverride("celebrate");
         setTimeout(() => {
-          setNarrationOverride(null);
           setPhaseOverride(null);
+          interaction.clearNarrationOverride();
           recordAttempt(true);
-        }, 2500);
-      } else {
-        sfx("wrong-move");
-        say(currentPuzzle.wrongMoveNarrationKey);
-        setSelectedSquare(null);
-        setValidMoves([]);
-        setCorrectMoveSquares([]);
-        setWrongFlash(true);
-        setNarrationOverride("try_again");
-        setTimeout(() => setWrongFlash(false), 600);
-        setTimeout(() => setNarrationOverride(null), 2000);
+        }, SUCCESS_DISPLAY_DURATION);
+      } else if (result === false) {
         recordAttempt(false);
       }
     },
-    [state.phase, currentPuzzle, selectedSquare, boardPieces, sfx, say, recordAttempt]
+    [interaction, currentPuzzle, state.phase, recordAttempt]
   );
 
   const handleReplay = useCallback(() => {

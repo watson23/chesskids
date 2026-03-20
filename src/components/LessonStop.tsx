@@ -3,6 +3,7 @@
 import { type ReactNode, useState, useCallback } from "react";
 import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
+import { SHAKE_DURATION } from "@/lib/timing";
 import {
   PawnSVG,
   KnightSVG,
@@ -99,7 +100,7 @@ export default function LessonStop({
     if (shaking) return;
     setShaking(true);
     onLockedTap?.();
-    setTimeout(() => setShaking(false), 400);
+    setTimeout(() => setShaking(false), SHAKE_DURATION);
   }, [shaking, onLockedTap]);
 
   // Color configs per status

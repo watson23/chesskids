@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
+import { WIGGLE_DURATION } from "@/lib/timing";
 
 import SpeechBubble from "@/components/SpeechBubble";
 import NavIcon from "@/components/NavIcon";
@@ -95,7 +96,7 @@ export default function PlayPage() {
       if (isLocked) {
         sfx("button-tap");
         setWiggleId(opponent.level);
-        setTimeout(() => setWiggleId(null), 600);
+        setTimeout(() => setWiggleId(null), WIGGLE_DURATION);
         return;
       }
       sfx("button-tap");

@@ -4,9 +4,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import NavIcon from "@/components/NavIcon";
 import type { PuzzleDefinition } from "@/types/lesson";
-import type { Square, ChessPiece } from "@/types/chess";
-import { getLegalMovesFromBoard } from "@/lib/chess-helpers";
-import type { LocaleKey } from "@/types/locale";
+import type { Square } from "@/types/chess";
 import type { PuzzleProgress } from "@/types/user";
 import ChessBoard from "@/components/ChessBoard";
 import StarDisplay from "@/components/StarDisplay";
@@ -14,6 +12,8 @@ import Confetti from "@/components/Confetti";
 import NarrationArea from "@/components/NarrationArea";
 import Piku from "@/components/Piku";
 import TapHint from "@/components/TapHint";
+import { usePuzzleInteraction } from "@/hooks/usePuzzleInteraction";
+import { NARRATION_DELAY, SUCCESS_DISPLAY_DURATION, TAP_HINT_IDLE } from "@/lib/timing";
 import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
@@ -67,20 +67,21 @@ export default function PuzzlePlayer({
   // Track puzzles solved in this session (for immediate star fill before Firestore roundtrip)
   const [solvedInSession, setSolvedInSession] = useState<Set<string>>(new Set());
 
-  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-  const [validMoves, setValidMoves] = useState<Square[]>([]);
-  const [correctMoveSquares, setCorrectMoveSquares] = useState<Square[]>([]);
-  const [lastMove, setLastMove] = useState<{
-    from: Square;
-    to: Square;
-  } | null>(null);
-  const [boardPieces, setBoardPieces] = useState<Record<string, ChessPiece>>(
-    {}
-  );
+  const interaction = usePuzzleInteraction({ sfx, say });
+  const {
+    selectedSquare,
+    validMoves,
+    correctMoveSquares,
+    lastMove,
+    boardPieces,
+    wrongFlash,
+    narrationOverride,
+    resetBoard,
+  } = interaction;
+
   const [showTapHint, setShowTapHint] = useState(false);
-  const [wrongFlash, setWrongFlash] = useState(false);
-  const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const narrationAbort = useRef<AbortController | null>(null);
 
   const currentPuzzle = useMemo(
     () => puzzles[puzzleIndex] ?? null,
@@ -98,7 +99,7 @@ export default function PuzzlePlayer({
     setShowTapHint(false);
 
     if (phase === "solving" && !selectedSquare) {
-      tapHintTimer.current = setTimeout(() => setShowTapHint(true), 4000);
+      tapHintTimer.current = setTimeout(() => setShowTapHint(true), TAP_HINT_IDLE);
     }
 
     return () => { if (tapHintTimer.current) clearTimeout(tapHintTimer.current); };
@@ -106,27 +107,29 @@ export default function PuzzlePlayer({
 
   // Set up board when puzzle changes
   useEffect(() => {
-    let cancelled = false;
+    narrationAbort.current?.abort();
+    const abort = new AbortController();
+    narrationAbort.current = abort;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const delay = (ms: number, fn: () => void) => {
+      const id = setTimeout(() => { if (!abort.signal.aborted) fn(); }, ms);
+      timers.push(id);
+    };
+
     if (phase === "solving" && currentPuzzle) {
-      setBoardPieces(currentPuzzle.boardSetup);
-      setSelectedSquare(null);
-      setValidMoves([]);
-      setLastMove(null);
-      const timer = setTimeout(() => {
-        if (!cancelled) say(currentPuzzle.narrationKey);
-      }, 300);
-      return () => { cancelled = true; clearTimeout(timer); };
+      resetBoard(currentPuzzle.boardSetup);
+      delay(NARRATION_DELAY, () => say(currentPuzzle.narrationKey));
     } else if (phase === "celebrate") {
-      const timer = setTimeout(() => {
-        if (!cancelled) {
-          sfx("lesson-complete");
-          const starKey =
-            stars === 3 ? "stars_3" : stars === 2 ? "stars_2" : "stars_1";
-          say(starKey);
-        }
-      }, 300);
-      return () => { cancelled = true; clearTimeout(timer); };
+      delay(NARRATION_DELAY, () => {
+        sfx("lesson-complete");
+        const starKey =
+          stars === 3 ? "stars_3" : stars === 2 ? "stars_2" : "stars_1";
+        say(starKey);
+      });
     }
+
+    return () => { abort.abort(); timers.forEach(clearTimeout); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, puzzleIndex]);
 
@@ -137,86 +140,16 @@ export default function PuzzlePlayer({
       sfx("button-tap");
       setPuzzleIndex(index);
       setPhase("solving");
-      setSelectedSquare(null);
-      setValidMoves([]);
-      setLastMove(null);
       setWrongAttempts(0);
-      setNarrationOverride(null);
+      interaction.clearNarrationOverride();
     },
-    [puzzleIndex, phase, sfx]
+    [puzzleIndex, phase, sfx, interaction]
   );
 
   const handleSquareTap = useCallback(
     (square: Square) => {
-      if (phase !== "solving" || !currentPuzzle) return;
-
-      const correctMoves = currentPuzzle.correctMoves;
-
-      // If no piece is selected yet
-      if (selectedSquare === null) {
-        const isValidSource = correctMoves.some((m) => m.from === square);
-        const piece = boardPieces[square];
-
-        if (isValidSource && piece) {
-          setSelectedSquare(square);
-          sfx("piece-pickup");
-          // Show all legal moves as subtle dots, correct moves as golden
-          const allLegal = getLegalMovesFromBoard(boardPieces, square, piece.color);
-          const correctDestinations = correctMoves.filter((m) => m.from === square).map((m) => m.to);
-          setValidMoves(allLegal);
-          setCorrectMoveSquares(correctDestinations);
-        }
-        return;
-      }
-
-      // A piece is already selected
-      if (square === selectedSquare) {
-        setSelectedSquare(null);
-        setValidMoves([]);
-        setCorrectMoveSquares([]);
-        return;
-      }
-
-      // Check if the move is correct
-      const isCorrect = correctMoves.some(
-        (m) => m.from === selectedSquare && m.to === square
-      );
-
-      if (isCorrect) {
-        // Move the piece visually
-        const piece = boardPieces[selectedSquare];
-        if (piece) {
-          const newPieces = { ...boardPieces };
-          delete newPieces[selectedSquare];
-
-          // Promotion: pawn reaching back rank becomes queen
-          const destRank = square[1];
-          if (piece.type === "pawn" && (destRank === "8" || destRank === "1")) {
-            newPieces[square] = { ...piece, type: "queen" };
-          } else {
-            newPieces[square] = piece;
-          }
-
-          // En passant: pawn captures diagonally to empty square → remove captured pawn
-          if (piece.type === "pawn") {
-            const fromFile = selectedSquare[0];
-            const toFile = square[0];
-            if (fromFile !== toFile && !boardPieces[square]) {
-              // Diagonal move to empty square = en passant
-              const capturedSquare = `${toFile}${selectedSquare[1]}` as Square;
-              delete newPieces[capturedSquare];
-            }
-          }
-
-          setBoardPieces(newPieces);
-        }
-        setLastMove({ from: selectedSquare, to: square });
-        setSelectedSquare(null);
-        setValidMoves([]);
-        setCorrectMoveSquares([]);
-        sfx("piece-place");
-        say(currentPuzzle.successNarrationKey);
-
+      const result = interaction.handleSquareTap(square, currentPuzzle, phase === "solving");
+      if (result === true && currentPuzzle) {
         // Save puzzle progress to Firestore
         if (uid && childId) markPuzzleSolved(uid, childId, currentPuzzle.id);
         // Track in session for immediate star fill
@@ -224,12 +157,10 @@ export default function PuzzlePlayer({
         // Notify parent to refresh progress
         onPuzzleSolved?.();
 
-        // Show success briefly, then advance to next unsolved (or stay)
+        // Show success briefly, then advance
         setPhase("success");
         setTimeout(() => {
           if (hasTealStars) {
-            // Auto-advance to next unsolved puzzle
-            // Use fresh solvedInSession since we just added current puzzle above
             const newSolved = new Set(solvedInSession);
             newSolved.add(currentPuzzle.id);
             const nextUnsolved = puzzles.findIndex((p, i) =>
@@ -247,44 +178,29 @@ export default function PuzzlePlayer({
               setPuzzleIndex(nextIndex);
               setPhase("solving");
             } else {
-              // All puzzles done (lesson mode)
               const earnedStars = calculateStars(wrongAttempts);
               setStars(earnedStars);
               setPhase("celebrate");
             }
           }
-        }, 2500);
-      } else {
-        // Wrong move
-        sfx("wrong-move");
-        say(currentPuzzle.wrongMoveNarrationKey);
-        setSelectedSquare(null);
-        setValidMoves([]);
-        setCorrectMoveSquares([]);
-        setWrongFlash(true);
-        setNarrationOverride("try_again");
-        setTimeout(() => setWrongFlash(false), 600);
-        setTimeout(() => setNarrationOverride(null), 2000);
+        }, SUCCESS_DISPLAY_DURATION);
+      } else if (result === false) {
         setWrongAttempts((prev) => prev + 1);
       }
     },
     [
-      phase,
+      interaction,
       currentPuzzle,
-      selectedSquare,
-      boardPieces,
-      sfx,
-      say,
+      phase,
       puzzleIndex,
-      puzzles.length,
+      puzzles,
       wrongAttempts,
-      onComplete,
-      onPuzzleSolved,
       hasTealStars,
       uid,
       childId,
       solvedInSession,
       puzzleProgress,
+      onPuzzleSolved,
     ]
   );
 

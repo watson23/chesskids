@@ -8,6 +8,13 @@ import TreasureChest from "@/components/TreasureChest";
 import JourneyMapOnboarding from "@/components/JourneyMapOnboarding";
 import PikuWithOutfit from "@/components/PikuWithOutfit";
 import { useAudio } from "@/hooks/useAudio";
+import {
+  MAP_SPARKLE_DELAY,
+  MAP_WALK_DELAY,
+  MAP_ARRIVE_PAUSE,
+  MAP_CELEBRATE_DURATION,
+  MAP_CHEST_GLOW_DURATION,
+} from "@/lib/timing";
 import type { LessonProgress } from "@/types/user";
 
 interface JourneyMapProps {
@@ -285,12 +292,12 @@ export default function JourneyMap({
         if (completedIndex >= 0) scrollToLesson(completedIndex);
 
         // Step 2: Sparkle on completed lesson
-        await delay(300, signal);
+        await delay(MAP_SPARKLE_DELAY, signal);
         setSparkleLesson(justCompletedLesson);
         sfx("confetti");
 
         // Step 3: Walk Piku to newly unlocked lesson (or igloo)
-        await delay(700, signal);
+        await delay(MAP_WALK_DELAY, signal);
         const newPos = isAllComplete ? IGLOO_POSITION : getLessonPosition(justUnlockedLesson, LESSONS.length);
         const walkAnim = walkPikuTo(newPos, isAllComplete);
         if (walkAnim) {
@@ -306,7 +313,7 @@ export default function JourneyMap({
         } else {
           setUnlockingIndex(justUnlockedLesson);
           sfx("chest-open");
-          await delay(600, signal);
+          await delay(MAP_ARRIVE_PAUSE, signal);
           setUnlockingIndex(null);
           setGlowingIndex(justUnlockedLesson);
         }
@@ -316,16 +323,16 @@ export default function JourneyMap({
         const hasNewChest = newlyUnlockedChest && !openedChests.includes(newlyUnlockedChest.index);
 
         if (hasNewChest) {
-          await delay(1500, signal);
+          await delay(MAP_CELEBRATE_DURATION, signal);
           const chestPos = getChestPosition(newlyUnlockedChest.positionOnMap, LESSONS.length, newlyUnlockedChest.index);
           scrollToPosition(chestPos);
           say("chest_appeared");
-          await delay(3000, signal);
+          await delay(MAP_CHEST_GLOW_DURATION, signal);
         } else if (!isAllComplete) {
-          await delay(3000, signal);
+          await delay(MAP_CHEST_GLOW_DURATION, signal);
           setGlowingIndex(null);
         } else {
-          await delay(1500, signal);
+          await delay(MAP_CELEBRATE_DURATION, signal);
         }
 
         onUnlockAnimationDone?.();

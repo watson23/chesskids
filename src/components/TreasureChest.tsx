@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 import type { ChestDefinition } from "@/types/lesson";
+import { SHAKE_DURATION } from "@/lib/timing";
 
 type ChestStatus = "locked" | "unlocked" | "opened";
 
@@ -89,7 +90,7 @@ export default function TreasureChest({
     if (shaking) return;
     setShaking(true);
     onLockedTap?.();
-    setTimeout(() => setShaking(false), 400);
+    setTimeout(() => setShaking(false), SHAKE_DURATION);
   }, [shaking, onLockedTap]);
 
   return (

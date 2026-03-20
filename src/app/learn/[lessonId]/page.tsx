@@ -4,6 +4,7 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { getLessonById } from "@/data/lessons";
 import LessonPlayer from "@/components/LessonPlayer";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 interface LessonPageProps {
   params: Promise<{ lessonId: string }>;
@@ -28,5 +29,5 @@ export default function LessonPage({ params }: LessonPageProps) {
     );
   }
 
-  return <LessonPlayer lesson={lesson} />;
+  return <ErrorBoundary><LessonPlayer lesson={lesson} /></ErrorBoundary>;
 }
