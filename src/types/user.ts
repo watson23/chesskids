@@ -7,8 +7,8 @@ export interface UserSettings {
 }
 
 export interface UserDocument {
-  email: string;
-  displayName: string;
+  email?: string;
+  displayName?: string;
   settings: UserSettings;
   createdAt: Timestamp | unknown;
 }

@@ -56,13 +56,12 @@ function validatePuzzleProgress(data: unknown): PuzzleProgress | null {
   };
 }
 
-export async function getOrCreateUser(uid: string, email: string, displayName: string): Promise<UserDocument> {
+export async function getOrCreateUser(uid: string): Promise<UserDocument> {
   const db = getDb();
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
   if (snap.exists()) return snap.data() as UserDocument;
   const userData: UserDocument = {
-    email, displayName,
     settings: { language: "en", soundEnabled: true, ttsProvider: "browser" },
     createdAt: serverTimestamp(),
   };

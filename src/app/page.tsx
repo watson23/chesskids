@@ -10,6 +10,7 @@ import ChildSelector from "@/components/ChildSelector";
 import AddChildModal from "@/components/AddChildModal";
 import PikuIntro from "@/components/PikuIntro";
 import ParentSettings from "@/components/ParentSettings";
+import ParentGate from "@/components/ParentGate";
 import StarCounter from "@/components/StarCounter";
 import { CHESTS } from "@/data/chests";
 import { LESSONS } from "@/data/lessons";
@@ -43,6 +44,7 @@ function HomeContent() {
   const [openChestIndex, setOpenChestIndex] = useState<number | null>(null);
   const [showAddChild, setShowAddChild] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showParentGate, setShowParentGate] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
   const [showPikuIntro, setShowPikuIntro] = useState(false);
 
@@ -366,10 +368,20 @@ function HomeContent() {
             icon="icon-settings"
             alt="Settings"
             size="md"
-            onClick={() => setShowSettings(true)}
+            onClick={() => setShowParentGate(true)}
           />
         </div>
       </div>
+
+      {/* Parent gate — must solve math to access settings */}
+      <ParentGate
+        open={showParentGate}
+        onPass={() => {
+          setShowParentGate(false);
+          setShowSettings(true);
+        }}
+        onCancel={() => setShowParentGate(false)}
+      />
 
       {/* Parent settings panel */}
       <ParentSettings

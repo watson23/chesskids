@@ -2,9 +2,11 @@
 
 import { useState, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useAudio } from "@/hooks/useAudio";
 import { useAuth } from "@/hooks/useAuth";
 import AddChildModal from "@/components/AddChildModal";
+import DeleteAccountDialog from "@/components/DeleteAccountDialog";
 import { addChild as addChildToFirestore } from "@/lib/firestore";
 
 interface ParentSettingsProps {
@@ -18,6 +20,7 @@ export default function ParentSettings({ open, onClose, onChildAdded }: ParentSe
   const {
     user,
     signOut,
+    deleteAccount,
     children: childProfiles,
     activeChild,
     setActiveChild,
@@ -25,6 +28,7 @@ export default function ParentSettings({ open, onClose, onChildAdded }: ParentSe
   } = useAuth();
 
   const [showAddChild, setShowAddChild] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleSignOut = useCallback(async () => {
     await signOut();
@@ -172,8 +176,23 @@ export default function ParentSettings({ open, onClose, onChildAdded }: ParentSe
           </div>
         </div>
 
-        {/* Footer: Sign out */}
-        <div className="px-5 py-4 border-t border-gray-100">
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-gray-100 flex flex-col gap-2">
+          <Link
+            href="/privacy"
+            onClick={onClose}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-50 text-gray-600 font-semibold hover:bg-gray-100 active:scale-95 transition-all text-sm"
+          >
+            {t("settings_privacy_policy")}
+          </Link>
+
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-500 font-semibold hover:bg-red-100 active:scale-95 transition-all text-sm"
+          >
+            {t("settings_delete_data")}
+          </button>
+
           <button
             onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 active:scale-95 transition-all"
@@ -189,6 +208,16 @@ export default function ParentSettings({ open, onClose, onChildAdded }: ParentSe
         <AddChildModal
           onAdd={handleAddChild}
           onCancel={() => setShowAddChild(false)}
+        />
+      )}
+
+      {/* Delete account dialog */}
+      {showDeleteDialog && (
+        <DeleteAccountDialog
+          onConfirm={async () => {
+            await deleteAccount();
+          }}
+          onCancel={() => setShowDeleteDialog(false)}
         />
       )}
     </>

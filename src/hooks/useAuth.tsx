@@ -11,22 +11,21 @@ import {
 } from "react";
 import {
   onAuthStateChanged,
-  signInWithPopup,
   signInAnonymously,
   signOut as firebaseSignOut,
-  GoogleAuthProvider,
   type User,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { getOrCreateUser, getChildren } from "@/lib/firestore";
+import { deleteUserAccount } from "@/lib/account-deletion";
 import type { ChildProfile, UserSettings } from "@/types/user";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  signIn: () => Promise<User | null>;
   signInAnon: () => Promise<User | null>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   children: ChildProfile[];
   activeChild: ChildProfile | null;
   setActiveChild: (child: ChildProfile | null) => void;
@@ -37,18 +36,15 @@ interface AuthContextValue {
 const AuthCtx = createContext<AuthContextValue>({
   user: null,
   loading: true,
-  signIn: async () => null,
   signInAnon: async () => null,
   signOut: async () => {},
+  deleteAccount: async () => {},
   children: [],
   activeChild: null,
   setActiveChild: () => {},
   refreshChildren: async () => {},
   userSettings: null,
 });
-
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: "select_account" });
 
 export function AuthProvider({
   children: reactChildren,
@@ -68,7 +64,7 @@ export function AuthProvider({
   /** Load user document and children from Firestore */
   const loadUserData = useCallback(async (u: User) => {
     try {
-      const userData = await getOrCreateUser(u.uid, u.email ?? "", u.displayName ?? "");
+      const userData = await getOrCreateUser(u.uid);
       if (userData.settings) setUserSettings(userData.settings);
       const kids = await getChildren(u.uid);
       setChildProfiles(kids);
@@ -100,11 +96,6 @@ export function AuthProvider({
     return unsubscribe;
   }, [loadUserData]);
 
-  const signIn = async (): Promise<User | null> => {
-    const result = await signInWithPopup(getFirebaseAuth(), googleProvider);
-    return result.user;
-  };
-
   const signInAnon = async (): Promise<User | null> => {
     const result = await signInAnonymously(getFirebaseAuth());
     return result.user;
@@ -115,6 +106,23 @@ export function AuthProvider({
     setChildProfiles([]);
     setActiveChildState(null);
   };
+
+  const deleteAccount = useCallback(async () => {
+    const currentUser = getFirebaseAuth().currentUser;
+    if (!currentUser) return;
+    await deleteUserAccount(currentUser.uid);
+    await currentUser.delete();
+    // Clear all mfcm_ localStorage keys
+    if (typeof window !== "undefined") {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("mfcm_"))
+        .forEach((k) => localStorage.removeItem(k));
+    }
+    setChildProfiles([]);
+    setActiveChildState(null);
+    setUserSettings(null);
+    setUser(null);
+  }, []);
 
   const setActiveChild = useCallback(
     (child: ChildProfile | null) => {
@@ -145,9 +153,9 @@ export function AuthProvider({
       value={{
         user,
         loading,
-        signIn,
         signInAnon,
         signOut,
+        deleteAccount,
         children: childProfiles,
         activeChild,
         setActiveChild,

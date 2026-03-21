@@ -10,7 +10,7 @@ import TrustSection from "@/components/landing/TrustSection";
 import CTASection from "@/components/landing/CTASection";
 
 export default function LoginPage() {
-  const { user, loading, signIn, signInAnon } = useAuth();
+  const { user, loading, signInAnon } = useAuth();
   const router = useRouter();
   const { t } = useLocale();
 
@@ -22,10 +22,6 @@ export default function LoginPage() {
     await signInAnon();
   }, [signInAnon]);
 
-  const handleGoogleSignIn = useCallback(async () => {
-    await signIn();
-  }, [signIn]);
-
   // Override body overflow-hidden from root layout so landing page can scroll
   useEffect(() => {
     document.body.style.overflow = "auto";
@@ -36,10 +32,10 @@ export default function LoginPage() {
 
   return (
     <div>
-      <HeroSection t={t} onPlayFree={handlePlayFree} onGoogleSignIn={handleGoogleSignIn} />
+      <HeroSection t={t} onPlayFree={handlePlayFree} />
       <FeaturesSection t={t} />
       <TrustSection t={t} />
-      <CTASection t={t} onPlayFree={handlePlayFree} onGoogleSignIn={handleGoogleSignIn} />
+      <CTASection t={t} onPlayFree={handlePlayFree} />
     </div>
   );
 }
