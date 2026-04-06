@@ -66,10 +66,14 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
       setSaving(true);
       try {
+        console.log("[OUTFIT DEBUG] saving:", JSON.stringify(next), "uid:", user.uid, "childId:", activeChild.id);
         await updateEquippedOutfit(user.uid, activeChild.id, next);
+        console.log("[OUTFIT DEBUG] save succeeded, refreshing...");
         await refreshChildren();
+        console.log("[OUTFIT DEBUG] refresh done");
       } catch (err) {
-        console.error("Failed to update outfit:", err);
+        console.error("[OUTFIT DEBUG] Failed to update outfit:", err);
+        alert("Outfit save failed: " + (err instanceof Error ? err.message : String(err)));
       }
       setSaving(false);
     },
