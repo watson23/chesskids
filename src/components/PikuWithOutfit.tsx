@@ -190,6 +190,7 @@ export default function PikuWithOutfit({
           height={Math.round(size * head.widthScale * 0.63)}
           style={{
             position: "absolute",
+            zIndex: 2,
             top: head.top,
             left: head.left,
             transform: `translateX(-50%) rotate(${head.rotate}deg)`,
@@ -211,6 +212,7 @@ export default function PikuWithOutfit({
           height={Math.round(size * body.widthScale * 0.57)}
           style={{
             position: "absolute",
+            zIndex: 1,
             top: body.top,
             left: body.left,
             transform: `translateX(-50%) rotate(${body.rotate}deg)`,
