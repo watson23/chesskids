@@ -164,5 +164,9 @@ export async function updateEquippedOutfit(
 ): Promise<void> {
   const db = getDb();
   const ref = doc(db, "users", uid, "children", childId);
-  await updateDoc(ref, { equippedOutfit });
+  // Firestore rejects undefined values — strip them out
+  const clean: Record<string, string> = {};
+  if (equippedOutfit.head) clean.head = equippedOutfit.head;
+  if (equippedOutfit.body) clean.body = equippedOutfit.body;
+  await updateDoc(ref, { equippedOutfit: clean });
 }
