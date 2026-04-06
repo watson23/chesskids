@@ -86,6 +86,14 @@ const bodySlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
   "body-mint-bow": BOW_CONFIG,
   "body-gold-bow": BOW_CONFIG,
   "body-peach-bow": BOW_CONFIG,
+  "body-red-scarf": {
+    base: { top: "44%", left: "50%", widthScale: 0.33, rotate: 0 },
+    expressions: {
+      "standing-happy": { rotate: 5 },
+      "standing-celebrating": { top: "48%", left: "43%", rotate: 8 },
+      "standing-winking": { top: "47%", left: "47%", rotate: -2 },
+    },
+  },
   "body-medal-snowflake": {
     base: { top: "43.5%", left: "48.5%", widthScale: 0.22, rotate: 6 },
     expressions: {

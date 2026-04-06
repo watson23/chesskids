@@ -116,6 +116,7 @@ export const AVAILABLE_OUTFITS: OutfitItem[] = [
   { id: "gold-bow", slot: "body", nameKey: "outfit_gold_bow", image: "/outfits/body-gold-bow.webp" },
   { id: "peach-bow", slot: "body", nameKey: "outfit_peach_bow", image: "/outfits/body-peach-bow.webp" },
   { id: "medal-snowflake", slot: "body", nameKey: "outfit_medal_snowflake", image: "/outfits/body-medal-snowflake.webp" },
+  { id: "red-scarf", slot: "body", nameKey: "outfit_red_scarf", image: "/outfits/body-red-scarf.webp" },
 ];
 
 export function getAvailableBySlot(slot: OutfitSlot): OutfitItem[] {

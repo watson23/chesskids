@@ -104,6 +104,35 @@ export default function OutfitTestPage() {
         </div>
       </div>
 
+      {/* Red Scarf */}
+      <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Red Scarf (NEW)</h2>
+      <div className="flex gap-8 flex-wrap justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-happy" bodyImage="/outfits/body-red-scarf.webp" size={200} />
+          <span className="text-sm font-semibold">Happy</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-happy" headImage="/outfits/head-crown.webp" bodyImage="/outfits/body-red-scarf.webp" size={200} />
+          <span className="text-sm font-semibold">Happy + Crown</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-celebrating" bodyImage="/outfits/body-red-scarf.webp" size={200} />
+          <span className="text-sm font-semibold">Celebrating</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-winking" bodyImage="/outfits/body-red-scarf.webp" size={200} />
+          <span className="text-sm font-semibold">Winking</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-neutral" bodyImage="/outfits/body-red-scarf.webp" size={200} />
+          <span className="text-sm font-semibold">Neutral</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-teaching" bodyImage="/outfits/body-red-scarf.webp" size={200} />
+          <span className="text-sm font-semibold">Teaching</span>
+        </div>
+      </div>
+
       {/* All Bow Colors */}
       <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Bow Colors</h2>
       <div className="flex gap-6 flex-wrap justify-center">
