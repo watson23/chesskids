@@ -337,11 +337,6 @@ function HomeContent() {
         equippedOutfit={activeChild?.equippedOutfit}
       />
 
-      {/* DEBUG: show equippedOutfit value — REMOVE AFTER DEBUGGING */}
-      <div className="fixed bottom-2 left-2 z-50 bg-black/80 text-white text-[10px] px-2 py-1 rounded font-mono max-w-[250px] break-all">
-        outfit: {JSON.stringify(activeChild?.equippedOutfit ?? "no child")}
-      </div>
-
       {/* Top navigation bar */}
       <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+8px)] pb-2">
         {/* Left: rewards chest + star counter */}
