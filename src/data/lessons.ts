@@ -551,15 +551,17 @@ const checkLesson: Lesson = {
   steps: [
     {
       narrationKey: "check_intro",
-      // Rook on e1 gives check to king on e8
+      // Rook slides onto the open e-file (a1→e1) to attack the king on e8.
+      // It must check from a distance — moving onto e8 would land on (and erase) the king.
+      // Mirrors the check_puzzle_give setup so the demo matches what the kid does next.
       boardSetup: pos(
         ["e8", "king", "black"],
-        ["e1", "rook", "white"],
-        ["a1", "king", "white"]
+        ["a1", "rook", "white"],
+        ["h1", "king", "white"]
       ),
       animation: {
-        piece: "e1" as Square,
-        path: ["e8"] as Square[],
+        piece: "a1" as Square,
+        path: ["e1"] as Square[],
         highlights: ["e8"] as Square[],
       },
     },
