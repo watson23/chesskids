@@ -145,9 +145,14 @@ export default function PuzzlePlayer({
     } else if (phase === "celebrate") {
       delay(NARRATION_DELAY, () => {
         sfx("lesson-complete");
-        const starKey =
-          stars === 3 ? "stars_3" : stars === 2 ? "stars_2" : "stars_1";
-        say(starKey);
+        if (hasTealStars) {
+          // Practice: no performance rating — teal stars are the payoff
+          say("category_complete");
+        } else {
+          const starKey =
+            stars === 3 ? "stars_3" : stars === 2 ? "stars_2" : "stars_1";
+          say(starKey);
+        }
       });
     }
 
@@ -320,10 +325,26 @@ export default function PuzzlePlayer({
           <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             <Confetti active />
             <Piku expression="celebrating" size={120} />
-            <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-text)" }}>
-              {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
-            </h2>
-            <StarDisplay stars={stars} size={56} />
+            {hasTealStars ? (
+              <>
+                {/* Practice: the filled teal stars ARE the reward — no 1-3 rating */}
+                <h2 className="text-2xl font-extrabold text-center px-6" style={{ color: "var(--ck-text)" }}>
+                  {t("category_complete")}
+                </h2>
+                <div className="flex gap-2 items-center">
+                  {puzzles.map((puzzle) => (
+                    <TealStar key={puzzle.id} filled active={false} size={40} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-text)" }}>
+                  {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
+                </h2>
+                <StarDisplay stars={stars} size={56} />
+              </>
+            )}
             <button onClick={handleContinue} className="mt-2 animate-bounce-gentle p-2 active:scale-90 transition-transform">
               <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
             </button>
