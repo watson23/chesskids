@@ -108,6 +108,7 @@ export const AVAILABLE_OUTFITS: OutfitItem[] = [
   // Head
   { id: "crown", slot: "head", nameKey: "outfit_crown", image: "/outfits/head-crown.webp" },
   { id: "wizard-hat", slot: "head", nameKey: "outfit_wizard_hat", image: "/outfits/head-wizard-hat.webp", iconImage: "/outfits/head-wizard-hat-icon.webp" },
+  { id: "magician-hat", slot: "head", nameKey: "outfit_magician_hat", image: "/outfits/head-magician-hat.webp" },
   // Body
   { id: "pink-bow", slot: "body", nameKey: "outfit_pink_bow", image: "/outfits/body-pink-bow.webp" },
   { id: "purple-bow", slot: "body", nameKey: "outfit_purple_bow", image: "/outfits/body-purple-bow.webp" },

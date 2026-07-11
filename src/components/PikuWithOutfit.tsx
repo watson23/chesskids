@@ -51,6 +51,15 @@ const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
       "standing-celebrating":  { top: "-19.5%", left: "47%", widthScale: 0.72, rotate: 12 },
     },
   },
+  // Extracted via design/extract_outfit.py — base values are exact for standing-neutral
+  "head-magician-hat": {
+    base: { top: "-18.9%", left: "45.8%", widthScale: 0.47, rotate: 0 },
+    expressions: {
+      "standing-happy":       { top: "-18%", left: "54%", rotate: 3 },
+      "standing-celebrating": { top: "-6%", left: "54%", widthScale: 0.41, rotate: 10 },
+      "standing-winking":     { top: "-16%", left: "45%", rotate: -3 },
+    },
+  },
 };
 
 function resolveHeadPos(itemKey: string, expression: StandingExpression): SlotPos {
