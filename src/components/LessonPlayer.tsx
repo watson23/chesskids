@@ -22,6 +22,7 @@ import {
   SUCCESS_DISPLAY_DURATION,
   BOARD_TRANSITION_DURATION,
   WATCH_ANIM_DELAY,
+  WATCH_ANIM_AFTER_SPEECH,
   WATCH_TAP_FEEDBACK_DURATION,
   TAP_HINT_IDLE,
   WATCH_INDICATORS_LINGER,
@@ -68,6 +69,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
   } = interaction;
 
   const [showTapHint, setShowTapHint] = useState(false);
+  // Bumped by the replay button in watch phase to re-run the whole step
+  const [replayNonce, setReplayNonce] = useState(0);
   const [phaseOverride, setPhaseOverride] = useState<"watch" | "try" | "celebrate" | null>(null);
   const [boardTransition, setBoardTransition] = useState(false);
   const [watchTapFeedback, setWatchTapFeedback] = useState(false);
@@ -132,23 +135,29 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
         setValidMoves(currentStep.animation.highlights);
       }
 
-      delay(NARRATION_DELAY, () => say(currentStep.narrationKey));
-
-      // Auto-animate piece movement after a delay (e.g. castling, checkmate demos)
-      if (currentStep.animation?.piece && currentStep.animation?.path?.length) {
-        const anim = currentStep.animation;
+      const anim = currentStep.animation;
+      if (anim?.piece && anim.path?.length) {
+        // Narrate, then move the piece — never mid-sentence. The move waits
+        // for BOTH the narration to finish (+ a beat) and a minimum delay,
+        // so it still paces sensibly when audio is off or TTS is silent.
         const from = anim.piece;
         const to = anim.path[anim.path.length - 1];
-
-        delay(WATCH_ANIM_DELAY, () => {
+        delay(NARRATION_DELAY, async () => {
+          const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+          const narrated = say(currentStep.narrationKey).then(() =>
+            wait(WATCH_ANIM_AFTER_SPEECH)
+          );
+          await Promise.all([narrated, wait(WATCH_ANIM_DELAY - NARRATION_DELAY)]);
+          if (abort.signal.aborted) return;
           setBoardPieces((prev) => applyPieceMove(prev, from, to));
           setLastMove({ from, to });
+          // Clear the blue helper dots after a beat; the from/to move
+          // highlight stays until the kid taps Next, so they can always
+          // see what just happened.
+          delay(WATCH_INDICATORS_LINGER, () => setValidMoves([]));
         });
-
-        delay(WATCH_ANIM_DELAY + WATCH_INDICATORS_LINGER, () => {
-          setValidMoves([]);
-          setLastMove(null);
-        });
+      } else {
+        delay(NARRATION_DELAY, () => say(currentStep.narrationKey));
       }
     } else if (state.phase === "try" && currentPuzzle) {
       resetBoard(currentPuzzle.boardSetup);
@@ -168,7 +177,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
     return () => { abort.abort(); timers.forEach(clearTimeout); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.phase, state.stepIndex, state.puzzleIndex]);
+  }, [state.phase, state.stepIndex, state.puzzleIndex, replayNonce]);
 
   const handleSquareTap = useCallback(
     (square: Square) => {
@@ -190,7 +199,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
   const handleReplay = useCallback(() => {
     if (state.phase === "watch" && currentStep) {
-      say(currentStep.narrationKey);
+      // Re-run the whole step: board reset, narration, and the move animation
+      setReplayNonce((n) => n + 1);
     } else if (state.phase === "try" && currentPuzzle) {
       say(currentPuzzle.narrationKey);
     }

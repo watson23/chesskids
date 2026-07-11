@@ -29,14 +29,19 @@ export default function PracticeCategoryPage({
 }: PracticeCategoryPageProps) {
   const { category } = use(params);
   const router = useRouter();
-  const { user, activeChild } = useAuth();
-  const [puzzleProgress, setPuzzleProgress] = useState<Record<string, PuzzleProgress>>({});
+  const { user, activeChild, loading } = useAuth();
+  const [fetchedProgress, setFetchedProgress] = useState<Record<string, PuzzleProgress> | null>(null);
 
   // Fetch puzzle progress
   useEffect(() => {
     if (!user || !activeChild) return;
-    getPuzzleProgress(user.uid, activeChild.id).then(setPuzzleProgress);
+    getPuzzleProgress(user.uid, activeChild.id).then(setFetchedProgress);
   }, [user, activeChild]);
+
+  // null = still loading — PuzzlePlayer mounts only once progress is known,
+  // so it can start at the first unsolved puzzle. Signed-out users get {}.
+  const puzzleProgress =
+    fetchedProgress ?? (!loading && (!user || !activeChild) ? {} : null);
 
   const handleComplete = useCallback(() => {
     router.push("/practice");
@@ -45,7 +50,7 @@ export default function PracticeCategoryPage({
   // Re-fetch progress when a puzzle is solved (called from PuzzlePlayer)
   const handlePuzzleSolved = useCallback(() => {
     if (user && activeChild) {
-      getPuzzleProgress(user.uid, activeChild.id).then(setPuzzleProgress);
+      getPuzzleProgress(user.uid, activeChild.id).then(setFetchedProgress);
     }
   }, [user, activeChild]);
 
@@ -82,6 +87,10 @@ export default function PracticeCategoryPage({
         </button>
       </div>
     );
+  }
+
+  if (puzzleProgress === null) {
+    return <div className="min-h-dvh" style={{ background: "var(--ck-bg)" }} />;
   }
 
   return (

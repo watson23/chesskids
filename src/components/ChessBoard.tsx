@@ -7,9 +7,61 @@ import type {
   BoardTheme,
   PieceColorSet,
 } from "@/types/chess";
-import { coordsToSquare, isLightSquare } from "@/lib/board-utils";
+import { coordsToSquare, squareToCoords, isLightSquare } from "@/lib/board-utils";
 import { CAPTURE_FADE_DURATION } from "@/lib/timing";
 import ChessPiece from "./ChessPiece";
+
+/** Offset (in squares, screen coords) a piece slides in from, keyed for remount */
+interface PieceSlide {
+  dx: number;
+  dy: number;
+  id: string;
+}
+
+/**
+ * Diffs two board states and returns slide-in offsets for pieces that moved,
+ * so moves glide instead of teleporting. Matches each arrived piece to a
+ * departed piece of the same color (same type, or pawn→queen for promotion).
+ * Handles castling (king + rook both slide). Returns {} for wholesale board
+ * changes (resets), which callers signal by passing lastMove = null.
+ */
+function computeSlides(
+  prev: Record<string, ChessPieceType>,
+  next: Record<string, ChessPieceType>,
+  flipped: boolean
+): Record<string, PieceSlide> {
+  const changed = (a?: ChessPieceType, b?: ChessPieceType) =>
+    !a || !b || a.type !== b.type || a.color !== b.color;
+
+  const arrivals = Object.keys(next).filter((sq) => changed(prev[sq], next[sq]));
+  const departures = Object.keys(prev).filter((sq) => changed(prev[sq], next[sq]));
+  // A normal move arrives on 1 square; castling on 2. Anything else is a reset.
+  if (arrivals.length === 0 || arrivals.length > 2) return {};
+
+  const slides: Record<string, PieceSlide> = {};
+  const used = new Set<string>();
+  for (const to of arrivals) {
+    const piece = next[to];
+    const candidates = departures.filter((from) => {
+      if (used.has(from) || from === to) return false;
+      const p = prev[from];
+      if (p.color !== piece.color) return false;
+      return p.type === piece.type || (p.type === "pawn" && piece.type === "queen");
+    });
+    if (candidates.length !== 1) continue; // ambiguous — render without slide
+    const from = candidates[0];
+    used.add(from);
+    const f = squareToCoords(from as Square);
+    const t = squareToCoords(to as Square);
+    const sign = flipped ? -1 : 1;
+    slides[to] = {
+      dx: (f.col - t.col) * sign,
+      dy: (f.row - t.row) * sign,
+      id: `${from}-${to}`,
+    };
+  }
+  return slides;
+}
 
 interface ChessBoardProps {
   pieces: Record<string, ChessPieceType>;
@@ -31,6 +83,7 @@ interface BoardSquareProps {
   square: Square;
   piece: ChessPieceType | undefined;
   fadingPiece: ChessPieceType | undefined;
+  slide: PieceSlide | undefined;
   bgColor: string;
   isSelected: boolean;
   isValidMove: boolean;
@@ -46,6 +99,7 @@ const BoardSquare = memo(function BoardSquare({
   square,
   piece,
   fadingPiece,
+  slide,
   bgColor,
   isSelected,
   isValidMove,
@@ -61,7 +115,7 @@ const BoardSquare = memo(function BoardSquare({
   return (
     <div
       className="relative flex items-center justify-center"
-      style={{ backgroundColor: bgColor }}
+      style={{ backgroundColor: bgColor, zIndex: slide ? 20 : undefined }}
       onClick={() => interactive && onTap(square)}
       role={interactive ? "button" : undefined}
       tabIndex={interactive ? 0 : undefined}
@@ -87,15 +141,28 @@ const BoardSquare = memo(function BoardSquare({
         </div>
       )}
 
-      {/* Piece */}
+      {/* Piece — slides in from its previous square when it just moved */}
       {hasPiece && (
-        <div className="w-[92%] h-[92%] flex items-center justify-center pointer-events-none">
-          <ChessPiece
-            type={piece.type}
-            color={piece.color}
-            colorSet={pieceColors}
-            size={100}
-          />
+        <div
+          key={slide?.id}
+          className={`absolute inset-0 flex items-center justify-center pointer-events-none${slide ? " animate-piece-slide" : ""}`}
+          style={
+            slide
+              ? ({
+                  "--slide-x": `${slide.dx * 100}%`,
+                  "--slide-y": `${slide.dy * 100}%`,
+                } as React.CSSProperties)
+              : undefined
+          }
+        >
+          <div className="w-[92%] h-[92%] flex items-center justify-center">
+            <ChessPiece
+              type={piece.type}
+              color={piece.color}
+              colorSet={pieceColors}
+              size={100}
+            />
+          </div>
         </div>
       )}
 
@@ -211,6 +278,16 @@ export default function ChessBoard({
     [interactive, onSquareTap, onWatchTap]
   );
 
+  // Slide-in offsets for pieces that just moved (computed during render so the
+  // first paint already starts at the origin square — no teleport flash).
+  // lastMove === null signals a board reset: no sliding.
+  const [prevPieces, setPrevPieces] = useState(pieces);
+  const [slides, setSlides] = useState<Record<string, PieceSlide>>({});
+  if (pieces !== prevPieces) {
+    setPrevPieces(pieces);
+    setSlides(lastMove ? computeSlides(prevPieces, pieces, flipped) : {});
+  }
+
   // Track captured pieces for fade-out animation
   const prevPiecesRef = useRef(pieces);
   const [fadingPieces, setFadingPieces] = useState<Record<string, ChessPieceType>>({});
@@ -276,6 +353,7 @@ export default function ChessBoard({
                 square={square}
                 piece={piece}
                 fadingPiece={fadingPieces[square]}
+                slide={slides[square]}
                 bgColor={bgColor}
                 isSelected={isSelected}
                 isValidMove={isValidMove}

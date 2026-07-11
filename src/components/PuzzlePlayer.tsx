@@ -60,7 +60,14 @@ export default function PuzzlePlayer({
   const { boardTheme, pieceColors } = useActiveTheme();
   const { t } = useLocale();
 
-  const [puzzleIndex, setPuzzleIndex] = useState(0);
+  // Start at the first unsolved puzzle (falls back to 0 when all are solved)
+  const [puzzleIndex, setPuzzleIndex] = useState(() => {
+    if (!puzzleProgress) return 0;
+    const firstUnsolved = puzzles.findIndex(
+      (p) => !(puzzleProgress[p.id]?.solved ?? false)
+    );
+    return firstUnsolved === -1 ? 0 : firstUnsolved;
+  });
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [phase, setPhase] = useState<Phase>("solving");
   const [stars, setStars] = useState(0);

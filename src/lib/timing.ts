@@ -18,9 +18,11 @@ export const WRONG_FLASH_DURATION = 600;
 export const TAP_HINT_IDLE = 4000;
 
 // -- Watch phase (lesson) --
-/** Delay before auto-animating piece movement in watch phase */
+/** Minimum delay before auto-animating piece movement in watch phase (used when narration ends early or audio is off) */
 export const WATCH_ANIM_DELAY = 1200;
-/** Duration to show move indicators after watch animation completes (added to WATCH_ANIM_DELAY) */
+/** Pause between the narration finishing and the piece moving */
+export const WATCH_ANIM_AFTER_SPEECH = 600;
+/** Duration to keep the blue helper highlights after the watch move (the from/to move highlight stays until Next) */
 export const WATCH_INDICATORS_LINGER = 1500;
 
 // -- Board & transitions --
