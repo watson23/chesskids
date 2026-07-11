@@ -16,6 +16,8 @@ export const WRONG_NARRATION_DURATION = 2000;
 export const WRONG_FLASH_DURATION = 600;
 /** Idle time before showing tap hint */
 export const TAP_HINT_IDLE = 4000;
+/** How long a non-selectable piece wobbles after being tapped */
+export const DENIED_TAP_DURATION = 500;
 
 // -- Watch phase (lesson) --
 /** Minimum delay before auto-animating piece movement in watch phase (used when narration ends early or audio is off) */

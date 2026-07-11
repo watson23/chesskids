@@ -148,6 +148,27 @@ export function getCurrentTurn(fen: string): "white" | "black" {
 }
 
 /**
+ * Returns the square of the enemy king put in check by `moverColor`'s last
+ * move, or null when there is no check (or the board lacks kings — chess.js
+ * needs both, so piece-intro puzzle boards simply return null).
+ */
+export function getCheckSquareFromBoard(
+  pieces: Record<string, ChessPiece>,
+  moverColor: "white" | "black"
+): Square | null {
+  const colors = Object.values(pieces)
+    .filter((p) => p.type === "king")
+    .map((p) => p.color);
+  if (!colors.includes("white") || !colors.includes("black")) return null;
+  try {
+    const opponent = moverColor === "white" ? "black" : "white";
+    return getCheckSquare(boardPiecesToFen(pieces, opponent));
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Returns the square of the king that is in check, or null if no king is in check.
  */
 export function getCheckSquare(fen: string): Square | null {

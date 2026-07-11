@@ -19,6 +19,7 @@ import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
 import { calculateStars } from "@/lib/scoring";
 import { markPuzzleSolved } from "@/lib/firestore";
+import { getCheckSquareFromBoard } from "@/lib/chess-helpers";
 
 interface PuzzlePlayerProps {
   puzzles: PuzzleDefinition[];
@@ -83,9 +84,18 @@ export default function PuzzlePlayer({
     lastMove,
     boardPieces,
     wrongFlash,
+    deniedSquare,
     narrationOverride,
     resetBoard,
   } = interaction;
+
+  // Red ring on a king in check after the kid's move (check/checkmate puzzles)
+  const checkSquare = useMemo(() => {
+    if (!lastMove) return null;
+    const mover = boardPieces[lastMove.to];
+    if (!mover) return null;
+    return getCheckSquareFromBoard(boardPieces, mover.color);
+  }, [boardPieces, lastMove]);
 
   const [showTapHint, setShowTapHint] = useState(false);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -331,7 +341,15 @@ export default function PuzzlePlayer({
                       ? currentPuzzle.narrationKey
                       : ""
               }
-              phase={narrationOverride === "try_again" ? "wrong" : narrationOverride ? "try" : phase === "success" ? "celebrate" : "try"}
+              phase={
+                narrationOverride
+                  ? narrationOverride === currentPuzzle?.successNarrationKey
+                    ? "celebrate"
+                    : "wrong"
+                  : phase === "success"
+                    ? "celebrate"
+                    : "try"
+              }
             />
 
             <div className={`w-full flex justify-center${wrongFlash ? " animate-wrong-flash rounded-xl" : ""}`}>
@@ -342,6 +360,8 @@ export default function PuzzlePlayer({
                 selectedSquare={selectedSquare}
                 validMoves={validMoves}
                 correctMoves={correctMoveSquares}
+                checkSquare={checkSquare}
+                deniedSquare={deniedSquare}
                 lastMove={lastMove}
                 onSquareTap={handleSquareTap}
                 interactive={phase === "solving"}

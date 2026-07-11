@@ -134,8 +134,10 @@ const knightPuzzles: PuzzleDefinition[] = [
     narrationKey: "puzzle_knight_fork",
     // Knight can fork king and rook by going to c7
     // From c7, knight attacks: a6, a8, b5, d5, e6, e8
+    // White king included so grey legal-move dots render (chess.js needs both kings)
     boardSetup: board(
       ["d5", w("knight")],
+      ["e1", w("king")],
       ["e8", b("king")],
       ["a8", b("rook")]
     ),
@@ -150,8 +152,10 @@ const knightPuzzles: PuzzleDefinition[] = [
     narrationKey: "puzzle_knight_fork",
     // Knight on e5 forks king on h8 and queen on d8 by going to f7
     // From f7, knight attacks: d6, d8, e5, g5, h6, h8
+    // White king on a1: off the black queen's lines, so the knight isn't pinned
     boardSetup: board(
       ["e5", w("knight")],
+      ["a1", w("king")],
       ["h8", b("king")],
       ["d8", b("queen")]
     ),
@@ -347,6 +351,7 @@ const queenPuzzles: PuzzleDefinition[] = [
     ),
     correctMoves: [{ from: "d4" as Square, to: "d7" as Square }],
     wrongMoveNarrationKey: "try_again",
+    wrongCaptureNarrationKey: "good_but_better",
     successNarrationKey: "well_done",
   },
   {
@@ -362,6 +367,7 @@ const queenPuzzles: PuzzleDefinition[] = [
     ),
     correctMoves: [{ from: "a1" as Square, to: "a8" as Square }],
     wrongMoveNarrationKey: "try_again",
+    wrongCaptureNarrationKey: "good_but_better",
     successNarrationKey: "well_done",
   },
 ];

@@ -72,6 +72,8 @@ interface ChessBoardProps {
   correctMoves?: Square[];
   watchHighlights?: Square[];
   checkSquare?: Square | null;
+  /** Piece that was tapped but can't be selected — wobbles briefly */
+  deniedSquare?: Square | null;
   lastMove: { from: Square; to: Square } | null;
   onSquareTap: (square: Square) => void;
   onWatchTap?: () => void;
@@ -84,6 +86,7 @@ interface BoardSquareProps {
   piece: ChessPieceType | undefined;
   fadingPiece: ChessPieceType | undefined;
   slide: PieceSlide | undefined;
+  isDenied: boolean;
   bgColor: string;
   isSelected: boolean;
   isValidMove: boolean;
@@ -100,6 +103,7 @@ const BoardSquare = memo(function BoardSquare({
   piece,
   fadingPiece,
   slide,
+  isDenied,
   bgColor,
   isSelected,
   isValidMove,
@@ -145,7 +149,7 @@ const BoardSquare = memo(function BoardSquare({
       {hasPiece && (
         <div
           key={slide?.id}
-          className={`absolute inset-0 flex items-center justify-center pointer-events-none${slide ? " animate-piece-slide" : ""}`}
+          className={`absolute inset-0 flex items-center justify-center pointer-events-none${slide ? " animate-piece-slide" : ""}${isDenied ? " animate-wobble" : ""}`}
           style={
             slide
               ? ({
@@ -261,6 +265,7 @@ export default function ChessBoard({
   correctMoves = [],
   watchHighlights = [],
   checkSquare = null,
+  deniedSquare = null,
   lastMove,
   onSquareTap,
   onWatchTap,
@@ -354,6 +359,7 @@ export default function ChessBoard({
                 piece={piece}
                 fadingPiece={fadingPieces[square]}
                 slide={slides[square]}
+                isDenied={deniedSquare === square}
                 bgColor={bgColor}
                 isSelected={isSelected}
                 isValidMove={isValidMove}

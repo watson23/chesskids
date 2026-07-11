@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { Square, ChessPiece } from "@/types/chess";
 import type { LocaleKey } from "@/types/locale";
 import type { SoundEffect } from "@/types/audio";
 import { getLegalMovesFromBoard } from "@/lib/chess-helpers";
-import { WRONG_FLASH_DURATION, WRONG_NARRATION_DURATION } from "@/lib/timing";
+import { WRONG_FLASH_DURATION, WRONG_NARRATION_DURATION, DENIED_TAP_DURATION } from "@/lib/timing";
 
 interface CorrectMove {
   from: Square;
@@ -16,6 +16,8 @@ interface PuzzleConfig {
   correctMoves: CorrectMove[];
   successNarrationKey: LocaleKey;
   wrongMoveNarrationKey: LocaleKey;
+  /** Friendlier narration when the wrong move was a capture (a good idea, just not the best) */
+  wrongCaptureNarrationKey?: LocaleKey;
 }
 
 interface UsePuzzleInteractionOptions {
@@ -37,6 +39,8 @@ interface UsePuzzleInteractionReturn {
   lastMove: { from: Square; to: Square } | null;
   boardPieces: Record<string, ChessPiece>;
   wrongFlash: boolean;
+  /** Square whose piece was tapped but can't be selected — wobble it briefly */
+  deniedSquare: Square | null;
   narrationOverride: LocaleKey | null;
   setBoardPieces: React.Dispatch<React.SetStateAction<Record<string, ChessPiece>>>;
   setLastMove: React.Dispatch<React.SetStateAction<{ from: Square; to: Square } | null>>;
@@ -126,7 +130,15 @@ export function usePuzzleInteraction({
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
   const [boardPieces, setBoardPieces] = useState<Record<string, ChessPiece>>({});
   const [wrongFlash, setWrongFlash] = useState(false);
+  const [deniedSquare, setDeniedSquare] = useState<Square | null>(null);
+  const deniedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [narrationOverride, setNarrationOverride] = useState<LocaleKey | null>(null);
+
+  const denySquare = useCallback((square: Square) => {
+    if (deniedTimer.current) clearTimeout(deniedTimer.current);
+    setDeniedSquare(square);
+    deniedTimer.current = setTimeout(() => setDeniedSquare(null), DENIED_TAP_DURATION);
+  }, []);
 
   const clearSelection = useCallback(() => {
     setSelectedSquare(null);
@@ -179,7 +191,10 @@ export function usePuzzleInteraction({
 
       // No piece selected yet — try to select
       if (selectedSquare === null) {
-        selectSquare(square);
+        if (!selectSquare(square) && boardPieces[square]) {
+          // Tapped a piece that can't be picked up — wobble it as feedback
+          denySquare(square);
+        }
         return null;
       }
 
@@ -193,7 +208,9 @@ export function usePuzzleInteraction({
       // deselect), never count it as a wrong move
       if (boardPieces[square]?.color === boardPieces[selectedSquare]?.color) {
         clearSelection();
-        selectSquare(square);
+        if (!selectSquare(square)) {
+          denySquare(square);
+        }
         return null;
       }
 
@@ -209,17 +226,23 @@ export function usePuzzleInteraction({
         setNarrationOverride(puzzle.successNarrationKey);
         return true;
       } else {
+        // A capture attempt gets the friendlier "good idea, but…" narration
+        // when the puzzle provides one (e.g. best-move puzzles)
+        const wrongKey =
+          boardPieces[square] && puzzle.wrongCaptureNarrationKey
+            ? puzzle.wrongCaptureNarrationKey
+            : puzzle.wrongMoveNarrationKey;
         sfx("wrong-move");
-        say(puzzle.wrongMoveNarrationKey);
+        say(wrongKey);
         clearSelection();
         setWrongFlash(true);
-        setNarrationOverride(puzzle.wrongMoveNarrationKey);
+        setNarrationOverride(wrongKey);
         setTimeout(() => setWrongFlash(false), WRONG_FLASH_DURATION);
         setTimeout(() => setNarrationOverride(null), WRONG_NARRATION_DURATION);
         return false;
       }
     },
-    [selectedSquare, boardPieces, sfx, say, clearSelection, revealCorrectMoves]
+    [selectedSquare, boardPieces, sfx, say, clearSelection, revealCorrectMoves, denySquare]
   );
 
   return {
@@ -229,6 +252,7 @@ export function usePuzzleInteraction({
     lastMove,
     boardPieces,
     wrongFlash,
+    deniedSquare,
     narrationOverride,
     setBoardPieces,
     setLastMove,

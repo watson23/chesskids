@@ -629,6 +629,8 @@ const checkLesson: Lesson = {
         { from: "d5" as Square, to: "e4" as Square },
       ],
       wrongMoveNarrationKey: "try_again",
+      // Bxf7 wins a pawn but isn't check — acknowledge the idea
+      wrongCaptureNarrationKey: "good_but_better",
       successNarrationKey: "great_move",
     },
   ],
@@ -713,6 +715,8 @@ const checkmateLesson: Lesson = {
       ),
       correctMoves: [{ from: "g5" as Square, to: "g7" as Square }],
       wrongMoveNarrationKey: "try_again",
+      // Bxg7 wins the pawn but isn't mate
+      wrongCaptureNarrationKey: "good_but_better",
       successNarrationKey: "great_move",
     },
   ],
@@ -775,6 +779,8 @@ const pieceValuesLesson: Lesson = {
       ),
       correctMoves: [{ from: "d1" as Square, to: "d7" as Square }],
       wrongMoveNarrationKey: "try_again",
+      // Capturing the pawn is legal but worth less than the rook
+      wrongCaptureNarrationKey: "good_but_better",
       successNarrationKey: "great_move",
     },
     {
@@ -790,6 +796,8 @@ const pieceValuesLesson: Lesson = {
       ),
       correctMoves: [{ from: "a1" as Square, to: "a7" as Square }],
       wrongMoveNarrationKey: "try_again",
+      // Capturing the bishop is worth less than the queen
+      wrongCaptureNarrationKey: "good_but_better",
       successNarrationKey: "great_move",
     },
   ],
@@ -879,6 +887,8 @@ const protectingLesson: Lesson = {
         { from: "h1" as Square, to: "d1" as Square },
       ],
       wrongMoveNarrationKey: "try_again",
+      // Rxh4 grabs a pawn, but the knight still needs protection
+      wrongCaptureNarrationKey: "good_but_better",
       successNarrationKey: "great_move",
     },
   ],
@@ -1049,6 +1059,8 @@ const capstoneLesson: Lesson = {
       ),
       correctMoves: [{ from: "d1" as Square, to: "d7" as Square }],
       wrongMoveNarrationKey: "try_again",
+      // Capturing the knight is worth less than the rook
+      wrongCaptureNarrationKey: "good_but_better",
       successNarrationKey: "great_move",
     },
     {

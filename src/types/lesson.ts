@@ -18,6 +18,8 @@ export interface LessonPuzzle {
   boardSetup: Record<Square, ChessPiece>;
   correctMoves: { from: Square; to: Square }[];
   wrongMoveNarrationKey: LocaleKey;
+  /** Friendlier narration when the wrong move was a capture (good idea, not the best) */
+  wrongCaptureNarrationKey?: LocaleKey;
   successNarrationKey: LocaleKey;
 }
 
@@ -38,6 +40,8 @@ export interface PuzzleDefinition {
   boardSetup: Record<Square, ChessPiece>;
   correctMoves: { from: Square; to: Square }[];
   wrongMoveNarrationKey: LocaleKey;
+  /** Friendlier narration when the wrong move was a capture (good idea, not the best) */
+  wrongCaptureNarrationKey?: LocaleKey;
   successNarrationKey: LocaleKey;
 }
 

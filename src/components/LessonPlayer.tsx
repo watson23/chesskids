@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
@@ -31,6 +31,7 @@ import { useAudio } from "@/hooks/useAudio";
 import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
 import { useAuth } from "@/hooks/useAuth";
+import { getCheckSquareFromBoard } from "@/lib/chess-helpers";
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -61,12 +62,22 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
     lastMove,
     boardPieces,
     wrongFlash,
+    deniedSquare,
     narrationOverride,
     setBoardPieces,
     setLastMove,
     setValidMoves,
     resetBoard,
   } = interaction;
+
+  // Red ring on a king in check after a move — works in watch demos
+  // (check/checkmate lessons) and in try-phase puzzles alike
+  const checkSquare = useMemo(() => {
+    if (!lastMove) return null;
+    const mover = boardPieces[lastMove.to];
+    if (!mover) return null;
+    return getCheckSquareFromBoard(boardPieces, mover.color);
+  }, [boardPieces, lastMove]);
 
   const [showTapHint, setShowTapHint] = useState(false);
   // Bumped by the replay button in watch phase to re-run the whole step
@@ -277,7 +288,14 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                       ? currentPuzzle.narrationKey
                       : ""
               }
-              phase={phaseOverride ?? (narrationOverride === "try_again" ? "wrong" : narrationOverride ? "try" : (state.phase as "watch" | "try"))}
+              phase={
+                phaseOverride ??
+                (narrationOverride
+                  ? narrationOverride === currentPuzzle?.successNarrationKey
+                    ? "celebrate"
+                    : "wrong"
+                  : (state.phase as "watch" | "try"))
+              }
               onReplay={handleReplay}
             />
 
@@ -290,6 +308,8 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                 validMoves={state.phase === "watch" ? [] : validMoves}
                 correctMoves={correctMoveSquares}
                 watchHighlights={state.phase === "watch" ? validMoves : []}
+                checkSquare={checkSquare}
+                deniedSquare={deniedSquare}
                 lastMove={lastMove}
                 onSquareTap={handleSquareTap}
                 onWatchTap={state.phase === "watch" ? handleWatchTap : undefined}
