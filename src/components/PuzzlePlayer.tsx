@@ -67,7 +67,8 @@ export default function PuzzlePlayer({
   // Track puzzles solved in this session (for immediate star fill before Firestore roundtrip)
   const [solvedInSession, setSolvedInSession] = useState<Set<string>>(new Set());
 
-  const interaction = usePuzzleInteraction({ sfx, say });
+  // Practice tests skills: no golden answer hints, any own piece selectable
+  const interaction = usePuzzleInteraction({ sfx, say, revealCorrectMoves: false });
   const {
     selectedSquare,
     validMoves,
@@ -82,6 +83,10 @@ export default function PuzzlePlayer({
   const [showTapHint, setShowTapHint] = useState(false);
   const tapHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const narrationAbort = useRef<AbortController | null>(null);
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear a pending success→next-puzzle advance if the player unmounts
+  useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
 
   const currentPuzzle = useMemo(
     () => puzzles[puzzleIndex] ?? null,
@@ -150,6 +155,10 @@ export default function PuzzlePlayer({
     (square: Square) => {
       const result = interaction.handleSquareTap(square, currentPuzzle, phase === "solving");
       if (result === true && currentPuzzle) {
+        // Was this a fresh solve, or a replay of an already-solved puzzle?
+        const wasAlreadySolved =
+          (puzzleProgress?.[currentPuzzle.id]?.solved ?? false) ||
+          solvedInSession.has(currentPuzzle.id);
         // Save puzzle progress to Firestore
         if (uid && childId) markPuzzleSolved(uid, childId, currentPuzzle.id);
         // Track in session for immediate star fill
@@ -159,28 +168,42 @@ export default function PuzzlePlayer({
 
         // Show success briefly, then advance
         setPhase("success");
-        setTimeout(() => {
+        advanceTimer.current = setTimeout(() => {
+          const celebrate = () => {
+            setStars(calculateStars(wrongAttempts));
+            setPhase("celebrate");
+          };
           if (hasTealStars) {
             const newSolved = new Set(solvedInSession);
             newSolved.add(currentPuzzle.id);
-            const nextUnsolved = puzzles.findIndex((p, i) =>
-              i > puzzleIndex &&
-              !(puzzleProgress?.[p.id]?.solved ?? false) &&
-              !newSolved.has(p.id)
-            );
+            const isUnsolved = (p: PuzzleDefinition) =>
+              !(puzzleProgress?.[p.id]?.solved ?? false) && !newSolved.has(p.id);
+            // Next unsolved puzzle, searching forward and wrapping around
+            let nextUnsolved = -1;
+            for (let step = 1; step <= puzzles.length; step++) {
+              const i = (puzzleIndex + step) % puzzles.length;
+              if (isUnsolved(puzzles[i])) { nextUnsolved = i; break; }
+            }
             if (nextUnsolved !== -1) {
               setPuzzleIndex(nextUnsolved);
+              setPhase("solving");
+            } else if (!wasAlreadySolved) {
+              // Just solved the last remaining puzzle — category complete!
+              celebrate();
+            } else if (puzzleIndex + 1 < puzzles.length) {
+              // Replaying an already-finished category — continue in order
+              setPuzzleIndex(puzzleIndex + 1);
+              setPhase("solving");
+            } else {
+              celebrate();
             }
-            setPhase("solving");
           } else {
             const nextIndex = puzzleIndex + 1;
             if (nextIndex < puzzles.length) {
               setPuzzleIndex(nextIndex);
               setPhase("solving");
             } else {
-              const earnedStars = calculateStars(wrongAttempts);
-              setStars(earnedStars);
-              setPhase("celebrate");
+              celebrate();
             }
           }
         }, SUCCESS_DISPLAY_DURATION);

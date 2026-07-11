@@ -21,6 +21,13 @@ interface PuzzleConfig {
 interface UsePuzzleInteractionOptions {
   sfx: (effect: SoundEffect) => void;
   say: (key: LocaleKey) => void;
+  /**
+   * When true (lessons), only correct-answer pieces can be selected and their
+   * correct destinations show as golden dots. When false (practice), any of
+   * the player's pieces can be selected and no golden hints are shown — the
+   * kid has to find the answer themselves.
+   */
+  revealCorrectMoves?: boolean;
 }
 
 interface UsePuzzleInteractionReturn {
@@ -111,6 +118,7 @@ export function applyPieceMove(
 export function usePuzzleInteraction({
   sfx,
   say,
+  revealCorrectMoves = true,
 }: UsePuzzleInteractionOptions): UsePuzzleInteractionReturn {
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [validMoves, setValidMoves] = useState<Square[]>([]);
@@ -144,24 +152,48 @@ export function usePuzzleInteraction({
       if (!active || !puzzle) return null;
       const { correctMoves: moves } = puzzle;
 
+      // The kid plays the color of the correct-answer pieces
+      const playerColor = moves
+        .map((m) => boardPieces[m.from])
+        .find(Boolean)?.color;
+
+      const selectSquare = (sq: Square) => {
+        const piece = boardPieces[sq];
+        if (!piece) return false;
+        // Lessons: only correct-answer pieces are selectable (guided).
+        // Practice: any of the kid's own pieces (they must find the answer).
+        const selectable = revealCorrectMoves
+          ? moves.some((m) => m.from === sq)
+          : piece.color === playerColor;
+        if (!selectable) return false;
+        setSelectedSquare(sq);
+        sfx("piece-pickup");
+        setValidMoves(getLegalMovesFromBoard(boardPieces, sq, piece.color));
+        setCorrectMoveSquares(
+          revealCorrectMoves
+            ? moves.filter((m) => m.from === sq).map((m) => m.to)
+            : []
+        );
+        return true;
+      };
+
       // No piece selected yet — try to select
       if (selectedSquare === null) {
-        const isValidSource = moves.some((m) => m.from === square);
-        const piece = boardPieces[square];
-        if (isValidSource && piece) {
-          setSelectedSquare(square);
-          sfx("piece-pickup");
-          const allLegal = getLegalMovesFromBoard(boardPieces, square, piece.color);
-          const correctDests = moves.filter((m) => m.from === square).map((m) => m.to);
-          setValidMoves(allLegal);
-          setCorrectMoveSquares(correctDests);
-        }
+        selectSquare(square);
         return null;
       }
 
       // Tapping the same square — deselect
       if (square === selectedSquare) {
         clearSelection();
+        return null;
+      }
+
+      // Tapping another of the kid's own pieces — switch selection (or just
+      // deselect), never count it as a wrong move
+      if (boardPieces[square]?.color === boardPieces[selectedSquare]?.color) {
+        clearSelection();
+        selectSquare(square);
         return null;
       }
 
@@ -187,7 +219,7 @@ export function usePuzzleInteraction({
         return false;
       }
     },
-    [selectedSquare, boardPieces, sfx, say, clearSelection]
+    [selectedSquare, boardPieces, sfx, say, clearSelection, revealCorrectMoves]
   );
 
   return {

@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { speak, stopSpeaking, preloadVoices } from "@/lib/tts";
+import { speak, stopSpeaking, preloadVoices, unlockSpeech } from "@/lib/tts";
 import { playSound } from "@/lib/sounds";
 import { useAuth } from "@/hooks/useAuth";
 import { updateUserSettings } from "@/lib/firestore";
@@ -61,6 +61,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   // Pre-load TTS voices early so the first speak() call doesn't miss
   useEffect(() => {
     preloadVoices();
+  }, []);
+
+  // iOS/Android require the first speech to start inside a user gesture;
+  // unlock on the first tap so timer-driven narrations aren't dropped
+  useEffect(() => {
+    const unlock = () => unlockSpeech();
+    document.addEventListener("pointerdown", unlock, { once: true });
+    return () => document.removeEventListener("pointerdown", unlock);
   }, []);
 
   // Sync language between localStorage and Firestore when user logs in

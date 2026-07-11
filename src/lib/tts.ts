@@ -3,6 +3,26 @@ import type { TTSOptions } from "@/types/audio";
 let voicesLoaded = false;
 let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null;
 
+// iOS/Android browsers block speechSynthesis until a speak() happens inside a
+// user gesture. Narrations fire from timers (never gesture-linked), so the
+// session's first one is silently dropped. unlockSpeech() must be called from
+// a gesture handler; a narration blocked before unlock is stored and replayed.
+let speechUnlocked = false;
+let pendingRetry: (() => void) | null = null;
+
+export function unlockSpeech(): void {
+  if (speechUnlocked || typeof window === "undefined" || !window.speechSynthesis) return;
+  speechUnlocked = true;
+  const primer = new SpeechSynthesisUtterance(" ");
+  primer.volume = 0;
+  window.speechSynthesis.speak(primer);
+  if (pendingRetry) {
+    const retry = pendingRetry;
+    pendingRetry = null;
+    retry();
+  }
+}
+
 function loadVoices(): Promise<SpeechSynthesisVoice[]> {
   if (typeof window === "undefined" || !window.speechSynthesis) {
     return Promise.resolve([]);
@@ -85,6 +105,9 @@ export function preloadVoices(): void {
 export async function speak(text: string, options: TTSOptions): Promise<void> {
   if (typeof window === "undefined" || !window.speechSynthesis) return;
 
+  // A newer narration supersedes any blocked one waiting for unlock
+  pendingRetry = null;
+
   // Chrome/WebKit bug: calling cancel() immediately before speak() can silently
   // cancel the new utterance too. Add a brief delay when cancelling active speech.
   const wasSpeaking = window.speechSynthesis.speaking;
@@ -113,6 +136,11 @@ export async function speak(text: string, options: TTSOptions): Promise<void> {
     utterance.onend = () => resolve();
     utterance.onerror = (e) => {
       console.warn("[TTS] Speech error:", e.error, "lang:", utterance.lang, "voice:", utterance.voice?.name);
+      // Blocked for lack of a user gesture — replay this narration once speech
+      // is unlocked by the next tap (unless a newer narration replaces it).
+      if (e.error === "not-allowed" && !speechUnlocked) {
+        pendingRetry = () => speak(text, options);
+      }
       resolve();
     };
     window.speechSynthesis.speak(utterance);
@@ -124,6 +152,7 @@ export async function speak(text: string, options: TTSOptions): Promise<void> {
 }
 
 export function stopSpeaking() {
+  pendingRetry = null;
   if (typeof window !== "undefined" && window.speechSynthesis) {
     window.speechSynthesis.cancel();
   }

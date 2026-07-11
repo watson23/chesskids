@@ -30,7 +30,11 @@ const pawnPuzzles: PuzzleDefinition[] = [
     difficulty: 1,
     narrationKey: "puzzle_pawn_move_1",
     boardSetup: board(["e2", w("pawn")]),
-    correctMoves: [{ from: "e2" as Square, to: "e4" as Square }],
+    // Narration says the pawn CAN go two squares — one square is also right
+    correctMoves: [
+      { from: "e2" as Square, to: "e3" as Square },
+      { from: "e2" as Square, to: "e4" as Square },
+    ],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "great_move",
   },
@@ -401,7 +405,7 @@ const kingPuzzles: PuzzleDefinition[] = [
     difficulty: 2,
     narrationKey: "puzzle_king_safe",
     // King on d4, enemy bishop on a1 (controls a1-h8 diagonal: b2,c3,d4,e5,f6,g7).
-    // Safe king moves: d5, d3, e4, c4, e3 (not e5 or c3 - on the diagonal).
+    // Safe king moves: d5, d3, e4, c4, e3, c5 (not e5 or c3 - on the diagonal).
     boardSetup: board(["d4", w("king")], ["a1", b("bishop")]),
     correctMoves: [
       { from: "d4" as Square, to: "d5" as Square },
@@ -409,6 +413,7 @@ const kingPuzzles: PuzzleDefinition[] = [
       { from: "d4" as Square, to: "e4" as Square },
       { from: "d4" as Square, to: "c4" as Square },
       { from: "d4" as Square, to: "e3" as Square },
+      { from: "d4" as Square, to: "c5" as Square },
     ],
     wrongMoveNarrationKey: "king_danger",
     successNarrationKey: "great_move",
@@ -494,13 +499,16 @@ const checkmatePuzzles: PuzzleDefinition[] = [
     category: "checkmate",
     difficulty: 2,
     narrationKey: "puzzle_checkmate",
-    // Qd5-h5#: Queen checks along h-file. King h8 blocked: g8 guarded by Kf7, g7 guarded by Kf7, h7 guarded by Qh5.
+    // Qd5-h5# (or Qd5-h1#): Queen checks along h-file. King h8 blocked: g8 and g7 guarded by Kf7, h7 guarded by the queen.
     boardSetup: board(
       ["f7", w("king")],
       ["d5", w("queen")],
       ["h8", b("king")]
     ),
-    correctMoves: [{ from: "d5" as Square, to: "h5" as Square }],
+    correctMoves: [
+      { from: "d5" as Square, to: "h5" as Square },
+      { from: "d5" as Square, to: "h1" as Square },
+    ],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "well_done",
   },
