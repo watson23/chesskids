@@ -51,6 +51,14 @@ const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
       "standing-celebrating":  { top: "-19.5%", left: "47%", widthScale: 0.72, rotate: 12 },
     },
   },
+  "head-headband": {
+    base: { top: "4.1%", left: "48.5%", widthScale: 0.49, rotate: 0 },
+    expressions: {
+      "standing-happy":       { top: "3%", left: "54.7%", widthScale: 0.52, rotate: 3 },
+      "standing-celebrating": { top: "14%", left: "51.7%", widthScale: 0.46, rotate: 10 },
+      "standing-winking":     { top: "7.5%", left: "48.2%", widthScale: 0.54, rotate: -3 },
+    },
+  },
   // Extracted via design/extract_outfit.py — base values are exact for standing-neutral
   "head-magician-hat": {
     base: { top: "-18.9%", left: "45.8%", widthScale: 0.47, rotate: 0 },
@@ -190,11 +198,14 @@ export default function PikuWithOutfit({
         />
       )}
 
-      {/* Head overlay (e.g. crown, hat) */}
+      {/* Head overlay (e.g. crown, hat) — unoptimized: overlays are small
+          pre-optimized WebPs, and the optimizer's cache can serve stale
+          versions after an overlay is re-extracted */}
       {headImage && (
         <Image
           src={headImage}
           alt="Piku head accessory"
+          unoptimized
           width={Math.round(size * head.widthScale)}
           height={Math.round(size * head.widthScale * 0.63)}
           style={{
@@ -212,11 +223,12 @@ export default function PikuWithOutfit({
         />
       )}
 
-      {/* Body overlay (e.g. scarf, cape) */}
+      {/* Body overlay (e.g. scarf, cape) — unoptimized, see head overlay */}
       {bodyImage && (
         <Image
           src={bodyImage}
           alt="Piku body accessory"
+          unoptimized
           width={Math.round(size * body.widthScale)}
           height={Math.round(size * body.widthScale * 0.57)}
           style={{

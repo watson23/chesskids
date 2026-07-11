@@ -83,6 +83,27 @@ export default function OutfitTestPage() {
         </div>
       </div>
 
+      {/* Sports Headband */}
+      <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Sports Headband (NEW)</h2>
+      <div className="flex gap-8 flex-wrap justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-neutral" headImage="/outfits/head-headband.webp" size={200} />
+          <span className="text-sm font-semibold">Neutral</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-happy" headImage="/outfits/head-headband.webp" size={200} />
+          <span className="text-sm font-semibold">Happy</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-celebrating" headImage="/outfits/head-headband.webp" size={200} />
+          <span className="text-sm font-semibold">Celebrating</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <PikuWithOutfit expression="standing-winking" headImage="/outfits/head-headband.webp" size={200} />
+          <span className="text-sm font-semibold">Winking</span>
+        </div>
+      </div>
+
       {/* Pink Bow (body) */}
       <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Pink Bow (body)</h2>
       <div className="flex gap-8 flex-wrap justify-center">
