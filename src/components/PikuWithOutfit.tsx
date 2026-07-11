@@ -31,6 +31,16 @@ type PartialPos = Partial<SlotPos>;
  */
 const HEAD_DEFAULTS: SlotPos = { top: "-20%", left: "53%", widthScale: 0.6, rotate: 0 };
 
+// All headband color variants share the same geometry (recolors of one overlay)
+const HEADBAND_CONFIG = {
+  base: { top: "4.1%", left: "48.5%", widthScale: 0.49, rotate: 0 } as PartialPos,
+  expressions: {
+    "standing-happy":       { top: "3%", left: "54.7%", widthScale: 0.52, rotate: 3 },
+    "standing-celebrating": { top: "14%", left: "51.7%", widthScale: 0.46, rotate: 10 },
+    "standing-winking":     { top: "7.5%", left: "48.2%", widthScale: 0.54, rotate: -3 },
+  } as Partial<Record<StandingExpression, PartialPos>>,
+};
+
 const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<Record<StandingExpression, PartialPos>> }> = {
   "head-crown": {
     base: {},
@@ -51,14 +61,10 @@ const headSlotConfig: Record<string, { base: PartialPos; expressions?: Partial<R
       "standing-celebrating":  { top: "-19.5%", left: "47%", widthScale: 0.72, rotate: 12 },
     },
   },
-  "head-headband": {
-    base: { top: "4.1%", left: "48.5%", widthScale: 0.49, rotate: 0 },
-    expressions: {
-      "standing-happy":       { top: "3%", left: "54.7%", widthScale: 0.52, rotate: 3 },
-      "standing-celebrating": { top: "14%", left: "51.7%", widthScale: 0.46, rotate: 10 },
-      "standing-winking":     { top: "7.5%", left: "48.2%", widthScale: 0.54, rotate: -3 },
-    },
-  },
+  "head-headband": HEADBAND_CONFIG,
+  "head-headband-blue": HEADBAND_CONFIG,
+  "head-headband-gold": HEADBAND_CONFIG,
+  "head-headband-purple": HEADBAND_CONFIG,
   // Extracted via design/extract_outfit.py — base values are exact for standing-neutral
   "head-magician-hat": {
     base: { top: "-18.9%", left: "45.8%", widthScale: 0.47, rotate: 0 },

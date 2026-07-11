@@ -104,6 +104,17 @@ export default function OutfitTestPage() {
         </div>
       </div>
 
+      {/* Headband Colors */}
+      <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Headband Colors</h2>
+      <div className="flex gap-6 flex-wrap justify-center">
+        {["", "-blue", "-gold", "-purple"].map((suffix) => (
+          <div key={suffix || "red"} className="flex flex-col items-center gap-2">
+            <PikuWithOutfit expression="standing-happy" headImage={`/outfits/head-headband${suffix}.webp`} size={140} />
+            <span className="text-sm font-semibold capitalize">{suffix.replace("-", "") || "red"}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Pink Bow (body) */}
       <h2 className="text-lg font-semibold" style={{ color: "var(--ck-text)" }}>Pink Bow (body)</h2>
       <div className="flex gap-8 flex-wrap justify-center">
