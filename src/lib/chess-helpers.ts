@@ -68,8 +68,10 @@ export function boardToRecord(fen: string): Record<string, ChessPiece> {
 /**
  * Converts a board pieces record into a FEN string.
  * Used by lessons/puzzles to calculate legal moves via chess.js.
- * Turn is inferred from the moving piece color. Castling/en passant
- * are omitted (not relevant for showing legal move indicators).
+ * Turn is inferred from the moving piece color; en passant is omitted.
+ * Castling rights are granted only when the king AND matching rook are on
+ * their home squares — blanket "KQkq" made chess.js offer a phantom
+ * two-square king move whenever a rook happened to be on a1/h1.
  */
 export function boardPiecesToFen(
   pieces: Record<string, ChessPiece>,
@@ -96,7 +98,20 @@ export function boardPiecesToFen(
     if (empty > 0) row += empty;
     rows.push(row);
   }
-  return `${rows.join("/")} ${turn === "white" ? "w" : "b"} KQkq - 0 1`;
+
+  const is = (sq: string, type: PieceType, color: "white" | "black") =>
+    pieces[sq]?.type === type && pieces[sq]?.color === color;
+  let castling = "";
+  if (is("e1", "king", "white")) {
+    if (is("h1", "rook", "white")) castling += "K";
+    if (is("a1", "rook", "white")) castling += "Q";
+  }
+  if (is("e8", "king", "black")) {
+    if (is("h8", "rook", "black")) castling += "k";
+    if (is("a8", "rook", "black")) castling += "q";
+  }
+
+  return `${rows.join("/")} ${turn === "white" ? "w" : "b"} ${castling || "-"} - 0 1`;
 }
 
 /**

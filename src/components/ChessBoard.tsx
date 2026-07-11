@@ -345,9 +345,10 @@ export default function ChessBoard({
             } else if (isSelected) {
               bgColor = "#fbbf24"; // amber-400
             } else if (isLastMove) {
+              // 0.45 blend — 0.25 was invisible on the purple board theme
               bgColor = light
-                ? blendColors(theme.lightSquare, "#fbbf24", 0.25)
-                : blendColors(theme.darkSquare, "#fbbf24", 0.25);
+                ? blendColors(theme.lightSquare, "#fbbf24", 0.45)
+                : blendColors(theme.darkSquare, "#fbbf24", 0.45);
             } else {
               bgColor = light ? theme.lightSquare : theme.darkSquare;
             }

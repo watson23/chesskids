@@ -613,14 +613,19 @@ const tacticsPuzzles: PuzzleDefinition[] = [
     difficulty: 3,
     narrationKey: "puzzle_tactic_fork",
     // Queen fork: Qc2→e4 checks king on e8 (e-file) and attacks rook a8 (diagonal e4-d5-c6-b7-a8).
-    // Rook on a8 cannot capture queen on e4 (no shared file/rank/diagonal).
+    // Qc2→c6 also forks: checks e8 (c6-d7-e8) and attacks a8 (c6-b7-a8).
+    // Neither queen can be captured by the rook — both answers accepted.
+    // (Qa4 and Qc8 also fork but hang the queen to Rxa4/Rxc8 — wrong.)
     boardSetup: board(
       ["g1", w("king")],
       ["c2", w("queen")],
       ["e8", b("king")],
       ["a8", b("rook")]
     ),
-    correctMoves: [{ from: "c2" as Square, to: "e4" as Square }],
+    correctMoves: [
+      { from: "c2" as Square, to: "e4" as Square },
+      { from: "c2" as Square, to: "c6" as Square },
+    ],
     wrongMoveNarrationKey: "try_again",
     successNarrationKey: "well_done",
   },
