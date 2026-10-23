@@ -21,12 +21,12 @@ interface RewardCollectionProps {
   onClose: () => void;
 }
 
-/**
- * Section icons. Drop illustrated versions into /public/icons as
- * icon-section-hat.webp, icon-section-bow.webp, icon-section-board.webp and
- * set SECTION_ICONS below; until then these small inline drawings are used.
- */
-const SECTION_ICONS: Partial<Record<"hat" | "bow" | "board", string>> = {};
+/** Illustrated section icons; the inline glyphs below are the fallback. */
+const SECTION_ICONS: Partial<Record<"hat" | "bow" | "board", string>> = {
+  hat: "/icons/icon-section-hat.webp",
+  bow: "/icons/icon-section-bow.webp",
+  board: "/icons/icon-section-board.webp",
+};
 
 function HatGlyph() {
   return (
@@ -64,7 +64,7 @@ function SectionHeading({ icon, label }: { icon: "hat" | "bow" | "board"; label:
   return (
     <div className="flex items-center gap-2 mb-2 px-1">
       {img ? (
-        <Image src={img} alt="" width={26} height={26} className="object-contain" style={{ width: 26, height: 26 }} />
+        <Image src={img} alt="" width={30} height={30} className="object-contain" style={{ width: 30, height: 30 }} />
       ) : icon === "hat" ? <HatGlyph /> : icon === "bow" ? <BowGlyph /> : <BoardGlyph />}
       <span className="text-[15px] font-extrabold" style={{ color: "var(--ck-text)" }}>{label}</span>
     </div>
@@ -209,18 +209,17 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
 
       {/* Piku is the point of this screen: the outfit preview, front and centre */}
       <div className="relative z-10 flex flex-col items-center shrink-0 pt-1 pb-3">
-        <div
+        <Image
+          src="/reward-pedestal.webp"
+          alt=""
           aria-hidden="true"
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            bottom: 10,
-            width: 180,
-            height: 44,
-            borderRadius: "50%",
-            background: "radial-gradient(ellipse at center, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 55%, transparent 75%)",
-          }}
+          width={240}
+          height={77}
+          className="absolute left-1/2 -translate-x-1/2 object-contain pointer-events-none"
+          style={{ width: 240, height: "auto", bottom: -6 }}
+          priority
         />
-        <div className="relative animate-float">
+        <div className="relative animate-float" style={{ marginBottom: 18 }}>
           <PikuWithOutfit
             expression="standing-happy"
             headImage={previewOutfit.head}

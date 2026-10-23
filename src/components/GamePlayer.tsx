@@ -27,19 +27,15 @@ interface OpponentDef {
   image: string;
   bgColor: string;
   accentColor: string;
-  /**
-   * Optional mood portraits for the result card. Drop the files into
-   * /public/opponents (e.g. mouse-sad.webp, mouse-proud.webp) and list them
-   * here; until then the neutral portrait is used.
-   */
+  /** Mood portraits for the result card (sad = lost to the kid, proud = beat the kid). */
   moods?: { sad?: string; proud?: string };
 }
 
 const OPPONENTS: Record<number, OpponentDef> = {
-  1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse-t.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7" },
-  2: { nameKey: "opponent_fox_name", image: "/opponents/fox-t.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D" },
-  3: { nameKey: "opponent_owl_name", image: "/opponents/owl-t.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD" },
-  4: { nameKey: "opponent_bear_name", image: "/opponents/bear-t.webp", bgColor: "#FCE7F3", accentColor: "#FDA4AF" },
+  1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse-t.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7", moods: { sad: "/opponents/mouse-sad.webp", proud: "/opponents/mouse-proud.webp" } },
+  2: { nameKey: "opponent_fox_name", image: "/opponents/fox-t.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D", moods: { sad: "/opponents/fox-sad.webp", proud: "/opponents/fox-proud.webp" } },
+  3: { nameKey: "opponent_owl_name", image: "/opponents/owl-t.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD", moods: { sad: "/opponents/owl-sad.webp", proud: "/opponents/owl-proud.webp" } },
+  4: { nameKey: "opponent_bear_name", image: "/opponents/bear-t.webp", bgColor: "#FCE7F3", accentColor: "#FDA4AF", moods: { sad: "/opponents/bear-sad.webp", proud: "/opponents/bear-proud.webp" } },
 };
 
 interface GamePlayerProps {
