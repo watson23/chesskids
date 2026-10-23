@@ -1,34 +1,35 @@
 "use client";
 
 import Image from "next/image";
+import { UI } from "@/lib/ui";
 
 interface NavIconProps {
   icon: string;          // filename in /icons/, e.g. "icon-home"
   alt: string;
-  size?: "sm" | "md";
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
 }
 
+/**
+ * Round frosted navigation button. One size everywhere (UI.nav) so the
+ * top bars of the map, lessons, practice, play and game all line up.
+ */
 export default function NavIcon({
   icon,
   alt,
-  size = "sm",
   onClick,
   className = "",
   disabled = false,
 }: NavIconProps) {
-  const px = size === "md" ? 52 : 44;
-  const imgPx = size === "md" ? 40 : 28;
+  const px = UI.nav.button;
+  const imgPx = UI.nav.icon;
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center justify-center rounded-full bg-white/70 backdrop-blur shadow-sm cursor-pointer hover:scale-105 hover:bg-white/90 hover:shadow-md active:scale-90 transition-all duration-150 ${
-        disabled ? "opacity-40 cursor-default" : ""
-      } ${className}`}
+      className={`nav-button shrink-0 ${disabled ? "opacity-40 cursor-default" : ""} ${className}`}
       style={{ width: px, height: px }}
       aria-label={alt}
     >
@@ -38,7 +39,8 @@ export default function NavIcon({
         width={imgPx}
         height={imgPx}
         className="object-contain"
-        style={{ width: imgPx, height: "auto" }}
+        style={{ width: imgPx, height: imgPx }}
+        draggable={false}
       />
     </button>
   );

@@ -4,10 +4,12 @@ import { useLocale } from "@/hooks/useLocale";
 
 interface TapHintProps {
   visible: boolean;
+  /** White text for dark backgrounds (chest celebration). */
+  light?: boolean;
 }
 
 /** Pulsing hand icon that hints the player should tap a piece */
-export default function TapHint({ visible }: TapHintProps) {
+export default function TapHint({ visible, light = false }: TapHintProps) {
   const { t } = useLocale();
 
   if (!visible) return null;
@@ -25,7 +27,7 @@ export default function TapHint({ visible }: TapHintProps) {
           strokeLinejoin="round"
         />
       </svg>
-      <span className="font-bold" style={{ color: "var(--ck-text-light)" }}>
+      <span className={`font-bold ${light ? "drop-shadow-md" : ""}`} style={{ color: light ? "white" : "var(--ck-text-light)" }}>
         {t("tap_hint")}
       </span>
     </div>

@@ -4,6 +4,8 @@ import { useEffect, useCallback } from "react";
 import Image from "next/image";
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import ActionButton from "@/components/ActionButton";
+import { UI } from "@/lib/ui";
 import { useLocale } from "@/hooks/useLocale";
 import { useAudio } from "@/hooks/useAudio";
 import { speak } from "@/lib/tts";
@@ -53,7 +55,7 @@ export default function PikuIntro({ childName, onContinue }: PikuIntroProps) {
       <div className="flex flex-col items-center gap-4 animate-slide-in">
         {/* Piku mascot */}
         <div className="drop-shadow-xl">
-          <Piku expression="wave" size={200} />
+          <Piku expression="wave" size={UI.piku.hero} />
         </div>
 
         {/* Speech bubble with greeting */}
@@ -79,19 +81,14 @@ export default function PikuIntro({ childName, onContinue }: PikuIntroProps) {
       </div>
 
       {/* Continue button */}
-      <button
+      <ActionButton
+        icon="/icons/icon-next.webp"
+        label={t("continue")}
+        look="illustrated"
+        bounce
         onClick={onContinue}
-        className="mt-8 btn-3d btn-3d-purple p-5 animate-tap-hint"
-        aria-label="Continue"
-      >
-        <Image
-          src="/icons/icon-next.webp"
-          alt=""
-          width={44}
-          height={44}
-          className="object-contain"
-        />
-      </button>
+        className="mt-8"
+      />
     </div>
   );
 }

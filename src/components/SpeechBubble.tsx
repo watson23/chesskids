@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { UI } from "@/lib/ui";
 
 interface SpeechBubbleProps {
   /** Text shown as aria-label for accessibility (screen readers) */
@@ -29,7 +30,7 @@ export default function SpeechBubble({ text, icon, visible, pointer = "left" }: 
             style={{ width: 80, height: "auto" }}
           />
         ) : (
-          <p className="font-bold text-sm leading-snug" style={{ color: "var(--ck-text)" }}>
+          <p className="font-bold leading-snug" style={{ color: "var(--ck-text)", fontSize: UI.bubbleText }}>
             {text}
           </p>
         )}

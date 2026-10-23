@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import Piku from "@/components/Piku";
+import { UI } from "@/lib/ui";
 import { useAudio } from "@/hooks/useAudio";
 
 interface ParentGateProps {
@@ -52,7 +53,7 @@ export default function ParentGate({ open, onPass, onCancel }: ParentGateProps) 
 
       {/* Dialog */}
       <div className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 flex flex-col items-center gap-4 animate-fade-in-up">
-        <Piku expression="teaching" size={90} />
+        <Piku expression="teaching" size={UI.piku.talk} />
 
         <h3 className="text-xl font-extrabold text-amber-900 text-center">
           {t("parent_gate_title")}

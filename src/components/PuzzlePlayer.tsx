@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import Image from "next/image";
 import NavIcon from "@/components/NavIcon";
+import TopBar from "@/components/TopBar";
+import ActionButton from "@/components/ActionButton";
+import { UI } from "@/lib/ui";
 import type { PuzzleDefinition } from "@/types/lesson";
 import type { Square } from "@/types/chess";
 import type { PuzzleProgress } from "@/types/user";
@@ -272,11 +274,9 @@ export default function PuzzlePlayer({
   return (
     <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <NavIcon icon="icon-back" alt="Back" onClick={handleGoHome} />
-
-        {/* Teal star navigation (practice mode) or progress dots (lesson mode) */}
-        {hasTealStars ? (
+      <TopBar
+        left={<NavIcon icon="icon-back" alt="Back" onClick={handleGoHome} />}
+        center={hasTealStars ? (
           <div className="flex gap-1 items-center">
             {puzzles.map((puzzle, i) => {
               const isCurrent = i === puzzleIndex && phase !== "celebrate";
@@ -314,17 +314,14 @@ export default function PuzzlePlayer({
             })}
           </div>
         ) : null}
-
-        {/* Spacer to balance back button */}
-        <div className="w-10" />
-      </div>
+      />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
         {phase === "celebrate" ? (
           <div className="flex flex-col items-center gap-5 animate-slide-in mt-auto mb-auto">
             <Confetti active />
-            <Piku expression="celebrating" size={120} />
+            <Piku expression="standing-celebrating" size={UI.piku.hero} />
             {hasTealStars ? (
               <>
                 {/* Practice: the filled teal stars ARE the reward — no 1-3 rating */}
@@ -342,12 +339,17 @@ export default function PuzzlePlayer({
                 <h2 className="text-2xl font-extrabold" style={{ color: "var(--ck-text)" }}>
                   {t(stars === 3 ? "celebrate_3_stars" : stars === 2 ? "celebrate_2_stars" : "celebrate_1_star")}
                 </h2>
-                <StarDisplay stars={stars} size={56} />
+                <StarDisplay stars={stars} size={UI.star.big} />
               </>
             )}
-            <button onClick={handleContinue} className="mt-2 animate-bounce-gentle p-2 active:scale-90 transition-transform">
-              <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
-            </button>
+            <ActionButton
+              icon="/icons/icon-check-circle.webp"
+              label={t("continue")}
+              look="illustrated"
+              bounce
+              onClick={handleContinue}
+              className="mt-2"
+            />
           </div>
         ) : (
           <>

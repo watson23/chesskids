@@ -4,6 +4,9 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Confetti from "@/components/Confetti";
 import PikuWithOutfit from "@/components/PikuWithOutfit";
+import ActionButton from "@/components/ActionButton";
+import TapHint from "@/components/TapHint";
+import { UI } from "@/lib/ui";
 import { getOutfitItem } from "@/data/outfits";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
@@ -225,11 +228,8 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
 
             {/* Tap to open hint */}
             {phase === 1 && (
-              <div className="mt-4 flex flex-col items-center animate-bounce-gentle">
-                <span className="text-3xl" role="img" aria-label="tap">👆</span>
-                <span className="text-white text-sm font-bold mt-1 drop-shadow-md">
-                  {t("tap_hint")}
-                </span>
+              <div className="mt-4 flex justify-center">
+                <TapHint visible light />
               </div>
             )}
           </div>
@@ -258,12 +258,9 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
               />
             </div>
 
-            {/* Tap indicator — bouncing hand icon + text */}
-            <div className="mt-8 flex flex-col items-center animate-bounce-gentle">
-              <span className="text-3xl" role="img" aria-label="tap">👆</span>
-              <span className="text-white text-sm font-bold mt-1 drop-shadow-md">
-                {t("tap_hint")}
-              </span>
+            {/* Tap indicator */}
+            <div className="mt-8 flex justify-center">
+              <TapHint visible light />
             </div>
           </div>
         )}
@@ -275,22 +272,19 @@ export default function ChestOpenModal({ chest, onClose }: ChestOpenModalProps) 
               expression="standing-celebrating"
               headImage={pikuHead}
               bodyImage={pikuBody}
-              size={200}
+              size={UI.piku.hero}
             />
 
             {/* Close button — illustrated checkmark */}
-            <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="mt-6 animate-celebrate-pop"
-            >
-              <Image
-                src="/icons/icon-check-circle.webp"
-                alt="Done"
-                width={56}
-                height={56}
-                style={{ width: 56, height: "auto", filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.3))" }}
+            <div className="mt-6 animate-celebrate-pop" onClick={(e) => e.stopPropagation()}>
+              <ActionButton
+                icon="/icons/icon-check-circle.webp"
+                label={t("continue")}
+                look="illustrated"
+                bounce
+                onClick={onClose}
               />
-            </button>
+            </div>
           </div>
         )}
       </div>

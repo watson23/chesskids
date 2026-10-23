@@ -4,6 +4,7 @@ import { useEffect, useCallback } from "react";
 import Image from "next/image";
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import { UI } from "@/lib/ui";
 import { useLocale } from "@/hooks/useLocale";
 import { useAudio } from "@/hooks/useAudio";
 import { speak } from "@/lib/tts";
@@ -65,7 +66,7 @@ export default function JourneyMapOnboarding({
           />
         </button>
       </div>
-      <Piku expression="standing-winking" size={100} />
+      <Piku expression="standing-winking" size={UI.piku.standing} />
     </div>
   );
 }

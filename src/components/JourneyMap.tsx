@@ -141,6 +141,7 @@ export default function JourneyMap({
 }: JourneyMapProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const pikuRef = useRef<HTMLDivElement>(null);
+  const waddleRef = useRef<HTMLDivElement>(null);
   const walkingRef = useRef(false);
   const { sfx, say } = useAudio();
   const [sparkleLesson, setSparkleLesson] = useState<string | null>(null);
@@ -184,8 +185,12 @@ export default function JourneyMap({
   }, [currentLesson, justCompletedLesson]);
 
   // ── WAAPI-based walk animation ─────────────────────────────────────
+  // The outer element travels (left/top) over the whole duration while an
+  // inner wrapper waddles (rotate + bob) so Piku looks like it is walking the
+  // path rather than hopping to the next node and bouncing in place.
   const walkPikuTo = useCallback((newPos: { x: number; y: number }, atIgloo: boolean): Animation | null => {
     const el = pikuRef.current;
+    const body = waddleRef.current;
     const container = scrollRef.current;
     if (!el || !container) return null;
 
@@ -204,30 +209,43 @@ export default function JourneyMap({
       return null;
     }
 
-    // Parse old Y% for scroll interpolation
-    // oldTop is like "calc(72% - clamp(...))" — extract the percentage
+    // Parse old X%/Y% for distance + scroll interpolation
+    // (styles are like "calc(72% - clamp(...))" — take the percentage)
+    const oldXMatch = oldLeft.match(/([\d.]+)%/);
     const oldYMatch = oldTop.match(/([\d.]+)%/);
+    const oldX = oldXMatch ? parseFloat(oldXMatch[1]) : newPos.x;
     const oldY = oldYMatch ? parseFloat(oldYMatch[1]) : newPos.y;
+
+    // Duration follows the distance walked: a neighbouring node takes ~1.4s,
+    // the long treks across the map up to ~2.6s.
+    const mapWidth = container.clientWidth;
+    const mapHeight = container.scrollHeight;
+    const distancePx = Math.hypot(((newPos.x - oldX) / 100) * mapWidth, ((newPos.y - oldY) / 100) * mapHeight);
+    const duration = Math.min(2600, Math.max(1400, distancePx * 9));
+    const steps = Math.max(3, Math.round(duration / 260));
 
     walkingRef.current = true;
 
-    // Build keyframes with walk bounce overlaid.
-    // We use 5 keyframes to create 2 bounce cycles during the walk.
-    const keyframes: Keyframe[] = [
-      { left: oldLeft, top: oldTop, offset: 0 },
-      { left: oldLeft, top: oldTop, transform: "translateY(-4px)", offset: 0.15 },
-      { left: newLeft, top: newTop, transform: "translateY(0px)", offset: 0.35 },
-      { left: newLeft, top: newTop, transform: "translateY(-4px)", offset: 0.55 },
-      { left: newLeft, top: newTop, transform: "translateY(0px)", offset: 0.75 },
-      { left: newLeft, top: newTop, transform: "translateY(-3px)", offset: 0.9 },
-      { left: newLeft, top: newTop, transform: "translateY(0px)", offset: 1 },
-    ];
+    const animation = el.animate(
+      [
+        { left: oldLeft, top: oldTop },
+        { left: newLeft, top: newTop },
+      ],
+      { duration, easing: "cubic-bezier(0.45, 0.05, 0.4, 1)", fill: "forwards" }
+    );
 
-    const animation = el.animate(keyframes, {
-      duration: 2000,
-      easing: "ease-in-out",
-      fill: "forwards",
-    });
+    // Waddle: each step bobs up and tilts to alternate sides. Pivots at the
+    // feet so the tilt reads as a step, not a wobble.
+    const waddle = body?.animate(
+      [
+        { transform: "translateY(0) rotate(0deg)" },
+        { transform: "translateY(-5px) rotate(-6deg)" },
+        { transform: "translateY(0) rotate(0deg)" },
+        { transform: "translateY(-5px) rotate(6deg)" },
+        { transform: "translateY(0) rotate(0deg)" },
+      ],
+      { duration: duration / steps * 2, iterations: steps / 2, easing: "ease-in-out" }
+    );
 
     // Scroll follow: read animation progress each frame for perfect sync
     let rafId: number;
@@ -236,8 +254,7 @@ export default function JourneyMap({
       const timing = animation.effect?.getComputedTiming();
       const progress = typeof timing?.progress === "number" ? timing.progress : 0;
       const currentY = oldY + (newPos.y - oldY) * progress;
-      const mapHeight = container.scrollHeight;
-      const targetScroll = (currentY / 100) * mapHeight - container.clientHeight / 2;
+      const targetScroll = (currentY / 100) * container.scrollHeight - container.clientHeight / 2;
       container.scrollTo({ top: Math.max(0, targetScroll) });
       if (animation.playState !== "finished" && animation.playState !== "idle") {
         rafId = requestAnimationFrame(followScroll);
@@ -251,10 +268,12 @@ export default function JourneyMap({
       el.style.left = newLeft;
       el.style.top = newTop;
       animation.cancel();
+      waddle?.cancel();
       walkingRef.current = false;
     }).catch(() => {
       // Animation was cancelled (e.g. component unmount)
       cancelAnimationFrame(rafId);
+      waddle?.cancel();
       walkingRef.current = false;
     });
 
@@ -470,12 +489,14 @@ export default function JourneyMap({
               top: pikuTopCSS(pikuStartPos),
             }}
           >
-            <PikuWithOutfit
-              expression={allDone ? "standing-celebrating" : "standing-happy"}
-              headImage={equippedOutfit?.head}
-              bodyImage={equippedOutfit?.body}
-              cssSize={PIKU_CSS_SIZE}
-            />
+            <div ref={waddleRef} style={{ transformOrigin: "50% 100%" }}>
+              <PikuWithOutfit
+                expression={allDone ? "standing-celebrating" : "standing-happy"}
+                headImage={equippedOutfit?.head}
+                bodyImage={equippedOutfit?.body}
+                cssSize={PIKU_CSS_SIZE}
+              />
+            </div>
           </div>
         )}
 

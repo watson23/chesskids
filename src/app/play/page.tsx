@@ -9,6 +9,8 @@ import { WIGGLE_DURATION } from "@/lib/timing";
 
 import SpeechBubble from "@/components/SpeechBubble";
 import NavIcon from "@/components/NavIcon";
+import Piku from "@/components/Piku";
+import { UI } from "@/lib/ui";
 import type { LocaleKey } from "@/types/locale";
 
 const STAGGER_CLASSES = [
@@ -118,15 +120,11 @@ export default function PlayPage() {
         style={{ background: "rgba(245, 240, 255, 0.55)" }}
       >
         {/* Piku header with home button */}
-        <div className="flex items-center gap-3 px-4 pt-5 pb-2 animate-fade-in-up">
+        <div className="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+8px)] pb-2 animate-fade-in-up">
           <NavIcon icon="icon-home" alt="Back to map" onClick={() => router.push("/")} />
-          <Image
-            src="/mascot/piku-winking.webp"
-            alt="Piku"
-            width={72}
-            height={86}
-            className="flex-shrink-0 drop-shadow-md"
-          />
+          <div className="drop-shadow-md">
+            <Piku expression="winking" size={UI.piku.talk} />
+          </div>
           <SpeechBubble text={t("play_piku_speech")} visible />
         </div>
 

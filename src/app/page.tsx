@@ -3,6 +3,7 @@
 import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import NavIcon from "@/components/NavIcon";
+import TopBar from "@/components/TopBar";
 import JourneyMap from "@/components/JourneyMap";
 import ChestOpenModal from "@/components/ChestOpenModal";
 import RewardCollection from "@/components/RewardCollection";
@@ -338,40 +339,22 @@ function HomeContent() {
       />
 
       {/* Top navigation bar */}
-      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+8px)] pb-2">
-        {/* Left: rewards chest + star counter */}
-        <div className="flex items-center gap-2">
-          <NavIcon
-            icon="icon-chest-rewards"
-            alt="My rewards"
-            size="md"
-            onClick={() => setShowRewards(true)}
-          />
-          <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
-        </div>
-
-        {/* Right: practice, play, settings */}
-        <div className="flex items-center gap-2">
-          <NavIcon
-            icon="icon-practice"
-            alt="Practice puzzles"
-            size="md"
-            onClick={() => router.push("/practice")}
-          />
-          <NavIcon
-            icon="icon-play"
-            alt="Play against opponents"
-            size="md"
-            onClick={() => router.push("/play")}
-          />
-          <NavIcon
-            icon="icon-settings"
-            alt="Settings"
-            size="md"
-            onClick={() => setShowParentGate(true)}
-          />
-        </div>
-      </div>
+      <TopBar
+        fixed
+        left={
+          <>
+            <NavIcon icon="icon-chest-rewards" alt="My rewards" onClick={() => setShowRewards(true)} />
+            <StarCounter totalStars={totalStars} animate={justCompletedLesson !== null} />
+          </>
+        }
+        right={
+          <>
+            <NavIcon icon="icon-practice" alt="Practice puzzles" onClick={() => router.push("/practice")} />
+            <NavIcon icon="icon-play" alt="Play against opponents" onClick={() => router.push("/play")} />
+            <NavIcon icon="icon-settings" alt="Settings" onClick={() => setShowParentGate(true)} />
+          </>
+        }
+      />
 
       {/* Parent gate — must solve math to access settings */}
       <ParentGate

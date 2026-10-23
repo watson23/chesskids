@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 import Confetti from "@/components/Confetti";
 import SpeechBubble from "@/components/SpeechBubble";
 import StarDisplay from "@/components/StarDisplay";
 import PikuWithOutfit from "@/components/PikuWithOutfit";
+import ActionButton from "@/components/ActionButton";
+import { UI } from "@/lib/ui";
 import { useAudio } from "@/hooks/useAudio";
 import { useLocale } from "@/hooks/useLocale";
 
@@ -41,10 +42,10 @@ export default function FinalCelebration({ stars, onContinue, equippedOutfit }: 
       />
 
       {/* Large celebrating Piku */}
-      <PikuWithOutfit expression="standing-celebrating" headImage={equippedOutfit?.head} bodyImage={equippedOutfit?.body} size={200} />
+      <PikuWithOutfit expression="standing-celebrating" headImage={equippedOutfit?.head} bodyImage={equippedOutfit?.body} size={UI.piku.hero} />
 
       {/* Stars */}
-      <StarDisplay stars={stars} size={56} staggerDelay={300} />
+      <StarDisplay stars={stars} size={UI.star.big} staggerDelay={300} />
 
       {/* More adventures coming */}
       <p
@@ -55,9 +56,14 @@ export default function FinalCelebration({ stars, onContinue, equippedOutfit }: 
       </p>
 
       {/* Continue button */}
-      <button onClick={onContinue} className="mt-4 animate-bounce-gentle p-2 active:scale-90 transition-transform">
-        <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
-      </button>
+      <ActionButton
+        icon="/icons/icon-check-circle.webp"
+        label={t("continue")}
+        look="illustrated"
+        bounce
+        onClick={onContinue}
+        className="mt-2"
+      />
     </div>
   );
 }

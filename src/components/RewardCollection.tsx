@@ -1,17 +1,18 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import MiniBoardPreview from "@/components/MiniBoardPreview";
+import NavIcon from "@/components/NavIcon";
+import TopBar from "@/components/TopBar";
+import PikuWithOutfit from "@/components/PikuWithOutfit";
 import { BOARD_THEMES } from "@/data/themes";
-
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "@/hooks/useAudio";
-import { updateChildRewards } from "@/lib/firestore";
-import PikuWithOutfit from "@/components/PikuWithOutfit";
+import { updateChildRewards, updateEquippedOutfit } from "@/lib/firestore";
 import { getAvailableBySlot, isChestReward } from "@/data/outfits";
-import { updateEquippedOutfit } from "@/lib/firestore";
 import { useLocale } from "@/hooks/useLocale";
+import { UI } from "@/lib/ui";
 import type { BoardTheme } from "@/types/chess";
 import type { LocaleKey } from "@/types/locale";
 
@@ -20,23 +21,124 @@ interface RewardCollectionProps {
   onClose: () => void;
 }
 
+/**
+ * Section icons. Drop illustrated versions into /public/icons as
+ * icon-section-hat.webp, icon-section-bow.webp, icon-section-board.webp and
+ * set SECTION_ICONS below; until then these small inline drawings are used.
+ */
+const SECTION_ICONS: Partial<Record<"hat" | "bow" | "board", string>> = {};
+
+function HatGlyph() {
+  return (
+    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="16" width="18" height="4" rx="2" fill="var(--ck-purple)" />
+      <path d="M7 16 L7 7 Q7 4 12 4 Q17 4 17 7 L17 16 Z" fill="var(--ck-purple)" />
+      <rect x="7" y="11" width="10" height="3" fill="var(--ck-pink)" />
+    </svg>
+  );
+}
+
+function BowGlyph() {
+  return (
+    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 12 L3 6 Q2 12 3 18 Z" fill="var(--ck-pink)" />
+      <path d="M12 12 L21 6 Q22 12 21 18 Z" fill="var(--ck-pink)" />
+      <circle cx="12" cy="12" r="3" fill="var(--ck-pink-dark)" />
+    </svg>
+  );
+}
+
+function BoardGlyph() {
+  return (
+    <svg width={22} height={22} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="0" y="0" width="7" height="7" rx="1.5" fill="var(--ck-purple)" opacity="0.9" />
+      <rect x="9" y="0" width="7" height="7" rx="1.5" fill="var(--ck-purple)" opacity="0.4" />
+      <rect x="0" y="9" width="7" height="7" rx="1.5" fill="var(--ck-purple)" opacity="0.4" />
+      <rect x="9" y="9" width="7" height="7" rx="1.5" fill="var(--ck-purple)" opacity="0.9" />
+    </svg>
+  );
+}
+
+function SectionHeading({ icon, label }: { icon: "hat" | "bow" | "board"; label: string }) {
+  const img = SECTION_ICONS[icon];
+  return (
+    <div className="flex items-center gap-2 mb-2 px-1">
+      {img ? (
+        <Image src={img} alt="" width={26} height={26} className="object-contain" style={{ width: 26, height: 26 }} />
+      ) : icon === "hat" ? <HatGlyph /> : icon === "bow" ? <BowGlyph /> : <BoardGlyph />}
+      <span className="text-[15px] font-extrabold" style={{ color: "var(--ck-text)" }}>{label}</span>
+    </div>
+  );
+}
+
+/** One selectable square: outfit item, "nothing", or board theme. */
+function Tile({
+  selected,
+  onClick,
+  label,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="relative shrink-0 rounded-2xl flex items-center justify-center transition-transform active:scale-90"
+      style={{
+        width: UI.tile.size,
+        height: UI.tile.size,
+        border: `3px solid ${selected ? "var(--ck-gold)" : "rgba(255,255,255,0.9)"}`,
+        background: selected ? "rgba(252, 211, 77, 0.22)" : "rgba(255,255,255,0.82)",
+        boxShadow: selected ? "0 0 0 3px rgba(252, 211, 77, 0.35), 0 4px 10px rgba(61,51,96,0.12)" : "0 3px 8px rgba(61,51,96,0.1)",
+      }}
+      aria-label={label}
+      aria-pressed={selected}
+    >
+      {children}
+      {selected && (
+        <Image
+          src="/icons/icon-check-circle.webp"
+          alt=""
+          width={22}
+          height={22}
+          className="absolute -top-2 -right-2 object-contain"
+          style={{ width: 22, height: 22 }}
+        />
+      )}
+    </button>
+  );
+}
+
+function NothingGlyph() {
+  return (
+    <svg width={26} height={26} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" stroke="var(--ck-text-light)" strokeWidth="2.5" strokeDasharray="4 3" />
+    </svg>
+  );
+}
 
 export default function RewardCollection({ open, onClose }: RewardCollectionProps) {
   const { user, activeChild, refreshChildren } = useAuth();
   const { sfx } = useAudio();
+  const { t } = useLocale();
   const [saving, setSaving] = useState(false);
 
-  const unlockedRewards = activeChild?.unlockedRewards ?? [];
+  const unlockedRewards = useMemo(() => activeChild?.unlockedRewards ?? [], [activeChild?.unlockedRewards]);
   const activeThemeId = activeChild?.activeBoardTheme ?? "classic";
 
-  const { t } = useLocale();
-  const equippedOutfit = activeChild?.equippedOutfit ?? {};
-  const [previewOutfit, setPreviewOutfit] = useState<{ head?: string; body?: string }>(equippedOutfit);
+  const equipped = activeChild?.equippedOutfit;
+  const [previewOutfit, setPreviewOutfit] = useState<{ head?: string; body?: string }>(equipped ?? {});
 
-  // Sync preview when activeChild changes
-  useEffect(() => {
-    setPreviewOutfit(activeChild?.equippedOutfit ?? {});
-  }, [activeChild?.equippedOutfit]);
+  // Re-seed the preview when the saved outfit changes (child switch, chest
+  // reward) — adjusted during render instead of in an effect.
+  const [seenEquipped, setSeenEquipped] = useState(equipped);
+  if (equipped !== seenEquipped) {
+    setSeenEquipped(equipped);
+    setPreviewOutfit(equipped ?? {});
+  }
 
   // Only show outfits unlocked from chests (or free items not gated by any chest)
   const unlockedOutfitIds = new Set(
@@ -83,13 +185,7 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
       sfx("button-tap");
       setSaving(true);
       try {
-        await updateChildRewards(
-          user.uid,
-          activeChild.id,
-          unlockedRewards,
-          theme.id,
-          undefined
-        );
+        await updateChildRewards(user.uid, activeChild.id, unlockedRewards, theme.id, undefined);
         await refreshChildren();
       } catch (err) {
         console.error("Failed to update theme:", err);
@@ -99,175 +195,110 @@ export default function RewardCollection({ open, onClose }: RewardCollectionProp
     [user, activeChild, activeThemeId, unlockedRewards, sfx, saving, refreshChildren]
   );
 
-
   if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 animate-slide-in"
+      className="fixed inset-0 z-50 flex flex-col animate-slide-in"
       style={{ background: "var(--ck-bg) url(/bg-reward-view.webp) center / cover no-repeat" }}
     >
-      {/* Semi-transparent overlay for readability */}
-      <div className="fixed inset-0 z-0" style={{ background: "rgba(245, 240, 255, 0.5)" }} />
+      {/* Soft wash so tiles and text stay readable over the illustration */}
+      <div className="absolute inset-0" style={{ background: "rgba(245, 240, 255, 0.45)" }} aria-hidden="true" />
 
-      {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 py-3">
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full flex items-center justify-center card-pillow"
-          aria-label="Close"
-        >
-          <Image src="/icons/icon-close.webp" alt="Close" width={20} height={20} className="object-contain" />
-        </button>
+      <TopBar left={<NavIcon icon="icon-close" alt="Close" onClick={onClose} />} className="z-10" />
 
-        <div className="w-10" />
-        <div className="w-10" />
-      </div>
-
-      {/* Pikku + chest anchored at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center items-end pb-2 pointer-events-none">
-        <Image
-          src="/icons/icon-chest-rewards.webp"
-          alt=""
-          width={70}
-          height={70}
-          className="object-contain drop-shadow-lg"
-          style={{ width: 70, height: "auto" }}
+      {/* Piku is the point of this screen: the outfit preview, front and centre */}
+      <div className="relative z-10 flex flex-col items-center shrink-0 pt-1 pb-3">
+        <div
+          aria-hidden="true"
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            bottom: 10,
+            width: 180,
+            height: 44,
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse at center, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 55%, transparent 75%)",
+          }}
         />
-        <div className="overflow-visible" style={{ marginTop: -20, marginLeft: -8 }}>
+        <div className="relative animate-float">
           <PikuWithOutfit
             expression="standing-happy"
             headImage={previewOutfit.head}
             bodyImage={previewOutfit.body}
-            size={120}
+            size={UI.piku.hero}
           />
         </div>
       </div>
 
-      {/* Scrollable content area — extra bottom padding for Pikku */}
-      <div className="relative z-10 overflow-y-auto px-4 pb-40" style={{ height: "calc(100dvh - 60px)" }}>
-        {/* Boards section — no background, gold ring = selected */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <svg width={18} height={18} viewBox="0 0 16 16" fill="none">
-              <rect x="0" y="0" width="7" height="7" rx="1" fill="var(--ck-purple)" opacity="0.9" />
-              <rect x="9" y="0" width="7" height="7" rx="1" fill="var(--ck-purple)" opacity="0.4" />
-              <rect x="0" y="9" width="7" height="7" rx="1" fill="var(--ck-purple)" opacity="0.4" />
-              <rect x="9" y="9" width="7" height="7" rx="1" fill="var(--ck-purple)" opacity="0.9" />
-            </svg>
-            <span className="text-xs font-extrabold" style={{ color: "var(--ck-text)" }}>Boards</span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {BOARD_THEMES.map((theme) => {
-              const isActive = theme.id === activeThemeId;
-
-              return (
-                <button
-                  key={theme.id}
-                  onClick={() => selectTheme(theme)}
-                  className={`relative shrink-0 rounded-xl overflow-hidden transition-all ${isActive ? "ring-3 ring-amber-400" : "opacity-75"}`}
-                >
-                  <MiniBoardPreview theme={theme} size="sm" />
-
-                  {isActive && (
-                    <div className="absolute -top-1 -right-1">
-                      <Image src="/icons/icon-check-circle.webp" alt="Active" width={20} height={20} className="object-contain" style={{ width: 20, height: "auto" }} />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Outfits */}
-        <div className="mb-3">
-          {/* Head outfits */}
-          <div className="mb-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-base">🎩</span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              <button
-                onClick={() => toggleOutfit("head", undefined)}
-                className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{
-                  border: !previewOutfit.head ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                  background: !previewOutfit.head ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                }}
+      {/* Wardrobe */}
+      <div className="relative z-10 flex-1 overflow-y-auto px-4 pb-8 flex flex-col gap-5">
+        <section>
+          <SectionHeading icon="hat" label={t("rewards_hats")} />
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2 pt-2 px-1">
+            <Tile selected={!previewOutfit.head} onClick={() => toggleOutfit("head", undefined)} label={t("rewards_none")}>
+              <NothingGlyph />
+            </Tile>
+            {headOutfits.map((item) => (
+              <Tile
+                key={item.id}
+                selected={previewOutfit.head === item.image}
+                onClick={() => toggleOutfit("head", item.image)}
+                label={t(item.nameKey as LocaleKey)}
               >
-                <span className="text-base">✕</span>
-              </button>
-              {headOutfits.map((item) => {
-                const isEquipped = previewOutfit.head === item.image;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => toggleOutfit("head", item.image)}
-                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden"
-                    style={{
-                      border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                    }}
-                  >
-                    <Image
-                      src={item.iconImage ?? item.image}
-                      alt={t(item.nameKey as LocaleKey)}
-                      width={34}
-                      height={34}
-                      className="object-contain"
-                      style={{ width: 34, height: "auto" }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
+                <Image
+                  src={item.iconImage ?? item.image}
+                  alt=""
+                  width={UI.tile.icon}
+                  height={UI.tile.icon}
+                  className="object-contain"
+                  style={{ width: UI.tile.icon, height: UI.tile.icon }}
+                />
+              </Tile>
+            ))}
           </div>
+        </section>
 
-          {/* Body outfits */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-base">🎀</span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              <button
-                onClick={() => toggleOutfit("body", undefined)}
-                className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{
-                  border: !previewOutfit.body ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                  background: !previewOutfit.body ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                }}
+        <section>
+          <SectionHeading icon="bow" label={t("rewards_accessories")} />
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2 pt-2 px-1">
+            <Tile selected={!previewOutfit.body} onClick={() => toggleOutfit("body", undefined)} label={t("rewards_none")}>
+              <NothingGlyph />
+            </Tile>
+            {bodyOutfits.map((item) => (
+              <Tile
+                key={item.id}
+                selected={previewOutfit.body === item.image}
+                onClick={() => toggleOutfit("body", item.image)}
+                label={t(item.nameKey as LocaleKey)}
               >
-                <span className="text-base">✕</span>
-              </button>
-              {bodyOutfits.map((item) => {
-                const isEquipped = previewOutfit.body === item.image;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => toggleOutfit("body", item.image)}
-                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden"
-                    style={{
-                      border: isEquipped ? "3px solid var(--ck-gold)" : "3px solid var(--ck-border)",
-                      background: isEquipped ? "rgba(252, 211, 77, 0.15)" : "rgba(255,255,255,0.85)",
-                    }}
-                  >
-                    <Image
-                      src={item.image}
-                      alt={t(item.nameKey as LocaleKey)}
-                      width={34}
-                      height={34}
-                      className="object-contain"
-                      style={{ width: 34, height: "auto" }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
+                <Image
+                  src={item.iconImage ?? item.image}
+                  alt=""
+                  width={UI.tile.icon}
+                  height={UI.tile.icon}
+                  className="object-contain"
+                  style={{ width: UI.tile.icon, height: UI.tile.icon }}
+                />
+              </Tile>
+            ))}
           </div>
-        </div>
+        </section>
 
+        <section>
+          <SectionHeading icon="board" label={t("rewards_boards")} />
+          <div className="flex flex-wrap gap-3 pt-2 px-1">
+            {BOARD_THEMES.map((theme) => (
+              <Tile
+                key={theme.id}
+                selected={theme.id === activeThemeId}
+                onClick={() => selectTheme(theme)}
+                label={theme.name}
+              >
+                <MiniBoardPreview theme={theme} px={UI.tile.size - 14} />
+              </Tile>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

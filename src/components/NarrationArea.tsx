@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Piku from "@/components/Piku";
 import SpeechBubble from "@/components/SpeechBubble";
+import { UI } from "@/lib/ui";
 import { useLocale } from "@/hooks/useLocale";
 import type { LocaleKey } from "@/types/locale";
 
@@ -33,9 +34,9 @@ export default function NarrationArea({ narrationKey, phase, onReplay }: Narrati
   const expression = getExpression(phase);
 
   return (
-    <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: 120 }}>
+    <div className="flex items-end gap-3 w-full max-w-[360px] px-2" style={{ minHeight: UI.piku.standing + 8 }}>
       <div className="flex-shrink-0">
-        <Piku expression={expression} size={110} />
+        <Piku expression={expression} size={UI.piku.standing} />
       </div>
       <SpeechBubble text={text} visible={!!text} />
       {onReplay && (

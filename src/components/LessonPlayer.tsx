@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import type { Lesson } from "@/types/lesson";
 import type { Square } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
@@ -11,6 +10,9 @@ import Confetti from "@/components/Confetti";
 import SpeechBubble from "@/components/SpeechBubble";
 import NarrationArea from "@/components/NarrationArea";
 import NavIcon from "@/components/NavIcon";
+import TopBar from "@/components/TopBar";
+import ActionButton from "@/components/ActionButton";
+import { UI } from "@/lib/ui";
 import Piku from "@/components/Piku";
 import FinalCelebration from "@/components/FinalCelebration";
 import TapHint from "@/components/TapHint";
@@ -236,24 +238,25 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />
-
-        {/* Progress bar */}
-        <div className="flex-1 mx-4">
-          <div className="h-3.5 rounded-full overflow-hidden" style={{ background: "var(--ck-border)" }}>
+      {/* Top bar: home + lesson progress (no numbers — the bar is the story) */}
+      <TopBar
+        left={<NavIcon icon="icon-home" alt="Back to map" onClick={handleGoHome} />}
+        center={
+          <div
+            className="w-full max-w-[240px] h-4 rounded-full overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.7)", boxShadow: "inset 0 1px 3px rgba(61,51,96,0.15)" }}
+            role="progressbar"
+            aria-valuenow={Math.round(progress * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
               className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${(currentDotIndex / totalDots) * 100}%`, background: "var(--ck-purple)" }}
+              style={{ width: `${(currentDotIndex / totalDots) * 100}%`, background: "linear-gradient(90deg, var(--ck-purple), var(--ck-blue))" }}
             />
           </div>
-        </div>
-
-        <div className="text-xs font-bold" style={{ color: "var(--ck-text-light)" }} aria-label={`Progress: ${Math.round(progress * 100)}%`}>
-          {Math.round(progress * 100)}%
-        </div>
-      </div>
+        }
+      />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-start pt-2 px-4 gap-3">
@@ -268,11 +271,16 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
                 visible
                 pointer="bottom"
               />
-              <Piku expression="standing-celebrating" size={160} />
-              <StarDisplay stars={state.stars} size={56} staggerDelay={300} />
-              <button onClick={handleContinue} className="mt-4 animate-bounce-gentle p-2 active:scale-90 transition-transform">
-                <Image src="/icons/icon-check-circle.webp" alt={t("continue")} width={64} height={64} className="object-contain drop-shadow-lg" />
-              </button>
+              <Piku expression="standing-celebrating" size={UI.piku.hero} />
+              <StarDisplay stars={state.stars} size={UI.star.big} staggerDelay={300} />
+              <ActionButton
+                icon="/icons/icon-check-circle.webp"
+                label={t("continue")}
+                look="illustrated"
+                bounce
+                onClick={handleContinue}
+                className="mt-2"
+              />
             </div>
           )
         ) : (
@@ -321,9 +329,7 @@ export default function LessonPlayer({ lesson }: LessonPlayerProps) {
             </div>
 
             {state.phase === "watch" && (
-              <button onClick={handleNext} className="animate-bounce-gentle p-2 active:scale-90 transition-transform">
-                <Image src="/icons/icon-next.webp" alt={t("next")} width={80} height={80} className="object-contain drop-shadow-lg" />
-              </button>
+              <ActionButton icon="/icons/icon-next.webp" label={t("next")} look="illustrated" bounce onClick={handleNext} />
             )}
 
             {state.phase === "try" && (

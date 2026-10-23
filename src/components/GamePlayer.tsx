@@ -3,6 +3,9 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import NavIcon from "@/components/NavIcon";
+import TopBar from "@/components/TopBar";
+import ActionButton from "@/components/ActionButton";
+import { UI } from "@/lib/ui";
 import type { AIDifficulty } from "@/types/chess";
 import ChessBoard from "@/components/ChessBoard";
 import Confetti from "@/components/Confetti";
@@ -19,7 +22,20 @@ import { useActiveTheme } from "@/hooks/useActiveTheme";
 import { useLocale } from "@/hooks/useLocale";
 import type { LocaleKey } from "@/types/locale";
 
-const OPPONENTS: Record<number, { nameKey: LocaleKey; image: string; bgColor: string; accentColor: string }> = {
+interface OpponentDef {
+  nameKey: LocaleKey;
+  image: string;
+  bgColor: string;
+  accentColor: string;
+  /**
+   * Optional mood portraits for the result card. Drop the files into
+   * /public/opponents (e.g. mouse-sad.webp, mouse-proud.webp) and list them
+   * here; until then the neutral portrait is used.
+   */
+  moods?: { sad?: string; proud?: string };
+}
+
+const OPPONENTS: Record<number, OpponentDef> = {
   1: { nameKey: "opponent_mouse_name", image: "/opponents/mouse-t.webp", bgColor: "#D1FAE5", accentColor: "#6EE7B7" },
   2: { nameKey: "opponent_fox_name", image: "/opponents/fox-t.webp", bgColor: "#FEF3C7", accentColor: "#FCD34D" },
   3: { nameKey: "opponent_owl_name", image: "/opponents/owl-t.webp", bgColor: "#DBEAFE", accentColor: "#93C5FD" },
@@ -235,6 +251,12 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   }, []);
 
   const opponent = OPPONENTS[difficulty] || OPPONENTS[1];
+  const opponentSad = opponent.moods?.sad ?? opponent.image;
+  const opponentProud = opponent.moods?.proud ?? opponent.image;
+  const resultKey: LocaleKey | null =
+    gameResult === "win" ? "game_over_win"
+      : gameResult === "loss" ? "game_over_loss"
+        : gameResult === "draw" ? "game_over_draw" : null;
 
   // Opponent speech (shown near the opponent character)
   const opponentText = isAIThinking && !gameResult ? t("game_ai_thinking") : "";
@@ -270,26 +292,19 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
   return (
     <div className="min-h-dvh flex flex-col overflow-y-auto" style={{ background: "var(--ck-bg) url(/game-bg.webp) center / cover no-repeat" }}>
       {/* Top bar: back to opponents */}
-      <div className="flex items-center px-4 pt-3 pb-1">
-        <NavIcon icon="icon-back" alt="Back to opponents" size="md" onClick={handleExit} />
-      </div>
+      <TopBar left={<NavIcon icon="icon-back" alt="Back to opponents" onClick={handleExit} />} />
 
-      {/* Floating opponent */}
-      <div className="flex flex-col items-center px-4 pb-1">
-        {/* Character image with speech bubble anchored to its right */}
+      {/* Opponent above the board */}
+      <div className="flex flex-col items-center px-4 pb-2 -mt-1">
         <div className="relative">
-          <div
-            className={`transition-transform duration-500 ${
-              isAIThinking ? "animate-opponent-think" : ""
-            }`}
-          >
+          <div className={`transition-transform duration-500 ${isAIThinking ? "animate-opponent-think" : ""}`}>
             <Image
               src={opponent.image}
               alt={t(opponent.nameKey)}
-              width={100}
-              height={100}
-              className="drop-shadow-lg"
-              style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" }}
+              width={UI.opponent.header}
+              height={UI.opponent.header}
+              className="object-contain"
+              style={{ width: UI.opponent.header, height: UI.opponent.header, filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" }}
               priority
             />
           </div>
@@ -306,10 +321,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
             turn === "black" && !gameOver.over ? "ring-2 ring-amber-400 shadow-lg" : ""
           }`}
         >
-          <span
-            className="text-[15px] font-extrabold leading-tight"
-            style={{ color: "var(--ck-text)" }}
-          >
+          <span className="text-[15px] font-extrabold leading-tight" style={{ color: "var(--ck-text)" }}>
             {t(opponent.nameKey)}
           </span>
 
@@ -324,7 +336,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           {!isAIThinking && turn === "white" && !gameOver.over && !gameResult && (
             <div className="flex gap-0.5 ml-1">
               {Array.from({ length: difficulty }, (_, i) => (
-                <Image key={i} src="/icons/icon-star-full.webp" alt="Difficulty star" width={14} height={14} className="object-contain" style={{ width: 14, height: "auto" }} />
+                <Image key={i} src="/icons/icon-star-full.webp" alt="Difficulty star" width={UI.star.inline} height={UI.star.inline} className="object-contain" style={{ width: UI.star.inline, height: UI.star.inline }} />
               ))}
             </div>
           )}
@@ -349,105 +361,74 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           {/* Stuck nudge — bare king detected */}
           {showStuckNudge && !gameResult && (
             <div
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl animate-slide-in"
-              style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(2px)" }}
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-xl animate-slide-in"
+              style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(3px)" }}
             >
               <Image
                 src={opponent.image}
                 alt={t(opponent.nameKey)}
-                width={120}
-                height={120}
+                width={UI.opponent.header}
+                height={UI.opponent.header}
                 className="object-contain drop-shadow-lg"
+                style={{ width: UI.opponent.header, height: UI.opponent.header }}
               />
               <SpeechBubble text={t("stuck_nudge")} visible pointer="bottom" />
-              <div className="flex gap-4 mt-4">
-                <button onClick={handleRematch} className="btn-3d btn-3d-purple flex items-center gap-2 px-6 py-2.5">
-                  <Image src="/icons/icon-retry.webp" alt="" width={22} height={22} className="object-contain" />
-                  <span className="text-white font-bold">{t("rematch")}</span>
-                </button>
-                <button onClick={handleExit} className="btn-3d btn-3d-gray flex items-center gap-2 px-4 py-2.5">
-                  <Image src="/icons/icon-back.webp" alt="" width={22} height={22} className="object-contain" />
-                </button>
+              <div className="flex gap-4 mt-2">
+                <ActionButton icon="/icons/icon-retry.webp" label={t("rematch")} tone="purple" onClick={handleRematch} />
+                <ActionButton icon="/icons/icon-back.webp" label="Back to opponents" tone="gray" onClick={handleExit} />
               </div>
               <button
                 onClick={() => setShowStuckNudge(false)}
-                className="mt-2 text-sm text-gray-400 underline"
+                className="mt-1 text-sm font-bold underline"
+                style={{ color: "var(--ck-text-light)" }}
               >
                 {t("keep_playing")}
               </button>
             </div>
           )}
 
-          {/* Win: confetti on the board before the overlay appears */}
+          {/* Win: confetti over the final position while the kid admires it */}
           {gameResult === "win" && !showResultOverlay && <Confetti active />}
 
-          {/* Game over overlay on top of the board */}
-          {showResultOverlay && gameResult && (
+          {/* Result card on top of the board */}
+          {showResultOverlay && gameResult && resultKey && (
             <div
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl animate-slide-in"
-              style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(3px)" }}
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-xl animate-slide-in"
+              style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(3px)" }}
             >
               {gameResult === "win" && <Confetti active />}
 
-              {/* Opponent character */}
-              <Image
-                src={opponent.image}
-                alt={t(opponent.nameKey)}
-                width={140}
-                height={140}
-                className="object-contain drop-shadow-lg mb-2"
-              />
+              {gameResult === "win" ? (
+                /* The kid won: Piku is the hero, the opponent is a small good sport */
+                <div className="relative">
+                  <Piku expression="standing-celebrating" size={UI.opponent.hero} />
+                  <Image
+                    src={opponentSad}
+                    alt={t(opponent.nameKey)}
+                    width={UI.opponent.small}
+                    height={UI.opponent.small}
+                    className="object-contain absolute -left-14 bottom-0 drop-shadow-md"
+                    style={{ width: UI.opponent.small, height: UI.opponent.small, opacity: 0.9 }}
+                  />
+                </div>
+              ) : (
+                /* Loss or draw: the opponent takes the stage, Piku consoles below the board */
+                <Image
+                  src={gameResult === "loss" ? opponentProud : opponent.image}
+                  alt={t(opponent.nameKey)}
+                  width={UI.opponent.hero}
+                  height={UI.opponent.hero}
+                  className="object-contain drop-shadow-lg"
+                  style={{ width: UI.opponent.hero, height: UI.opponent.hero }}
+                />
+              )}
 
-              {/* Speech bubble with result message */}
-              <SpeechBubble
-                text={t(
-                  gameResult === "win"
-                    ? "game_over_win"
-                    : gameResult === "loss"
-                      ? "game_over_loss"
-                      : "game_over_draw"
-                )}
-                visible
-                pointer="bottom"
-              />
+              <SpeechBubble text={t(resultKey)} visible pointer={gameResult === "win" ? "left" : "bottom"} />
 
-              {/* Action buttons — big icons, no text needed */}
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={handleRematch}
-                  className="btn-3d btn-3d-purple p-4"
-                  aria-label={t("rematch")}
-                >
-                  <Image src="/icons/icon-retry.webp" alt="" width={36} height={36} className="object-contain" />
-                </button>
-                <button
-                  onClick={handleExit}
-                  className="btn-3d btn-3d-gray p-4"
-                  aria-label="Home"
-                >
-                  <Image src="/icons/icon-home.webp" alt="" width={36} height={36} className="object-contain" />
-                </button>
+              <div className="flex gap-4 mt-1">
+                <ActionButton icon="/icons/icon-retry.webp" label={t("rematch")} tone="purple" bounce onClick={handleRematch} />
+                <ActionButton icon="/icons/icon-back.webp" label="Back to opponents" tone="gray" onClick={handleExit} />
               </div>
-            </div>
-          )}
-
-          {/* Floating buttons on the board when result is known but overlay is not shown (admiring the position) */}
-          {gameResult && !showResultOverlay && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-3 animate-slide-in">
-              <button
-                onClick={handleRematch}
-                className="btn-3d btn-3d-purple p-3"
-                aria-label={t("rematch")}
-              >
-                <Image src="/icons/icon-retry.webp" alt="" width={28} height={28} className="object-contain" />
-              </button>
-              <button
-                onClick={handleExit}
-                className="btn-3d btn-3d-gray p-3"
-                aria-label="Home"
-              >
-                <Image src="/icons/icon-home.webp" alt="" width={28} height={28} className="object-contain" />
-              </button>
             </div>
           )}
         </div>
@@ -455,9 +436,9 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
         {/* Piku coach below the board */}
         <div className="flex items-end gap-2 w-full max-w-[400px]">
           <div className="drop-shadow-md">
-            <Piku expression={pikuExpression} size={100} />
+            <Piku expression={pikuExpression} size={UI.piku.talk} />
           </div>
-          <div className="pb-2 min-w-0">
+          <div className="pb-3 min-w-0">
             <SpeechBubble text={pikuText} icon={pikuIcon} visible={!!pikuText} />
           </div>
         </div>
