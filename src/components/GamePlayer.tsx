@@ -349,7 +349,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           {/* Stuck nudge — bare king detected */}
           {showStuckNudge && !gameResult && (
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl animate-slide-in"
               style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(2px)" }}
             >
               <Image
@@ -384,7 +384,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
           {/* Game over overlay on top of the board */}
           {showResultOverlay && gameResult && (
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center rounded-xl animate-slide-in"
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl animate-slide-in"
               style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(3px)" }}
             >
               {gameResult === "win" && <Confetti active />}
@@ -433,7 +433,7 @@ export default function GamePlayer({ difficulty, onExit }: GamePlayerProps) {
 
           {/* Floating buttons on the board when result is known but overlay is not shown (admiring the position) */}
           {gameResult && !showResultOverlay && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-3 animate-slide-in">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-3 animate-slide-in">
               <button
                 onClick={handleRematch}
                 className="btn-3d btn-3d-purple p-3"

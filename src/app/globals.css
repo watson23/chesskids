@@ -103,6 +103,15 @@ html, body {
   box-shadow: 0 0 0 var(--ck-peach-dark), 0 2px 4px rgba(251, 146, 60, 0.15);
 }
 
+.btn-3d-gray {
+  background: #E8E0F5;
+  color: var(--ck-text);
+  box-shadow: 0 6px 0 #C9BFE0, 0 8px 16px rgba(61, 51, 96, 0.15);
+}
+.btn-3d-gray:active {
+  box-shadow: 0 0 0 #C9BFE0, 0 2px 4px rgba(61, 51, 96, 0.1);
+}
+
 /* Pillowy card — soft white with purple tint border */
 .card-pillow {
   background: white;

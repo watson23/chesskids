@@ -140,7 +140,7 @@ export default function PlayPage() {
               <button
                 key={opponent.level}
                 onClick={() => handleOpponentTap(opponent)}
-                className={`card-pillow w-full max-w-sm flex items-center gap-4 px-4 py-3 transition-transform ${STAGGER_CLASSES[index] || "animate-fade-in-up"} ${isWiggling ? "animate-wiggle-locked" : ""}`}
+                className={`card-pillow w-full max-w-sm px-4 py-3 transition-transform ${STAGGER_CLASSES[index] || "animate-fade-in-up"}`}
                 style={{
                   transform: "translateY(0)",
                   opacity: isLocked ? 0.7 : 1,
@@ -158,6 +158,10 @@ export default function PlayPage() {
                 }}
                 aria-label={isLocked ? t("opponent_locked") : `${t(opponent.nameKey)}, level ${opponent.level}`}
               >
+              {/* Wiggle lives on an inner wrapper: putting it on the button would
+                  replace the stagger fade-in animation and replay it afterwards,
+                  making the card blink out for a second. */}
+              <div className={`flex items-center gap-4 w-full ${isWiggling ? "animate-wiggle-locked" : ""}`}>
                 {/* Animal portrait — transparent background, pops out of card */}
                 <div
                   className="relative w-[80px] h-[80px] rounded-2xl flex-shrink-0 flex items-center justify-center"
@@ -220,6 +224,7 @@ export default function PlayPage() {
                     </div>
                   )}
                 </div>
+              </div>
               </button>
             );
           })}
